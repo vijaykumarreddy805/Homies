@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issue Report: {{ issue.issue_id }}</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <style>
+      :root {
+        --primary-color: #0d6efd;
+        --secondary-color: #6c757d;
+        --text-color: #212529;
+        --light-gray: #f8f9fa;
+        --border-color: #e9ecef;
+        --success-color: #198754;
+        --high-prio: #dc3545;
+        --medium-prio: #ffc107;
+        --low-prio: #198754;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #f1f3f5;
+        margin: 0;
+        color: var(--text-color);
+      }
+      .container {
+        max-width: 900px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        padding: 30px 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+      }
+      .print-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: var(--light-gray);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 30px;
+      }
+      .live-indicator {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--success-color);
+      }
+      .live-indicator .dot {
+        height: 9px;
+        width: 9px;
+        background-color: var(--success-color);
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .print-button {
+        padding: 10px 20px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+      }
+      .print-button:hover {
+        background-color: #0b5ed7;
+      }
+      .report-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 3px solid var(--primary-color);
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+      }
+      .logo-img {
+        max-height: 100px;
+      }
+      #issue-id {
+        font-size: 1.5rem;
+        line-height: 1.1;
+        color: var(--high-prio);
+      }
+      h1 {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -1px;
+      }
+      h2.section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 12px;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px 30px;
+      }
+      .grid-item {
+        padding-bottom: 10px;
+      }
+      .grid-item.full-width {
+        grid-column: 1 / -1;
+      }
+      .detail-label {
+        font-weight: 600;
+        color: var(--secondary-color);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .detail-value {
+        font-size: 1rem;
+        word-wrap: break-word;
+      }
+      .priority-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .priority-High,
+      .priority-critical {
+        background-color: var(--high-prio);
+      }
+      .priority-Medium,
+      .priority-normal {
+        background-color: var(--primary-color);
+      }
+      .priority-low {
+        background-color: var(--low-prio);
+      }
+      .timeline {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+      .timeline th,
+      .timeline td {
+        border: 1px solid var(--border-color);
+        padding: 12px 15px;
+        text-align: left;
+        vertical-align: top;
+      }
+      .timeline thead th {
+        background-color: var(--light-gray);
+        font-weight: 600;
+      }
+      .description-box {
+        white-space: pre-wrap;
+        line-height: 1.6;
+        background-color: var(--light-gray);
+        border: 1px solid var(--border-color);
+        padding: 20px;
+        border-radius: 8px;
+        font-size: 1.05rem;
+      }
+      .submitted-image {
+        display: block;
+        width: 100%;
+        max-width: 500px;
+        margin: 15px auto 0 auto;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+      #map {
+        height: 350px;
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-top: 15px;
+      }
+      .report-footer {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--secondary-color);
+        border-top: 1px solid var(--border-color);
+        padding-top: 20px;
+        margin-top: 40px;
+      }
+      .report-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .static-map-for-print {
+        display: none;
+        width: 100%;
+        max-width: 640px;
+        margin: 15px auto 0 auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+      }
+
+      /* --- QR Code & Header Styles --- */
+      .header-right-content {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .issue-id-block {
+        text-align: right;
+      }
+      .qr-code-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          background-color: #ffffff !important;
+        }
+        .print-header {
+          display: none;
+        }
+        .container {
+          margin: 0;
+          padding: 0;
+          box-shadow: none;
+          border: none;
+          max-width: 100%;
+        }
+        @page {
+          size: A4;
+          margin: 1.5cm;
+        }
+        .grid-container,
+        .timeline,
+        .description-box {
+          page-break-inside: avoid;
+        }
+        #map {
+          display: none;
+        }
+        .static-map-for-print {
+          display: block;
+        }
+        .qr-code-img {
+          width: 100px;
+          height: 100px;
+        }
+      }
+
+      /* Add these styles for the new status badge */
+      .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .status-submitted {
+        background-color: var(--secondary-color); /* Grey */
+      }
+
+      .status-in-progress {
+        background-color: var(--medium-prio); /* Yellow */
+      }
+
+      .status-resolved {
+        background-color: var(--success-color); /* Green */
+      }
+
+      .status-rejected {
+        background-color: var(--high-prio); /* Red */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="print-header">
+        <div class="live-indicator"><span class="dot"></span>Live Report</div>
+        <button class="print-button" onclick="window.print()">
+          <span class="material-symbols-rounded">print</span>
+          Print or Save as PDF
+        </button>
+      </header>
+      <main id="report-content">
+        <div class="report-header">
+          <div>
+            {% if logo_base64 %}
+            <img
+              src="data:image/png;base64,{{ logo_base64 }}"
+              alt="Logo"
+              class="logo-img"
+            />
+            {% else %}
+            <h1>Civicsense AI</h1>
+            {% endif %}
+          </div>
+          <div class="header-right-content">
+            <div class="issue-id-block">
+              <div class="detail-label">Issue ID</div>
+              <h1 id="issue-id" class="detail-value">{{ issue.issue_id }}</h1>
+            </div>
+            {% if qr_code_base64 %}
+            <div class="qr-code-container">
+              <img
+                src="data:image/png;base64,{{ qr_code_base64 }}"
+                alt="Issue Details QR Code"
+                class="qr-code-img"
+              />
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <h2 class="section-title">
+          <span class="material-symbols-rounded">summarize</span>Issue Overview
+        </h2>
+        <div class="grid-container">
+          <div class="grid-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value" id="issue-status">
+              <span
+                class="status-badge status-{{ issue.status | replace(' ', '-') | lower }}"
+              >
+                {{ issue.status }}
+              </span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Priority</div>
+            <div class="detail-value" id="issue-priority">
+              <span class="priority-badge priority-{{ issue.priority }}"
+                >{{ issue.priority }}</span
+              >
+            </div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Category</div>
+            <div class="detail-value" id="issue-category">
+              {{ issue.customIssueType or issue.issueCategory }}
+            </div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Submitted</div>
+            <div class="detail-value" id="issue-submitted-at">
+              {{ issue.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}
+            </div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Last Updated</div>
+            <div class="detail-value" id="issue-updated-at">
+              {{ issue.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">
+          <span class="material-symbols-rounded">person</span>Submitter Details
+        </h2>
+        <div class="grid-container">
+          <div class="grid-item">
+            <div class="detail-label">Full Name</div>
+            <div class="detail-value">{{ issue.fullName or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Age</div>
+            <div class="detail-value">{{ issue.age or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Gender</div>
+            <div class="detail-value">{{ issue.gender or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Mobile</div>
+            <div class="detail-value">{{ issue.mobile or 'N/A' }}</div>
+          </div>
+          <div class="grid-item full-width">
+            <div class="detail-label">Email</div>
+            <div class="detail-value">{{ issue.email or 'N/A' }}</div>
+          </div>
+          <div class="grid-item full-width">
+            <div class="detail-label">Residential Address</div>
+            <div class="detail-value">
+              {{ issue.residentialAddress or 'N/A' }}
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section-title">
+          <span class="material-symbols-rounded">location_on</span>Location
+          Details
+        </h2>
+        <div class="grid-container">
+          <div class="grid-item full-width">
+            <div class="detail-label">Address</div>
+            <div class="detail-value">{{ issue.locationAddress or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">City</div>
+            <div class="detail-value">{{ issue.city or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Pincode</div>
+            <div class="detail-value">{{ issue.pincode or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">District</div>
+            <div class="detail-value">{{ issue.district or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">State</div>
+            <div class="detail-value">{{ issue.state or 'N/A' }}</div>
+          </div>
+          <div class="grid-item">
+            <div class="detail-label">Coordinates</div>
+            <div class="detail-value">
+              {{ issue.latitude }}, {{ issue.longitude }}
+            </div>
+          </div>
+        </div>
+
+        <div id="map"></div>
+
+        {% if static_map_url %}
+        <img
+          src="{{ static_map_url }}"
+          class="static-map-for-print"
+          alt="Location Map"
+        />
+        {% else %}
+        <p
+          class="static-map-for-print"
+          style="
+            text-align: center;
+            padding: 20px;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+          "
+        >
+          Static map could not be loaded. Please ensure the Maps Static API is
+          enabled and the API key is correct.
+        </p>
+        {% endif %}
+
+        <h2 class="section-title">
+          <span class="material-symbols-rounded">description</span>Description &
+          Evidence
+        </h2>
+        <div class="description-box">
+          {{ issue.issueDescription or 'No description provided.' }}
+        </div>
+        {% if issue.image_filename %}
+        <img
+          src="{{ url_for('static', filename='uploads/' + issue.image_filename) }}"
+          alt="Submitted Evidence"
+          class="submitted-image"
+        />
+        {% endif %}
+
+        <h2 class="section-title">
+          <span class="material-symbols-rounded">history</span>Status History
+        </h2>
+        <table class="timeline">
+          <thead>
+            <tr>
+              <th style="width: 30%">Date & Time</th>
+              <th style="width: 20%">Status</th>
+              <th>Notes / Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="status-history-body"></tbody>
+        </table>
+      </main>
+
+      <footer class="report-footer">
+        <div>
+          This report was automatically generated by the Civicsense AI system.
+        </div>
+        <div style="margin-top: 8px">
+          Developed by <a href="#">Team UNIQUE</a>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+            document.addEventListener("DOMContentLoaded", () => {
+              const issueId = {{ issue.id }};
+              const statusHistoryBody = document.getElementById('status-history-body');
+
+              function updateReportData(data) {
+        // --- THIS IS THE FIX ---
+        // 1. Build the full HTML for the status badge, just like the priority one.
+        const statusClass = (data.issue.status || '').replace(' ', '-').toLowerCase();
+        const statusBadge = `<span class="status-badge status-${statusClass}">${data.issue.status}</span>`;
+
+        // 2. Update the div using .innerHTML to render the HTML tag correctly.
+        document.getElementById('issue-status').innerHTML = statusBadge;
+
+        // --- The rest of the function remains the same ---
+        document.getElementById('issue-updated-at').textContent = data.issue.updated_at_formatted;
+        const priorityBadge = `<span class="priority-badge priority-${data.issue.priority}">${data.issue.priority}</span>`;
+        document.getElementById('issue-priority').innerHTML = priorityBadge;
+
+        let historyHtml = '';
+        if (data.status_history && data.status_history.length > 0) {
+          data.status_history.forEach(item => {
+            historyHtml += `<tr><td>${item.created_at_formatted}</td><td>${item.status}</td><td>${item.notes || 'N/A'}</td></tr>`;
+          });
+        } else {
+          historyHtml = '<tr><td colspan="3" style="text-align: center;">No status history found.</td></tr>';
+        }
+        statusHistoryBody.innerHTML = historyHtml;
+      }
+
+              async function fetchLatestData() {
+                try {
+                  const response = await fetch(`/api/report/data/${issueId}`);
+                  if (!response.ok) return;
+                  const data = await response.json();
+                  updateReportData(data);
+                } catch (error) {
+                  console.error('Error fetching report data:', error);
+                }
+              }
+
+              fetchLatestData();
+              setInterval(fetchLatestData, 30000);
+            });
+
+            function initMap() {
+              const issueLocation = { lat: {{ issue.latitude }}, lng: {{ issue.longitude }} };
+              const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 16,
+                center: issueLocation,
+                disableDefaultUI: true,
+                gestureHandling: "cooperative"
+              });
+              const marker = new google.maps.Marker({
+                position: issueLocation,
+                map: map,
+              });
+            }
+    </script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&callback=initMap"
+      async
+      defer
+    ></script>
+  </body>
+</html>

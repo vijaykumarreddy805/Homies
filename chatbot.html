@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chatbot - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <style>
+      /* --- Base & Theme Styles --- */
+      :root {
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border: #e2e8f0;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+      body.dark-theme {
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border: #334155;
+        --color-border-hr: #334155;
+        --color-hover-secondary: #334155;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      /* --- Sidebar & Layout --- */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+        flex-shrink: 0;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+      }
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar);
+      }
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+      }
+      .menu-link.active {
+        background-color: var(--color-hover-primary);
+        color: white;
+      }
+      .menu-link:not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1 0 auto;
+        padding: 30px;
+      }
+      .page-header {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+      }
+      .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+
+      /* --- Content Sections & Cards --- */
+      .content-section {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        margin-bottom: 2rem;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-border-hr);
+      }
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .developers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+      .dev-card {
+        text-align: center;
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid var(--color-border);
+        position: relative;
+        background: var(--color-bg-primary);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .dev-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px var(--color-shadow);
+      }
+      .dev-photo {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 1rem;
+        border: 3px solid var(--color-border-hr);
+      }
+      .dev-name {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: var(--color-hover-primary);
+      }
+      .dev-role {
+        color: var(--color-accent);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+      .leader-tag {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--color-warning);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+      .card-actions {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+      .guide-card-admin {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      /* --- Buttons & Forms --- */
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+      }
+      .btn-primary {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #2563eb;
+      }
+      .btn-secondary {
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+      }
+      .btn-secondary:hover {
+        background: var(--color-border-hr);
+      }
+      .btn-danger {
+        background: var(--color-error);
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #d03434;
+      }
+      .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        transition: border-color 0.2s;
+      }
+      .form-control:focus {
+        outline: none;
+        border-color: var(--color-hover-primary);
+      }
+      textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+      }
+      .mt-3 {
+        margin-top: 1rem;
+      }
+
+      /* --- Modals & Overlays --- */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .modal.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-content {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        padding: 30px;
+        max-width: 600px;
+        width: 95%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+      }
+      .modal.active .modal-content {
+        transform: scale(1);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .modal-body {
+        overflow-y: auto;
+        padding-right: 15px;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+        line-height: 1;
+      }
+      .modal-footer {
+        margin-top: 24px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        border-top: 1px solid var(--color-border-hr);
+        padding-top: 20px;
+      }
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.7);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      body.dark-theme .loading-overlay {
+        background: rgba(0, 0, 0, 0.7);
+      }
+      .loading-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .loading-spinner {
+        border: 4px solid var(--color-border);
+        border-top-color: var(--color-hover-primary);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .toast {
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: 300px;
+        opacity: 0;
+        transform: translateX(110%);
+        animation: slideIn 0.4s forwards;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .toast.bg-success {
+        background-color: var(--color-accent);
+      }
+      .toast.bg-danger {
+        background-color: var(--color-error);
+      }
+      @keyframes slideIn {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* --- Footer --- */
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        padding: 1.5rem 2rem;
+        flex-shrink: 0;
+        margin-top: auto;
+      }
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .footer-copyright,
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img
+          src="{{ url_for('static', filename='images/Civicsense.png') }}"
+          alt="Civicsense AI Logo"
+          class="logo-img"
+        />
+      </div>
+      <div class="sidebar-content">
+        <ul class="menu-list">
+          <li>
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-link"
+              ><span class="material-symbols-rounded">dashboard</span
+              >Dashboard</a
+            >
+          </li>
+          <li>
+            <a href="{{ url_for('admin_issue_reports') }}" class="menu-link"
+              ><span class="material-symbols-rounded">assignment</span>Manage
+              Issues</a
+            >
+          </li>
+          <li>
+            <a href="{{ url_for('admin_user_management') }}" class="menu-link"
+              ><span class="material-symbols-rounded">group</span>User
+              Management</a
+            >
+          </li>
+          <li>
+            <a
+              href="{{ url_for('admin_manage_about_us') }}"
+              class="menu-link active"
+              ><span class="material-symbols-rounded">info</span>Manage About
+              Us</a
+            >
+          </li>
+          <li>
+            <a href="{{ url_for('admin_chat_analytics') }}" class="menu-link"
+              ><span class="material-symbols-rounded">trending_up</span
+              >Analytics</a
+            >
+          </li>
+          <li>
+            <a href="{{ url_for('admin_user_feedbacks') }}" class="menu-link"
+              ><span class="material-symbols-rounded">feedback</span
+              >Feedbacks</a
+            >
+          </li>
+          <li>
+            <a href="{{ url_for('admin_logout') }}" class="menu-link"
+              ><span class="material-symbols-rounded">logout</span>Logout</a
+            >
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <div class="page-header">
+          <h1 class="page-title">Manage 'About Us' Page</h1>
+          <p class="page-subtitle">
+            Update the content for the project guide and development team.
+          </p>
+        </div>
+
+        <div class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Project Guide</h2>
+            <button class="btn btn-primary" id="editGuideBtn">
+              <span class="material-symbols-rounded">edit</span> Edit Details
+            </button>
+          </div>
+          <div id="guide-display-area">
+            <p>Loading guide details...</p>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Development Team</h2>
+            <button class="btn btn-primary" id="addDeveloperBtn">
+              <span class="material-symbols-rounded">add</span> Add Developer
+            </button>
+          </div>
+          <div class="developers-grid" id="developers-grid-area">
+            <p>Loading developer profiles...</p>
+          </div>
+        </div>
+      </div>
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by
+            <a href="{{ url_for('team_details') }}">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="modal" id="formModal">
+      <div class="modal-content" id="modal-content-area"></div>
+    </div>
+    <div id="toast-container"></div>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- UTILITY FUNCTIONS ---
+        const api = async (endpoint, options = {}) => {
+          document.getElementById("loading-overlay").classList.add("active");
+          try {
+            const response = await fetch(endpoint, options);
+            if (!response.ok)
+              throw new Error(
+                `Server responded with status: ${response.status}`
+              );
+            return await response.json();
+          } catch (error) {
+            showToast(`API Error: ${error.message}`, "danger");
+            console.error("API call failed:", error);
+            return null;
+          } finally {
+            document
+              .getElementById("loading-overlay")
+              .classList.remove("active");
+          }
+        };
+
+        const showToast = (message, type = "success") => {
+          const container = document.getElementById("toast-container");
+          const toast = document.createElement("div");
+          toast.className = `toast bg-${type}`;
+          toast.textContent = message;
+          container.appendChild(toast);
+          setTimeout(() => toast.classList.add("show"), 10);
+          setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.remove(), 500);
+          }, 4000);
+        };
+
+        const openModal = () =>
+          document.getElementById("formModal").classList.add("active");
+        const closeModal = () =>
+          document.getElementById("formModal").classList.remove("active");
+
+        // --- RENDER FUNCTIONS ---
+        const renderGuide = (guide) => {
+          const container = document.getElementById("guide-display-area");
+          if (!guide) {
+            container.innerHTML = `<p>No guide details found. Click 'Edit Details' to add them.</p>`;
+            return;
+          }
+          const photoUrl = guide.photo_filename
+            ? `/static/uploads/${guide.photo_filename}`
+            : "/static/images/female_avatar.png";
+          container.innerHTML = `
+            <div class="guide-card-admin">
+                <img src="${photoUrl}" alt="Guide Photo" class="dev-photo">
+                <div>
+                    <h3 class="dev-name">${guide.name || "N/A"}</h3>
+                    <p class="dev-role">${(guide.role || "").replace(
+                      /\n/g,
+                      "<br>"
+                    )}</p>
+                    <p><em>"${guide.bio_quote || ""}"</em></p>
+                </div>
+            </div>`;
+        };
+
+        const renderDevelopers = (developers) => {
+          const grid = document.getElementById("developers-grid-area");
+          grid.innerHTML = "";
+          if (!developers || developers.length === 0) {
+            grid.innerHTML =
+              '<p>No developers added yet. Click "Add Developer" to start.</p>';
+            return;
+          }
+          developers.forEach((dev) => {
+            const photoUrl = dev.photo_filename
+              ? `/static/uploads/${dev.photo_filename}`
+              : "/static/images/female_avatar.png";
+            const card = document.createElement("div");
+            card.className = "dev-card";
+            card.innerHTML = `
+                ${dev.is_leader ? '<span class="leader-tag">Leader</span>' : ""}
+                <img src="${photoUrl}" alt="Photo of ${
+              dev.name
+            }" class="dev-photo">
+                <h3 class="dev-name">${dev.name}</h3>
+                <p class="dev-role">${dev.role}</p>
+                <div class="card-actions">
+                    <button class="btn btn-secondary edit-dev-btn" data-id="${
+                      dev.id
+                    }">Edit</button>
+                    <button class="btn btn-danger delete-dev-btn" data-id="${
+                      dev.id
+                    }">Delete</button>
+                </div>`;
+            grid.appendChild(card);
+          });
+        };
+
+        // --- MODAL FORM BUILDERS ---
+        const showGuideForm = async () => {
+          const res = await api("/admin/api/guide");
+          const guide = res ? res.guide : {};
+          document.getElementById("modal-content-area").innerHTML = `
+            <div class="modal-header"><h3 class="modal-title">Edit Guide Details</h3><button type="button" class="modal-close">&times;</button></div>
+            <form id="guideForm" class="modal-body">
+                <label class="form-label">Name</label><input type="text" name="name" class="form-control" value="${
+                  guide?.name || ""
+                }" required>
+                <label class="form-label mt-3">Role & University (e.g., Associate Professor<br>Kalasalingam University)</label><textarea name="role" class="form-control">${
+                  guide?.role || ""
+                }</textarea>
+                <label class="form-label mt-3">Bio Quote</label><textarea name="bio_quote" class="form-control">${
+                  guide?.bio_quote || ""
+                }</textarea>
+                <label class="form-label mt-3">Photo (leave blank to keep existing)</label><input type="file" name="photo" class="form-control" accept="image/*">
+                <label class="form-label mt-3">LinkedIn URL</label><input type="url" name="linkedin_url" class="form-control" value="${
+                  guide?.linkedin_url || ""
+                }">
+                <label class="form-label mt-3">Email</label><input type="email" name="email" class="form-control" value="${
+                  guide?.email || ""
+                }">
+            </form>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="submit" form="guideForm" class="btn btn-primary">Save Changes</button></div>
+        `;
+          openModal();
+        };
+
+        const showDeveloperForm = (dev = null) => {
+          const isEditing = dev !== null;
+          document.getElementById("modal-content-area").innerHTML = `
+            <div class="modal-header"><h3 class="modal-title">${
+              isEditing ? "Edit" : "Add"
+            } Developer</h3><button type="button" class="modal-close">&times;</button></div>
+            <form id="developerForm" data-id="${
+              isEditing ? dev.id : ""
+            }" class="modal-body">
+                <label class="form-label">Full Name</label><input type="text" name="name" class="form-control" value="${
+                  dev?.name || ""
+                }" required>
+                <label class="form-label mt-3">Role (e.g., Team Lead & Developer)</label><input type="text" name="role" class="form-control" value="${
+                  dev?.role || ""
+                }" required>
+                <label class="form-label mt-3">Details (e.g., Final Year, CSE<br>Reg. No: 99220041072<br>Kalasalingam University)</label><textarea name="details" class="form-control">${
+                  dev?.details || ""
+                }</textarea>
+                <label class="form-label mt-3">Photo ${
+                  isEditing ? "(leave blank to keep existing)" : ""
+                }</label><input type="file" name="photo" class="form-control" accept="image/*">
+                <label class="form-label mt-3">LinkedIn URL</label><input type="url" name="linkedin_url" class="form-control" value="${
+                  dev?.linkedin_url || ""
+                }">
+                <label class="form-label mt-3">GitHub URL</label><input type="url" name="github_url" class="form-control" value="${
+                  dev?.github_url || ""
+                }">
+                <label class="form-label mt-3">Email</label><input type="email" name="email" class="form-control" value="${
+                  dev?.email || ""
+                }">
+                <div style="margin-top:1rem; display:flex; align-items:center;"><input type="checkbox" name="is_leader" id="is_leader" ${
+                  dev?.is_leader ? "checked" : ""
+                } style="width:auto; margin-right:8px;"><label for="is_leader">Mark as Team Leader</label></div>
+            </form>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="submit" form="developerForm" class="btn btn-primary">Save</button></div>
+        `;
+          openModal();
+        };
+
+        // --- DATA HANDLING & MAIN LOGIC ---
+        const loadAllData = async () => {
+          const guideRes = await api("/admin/api/guide");
+          if (guideRes) renderGuide(guideRes.guide);
+
+          const devRes = await api("/admin/api/developers");
+          if (devRes) renderDevelopers(devRes.developers);
+        };
+
+        // --- EVENT LISTENERS ---
+        document
+          .getElementById("editGuideBtn")
+          .addEventListener("click", showGuideForm);
+        document
+          .getElementById("addDeveloperBtn")
+          .addEventListener("click", () => showDeveloperForm());
+
+        document.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (e.target.id === "guideForm") {
+            const formData = new FormData(e.target);
+            const res = await api("/admin/api/guide", {
+              method: "POST",
+              body: formData,
+            });
+            if (res && res.status === "success") {
+              showToast(res.message);
+              closeModal();
+              loadAllData();
+            }
+          }
+
+          if (e.target.id === "developerForm") {
+            const devId = e.target.dataset.id;
+            const isEditing = !!devId;
+            const endpoint = isEditing
+              ? `/admin/api/developers/${devId}`
+              : "/admin/api/developers";
+            const formData = new FormData(e.target);
+            // Convert checkbox value for the backend
+            formData.set(
+              "is_leader",
+              document.getElementById("is_leader").checked
+            );
+            const res = await api(endpoint, { method: "POST", body: formData });
+            if (res && res.status === "success") {
+              showToast(res.message);
+              closeModal();
+              loadAllData();
+            }
+          }
+        });
+
+        document.addEventListener("click", async (e) => {
+          if (e.target.closest(".modal-close")) closeModal();
+
+          const editBtn = e.target.closest(".edit-dev-btn");
+          if (editBtn) {
+            const devId = editBtn.dataset.id;
+            const res = await api(`/admin/api/developers/${devId}`);
+            if (res && res.status === "success")
+              showDeveloperForm(res.developer);
+          }
+
+          const deleteBtn = e.target.closest(".delete-dev-btn");
+          if (deleteBtn) {
+            const devId = deleteBtn.dataset.id;
+            if (
+              confirm(
+                "Are you sure you want to permanently delete this developer profile?"
+              )
+            ) {
+              const res = await api(`/admin/api/developers/${devId}`, {
+                method: "DELETE",
+              });
+              if (res && res.status === "success") {
+                showToast(res.message);
+                loadAllData();
+              }
+            }
+          }
+        });
+
+        // --- INITIAL LOAD ---
+        loadAllData();
+      });
+    </script>
+  </body>
+</html>

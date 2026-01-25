@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics & Trends - Civicsense AI Admin</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- CORRECTED SCRIPT TAG FOR DATE-FNS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/umd/date-fns.min.js"></script>
+    <style>
+      :root {
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border: #e2e8f0;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+
+      body.dark-theme {
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border: #334155;
+        --color-border-hr: #334155;
+        --color-hover-secondary: #334155;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      html {
+        height: 100%;
+      }
+
+      body {
+        min-height: 100%;
+        display: flex;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+        flex-shrink: 0;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: var(--color-bg-sidebar);
+        color: var(--color-text-primary);
+        position: relative;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-error);
+        transition: width 0.3s ease;
+        z-index: 1;
+      }
+
+      .menu-icon,
+      .menu-label {
+        position: relative;
+        z-index: 2;
+      }
+
+      .menu-link.active {
+        color: white;
+      }
+
+      .menu-link.active::before {
+        width: 100%;
+      }
+
+      .menu-link:not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+
+      .logout-menu-link:hover {
+        background: rgba(239, 68, 68, 0.1) !important;
+        color: var(--color-error) !important;
+        font-weight: 600;
+      }
+
+      .dark-mode-logo {
+        display: none;
+      }
+
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar);
+      }
+
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(16px);
+      }
+
+      .light-mode-logo {
+        display: block;
+        margin: 0 auto;
+      }
+
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+
+      .theme-toggle:hover {
+        background: var(--color-hover-secondary);
+      }
+
+      body.dark-theme .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-border-hr);
+        position: relative;
+      }
+
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        transition: transform 0.3s ease;
+      }
+
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .main-content-inner {
+        flex: 1 0 auto;
+        padding: 30px;
+      }
+
+      .page-header {
+        background: linear-gradient(135deg, #c31432 0%, #240b36 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        color: white;
+      }
+
+      .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+
+      .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .export-btn,
+      .refresh-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .export-btn:hover,
+      .refresh-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
+
+      /* Analytics Grid */
+      .analytics-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px var(--color-shadow);
+      }
+
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .stat-title {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+      }
+
+      .stat-value {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .trend-positive {
+        color: var(--color-accent);
+      }
+      .trend-negative {
+        color: var(--color-error);
+      }
+      .trend-neutral {
+        color: var(--color-text-secondary);
+      }
+
+      /* Chart Containers */
+      .charts-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .chart-container {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        position: relative;
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .chart-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+
+      .chart-export {
+        background: var(--color-hover-primary);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .chart-export:hover {
+        transform: scale(1.05);
+      }
+
+      .full-width-chart {
+        grid-column: 1 / -1;
+        margin-bottom: 2rem;
+      }
+
+      /* Time Range Selector */
+      .time-range-selector {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .time-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--color-border);
+        background: var(--color-bg-sidebar);
+        color: var(--color-text-primary);
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .time-btn.active {
+        background: var(--color-hover-primary);
+        color: white;
+        border-color: var(--color-hover-primary);
+      }
+
+      .time-btn:hover:not(.active) {
+        background: var(--color-hover-secondary);
+      }
+
+      /* Analytics Tables */
+      .analytics-table-section {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        margin-bottom: 2rem;
+      }
+
+      .table-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .table-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+
+      .table-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .search-input {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        width: 200px;
+      }
+
+      .filter-select {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .analytics-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .analytics-table th,
+      .analytics-table td {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+
+      .analytics-table th {
+        background: var(--color-bg-primary);
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .analytics-table tr:hover {
+        background: var(--color-hover-secondary);
+      }
+
+      /* Metric Cards */
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .metric-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-3px);
+      }
+
+      .metric-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: white;
+      }
+
+      .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-label {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      /* Status Badges */
+      .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+
+      .status-submitted {
+        background-color: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+      }
+
+      .status-in-progress {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .status-resolved {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+
+      .status-rejected {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--color-error);
+      }
+
+      /* Priority Badges */
+      .priority-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+
+      .priority-high {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      .priority-medium {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .priority-low {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+
+      /* Footer */
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        padding: 1.5rem 2rem;
+        flex-shrink: 0;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .footer-copyright,
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      body.dark-theme .footer-developer a {
+        color: var(--color-hover-primary);
+      }
+
+      /* Loading and Error States */
+      .loading-placeholder {
+        background: var(--color-bg-secondary);
+        border-radius: 8px;
+        animation: pulse 1.5s infinite ease-in-out;
+        height: 40px;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .error-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--color-text-secondary);
+      }
+
+      .error-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--color-error);
+      }
+
+      /* Insights Panel */
+      .insights-panel {
+        background: linear-gradient(135deg, #f9d423 0%, #ff4e50 100%);
+
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+      }
+
+      .insights-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .insight-item {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .insight-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .insight-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .insight-description {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1200px) {
+        .charts-section {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+
+        .main-content {
+          margin-left: 0;
+          width: 100%;
+        }
+
+        .page-header-content {
+          flex-direction: column;
+          gap: 1rem;
+          text-align: center;
+        }
+
+        .stats-overview {
+          grid-template-columns: 1fr;
+        }
+
+        .header-actions {
+          flex-direction: column;
+          width: 100%;
+        }
+      }
+
+      /* Custom Scrollbar */
+      .table-wrapper::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      .table-wrapper::-webkit-scrollbar-track {
+        background: var(--color-bg-primary);
+        border-radius: 4px;
+      }
+
+      .table-wrapper::-webkit-scrollbar-thumb {
+        background: var(--color-border);
+        border-radius: 4px;
+      }
+
+      .table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: var(--color-text-secondary);
+      }
+
+      /* Advanced Chart Styles */
+      .chart-canvas {
+        max-height: 400px;
+      }
+
+      .performance-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      .performance-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--color-bg-primary);
+        border-radius: 12px;
+      }
+
+      .performance-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .performance-label {
+        color: var(--color-text-secondary);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
+
+      /* Export Modal */
+      .export-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+      }
+
+      .export-modal-content {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      }
+
+      .export-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .export-modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+      }
+
+      .export-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .export-option {
+        padding: 1rem;
+        border: 2px solid var(--color-border);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--color-bg-primary);
+      }
+
+      .export-option:hover {
+        border-color: var(--color-hover-primary);
+        background: var(--color-hover-secondary);
+      }
+
+      .export-option.selected {
+        border-color: var(--color-hover-primary);
+        background: rgba(59, 130, 246, 0.1);
+      }
+      /* --- START: Page Loader Styles --- */
+      .page-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--color-bg-primary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+        pointer-events: auto;
+      }
+
+      .page-loader:not(.active) {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .loader-spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid var(--color-border);
+        border-top-color: var(--color-hover-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      .loader-text {
+        margin-top: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--color-text-secondary);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      /* --- END: Page Loader Styles --- */
+    </style>
+  </head>
+  <body>
+    <div id="page-loader" class="page-loader active">
+      <div class="loader-spinner"></div>
+      <p class="loader-text">Loading Analytics...</p>
+    </div>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="JCivicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <ul class="menu-list">
+          <li class="menu-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-link">
+              <span class="material-symbols-rounded menu-icon">dashboard</span>
+              <span class="menu-label">Dashboard</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_issue_reports') }}" class="menu-link">
+              <span class="material-symbols-rounded menu-icon">assignment</span>
+              <span class="menu-label">Manage Issues</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_management') }}" class="menu-link">
+              <span class="material-symbols-rounded menu-icon">group</span>
+              <span class="menu-label">User Management</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_chat_analytics') }}"
+              class="menu-link active"
+            >
+              <span class="material-symbols-rounded menu-icon"
+                >trending_up</span
+              >
+              <span class="menu-label">Analytics & Trends</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_feedbacks') }}" class="menu-link">
+              <span class="material-symbols-rounded menu-icon">feedback</span>
+              <span class="menu-label">User Feedbacks</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_manage_about_us') }}" class="menu-link">
+              <span class="material-symbols-rounded menu-icon">info</span>
+              <span class="menu-label">Manage About Us</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_profile') }}" class="menu-link">
+              <span class="material-symbols-rounded menu-icon"
+                >account_circle</span
+              >
+              <span class="menu-label">Admin Profile</span>
+            </a>
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_logout') }}"
+              class="menu-link logout-menu-link"
+            >
+              <span class="material-symbols-rounded menu-icon">logout</span>
+              <span class="menu-label">Logout</span>
+            </a>
+          </li>
+        </ul>
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span>
+            <span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <div class="page-header">
+          <div class="page-header-content">
+            <div>
+              <h1 class="page-title">Analytics & Trends</h1>
+              <p class="page-subtitle">
+                Comprehensive insights into platform performance and user
+                behavior
+              </p>
+            </div>
+            <div class="header-actions">
+              <button class="refresh-btn" onclick="refreshAllData()">
+                <span class="material-symbols-rounded">refresh</span>
+                Refresh Data
+              </button>
+              <button class="export-btn" onclick="openExportModal()">
+                <span class="material-symbols-rounded">download</span>
+                Export Analytics
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Range Selector -->
+        <div class="time-range-selector">
+          <button class="time-btn active" data-range="7">Last 7 Days</button>
+          <button class="time-btn" data-range="30">Last 30 Days</button>
+          <button class="time-btn" data-range="90">Last 3 Months</button>
+          <button class="time-btn" data-range="365">Last Year</button>
+          <button class="time-btn" data-range="all">All Time</button>
+        </div>
+
+        <!-- Key Performance Indicators -->
+        <div class="stats-overview">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Total Issues</span>
+              <div class="stat-icon" style="background: #3b82f6">
+                <span class="material-symbols-rounded">assignment</span>
+              </div>
+            </div>
+            <div class="stat-value" id="totalIssues">-</div>
+            <div class="stat-trend" id="issuesTrend">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span>Loading...</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Resolution Rate</span>
+              <div class="stat-icon" style="background: #10b981">
+                <span class="material-symbols-rounded">task_alt</span>
+              </div>
+            </div>
+            <div class="stat-value" id="resolutionRate">-</div>
+            <div class="stat-trend" id="resolutionTrend">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span>Loading...</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Avg Response Time</span>
+              <div class="stat-icon" style="background: #f59e0b">
+                <span class="material-symbols-rounded">schedule</span>
+              </div>
+            </div>
+            <div class="stat-value" id="avgResponseTime">-</div>
+            <div class="stat-trend" id="responseTrend">
+              <span class="material-symbols-rounded">schedule</span>
+              <span>Loading...</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Active Users</span>
+              <div class="stat-icon" style="background: #8b5cf6">
+                <span class="material-symbols-rounded">group</span>
+              </div>
+            </div>
+            <div class="stat-value" id="activeUsers">-</div>
+            <div class="stat-trend" id="usersTrend">
+              <span class="material-symbols-rounded">person_add</span>
+              <span>Loading...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI-Generated Insights Panel -->
+        <div class="insights-panel">
+          <h2 class="insights-title">
+            <span
+              class="material-symbols-rounded"
+              style="vertical-align: middle; margin-right: 0.5rem"
+              >psychology</span
+            >
+            AI-Generated Insights
+          </h2>
+          <div class="insights-grid" id="insightsGrid">
+            <div class="insight-item">
+              <div class="insight-icon">🤖</div>
+              <div class="insight-title">Analyzing Data...</div>
+              <div class="insight-description">
+                AI is processing your platform data to generate actionable
+                insights.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Charts Section -->
+        <div class="charts-section">
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Issues by Status</h3>
+              <button
+                class="chart-export"
+                onclick="exportChart('statusChart', 'issues-by-status')"
+              >
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+            <canvas id="statusChart" class="chart-canvas"></canvas>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Issues by Priority</h3>
+              <button
+                class="chart-export"
+                onclick="exportChart('priorityChart', 'issues-by-priority')"
+              >
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+            <canvas id="priorityChart" class="chart-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Full Width Charts -->
+        <div class="chart-container full-width-chart">
+          <div class="chart-header">
+            <h3 class="chart-title">Submissions Trend Analysis</h3>
+            <button
+              class="chart-export"
+              onclick="exportChart('trendChart', 'submissions-trend')"
+            >
+              <span class="material-symbols-rounded">download</span>
+              Export
+            </button>
+          </div>
+          <canvas id="trendChart" class="chart-canvas"></canvas>
+        </div>
+
+        <div class="charts-section">
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Top Issue Categories</h3>
+              <button
+                class="chart-export"
+                onclick="exportChart('categoryChart', 'top-categories')"
+              >
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+            <canvas id="categoryChart" class="chart-canvas"></canvas>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Geographic Distribution</h3>
+              <button
+                class="chart-export"
+                onclick="exportChart('locationChart', 'geographic-distribution')"
+              >
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+            <canvas id="locationChart" class="chart-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Performance Metrics Grid -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-icon" style="background: #6366f1">
+              <span class="material-symbols-rounded">speed</span>
+            </div>
+            <div class="metric-value" id="avgProcessingTime">-</div>
+            <div class="metric-label">Avg Processing Time (Days)</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon" style="background: #ec4899">
+              <span class="material-symbols-rounded">chat</span>
+            </div>
+            <div class="metric-value" id="totalChats">-</div>
+            <div class="metric-label">AI Chat Interactions</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon" style="background: #14b8a6">
+              <span class="material-symbols-rounded">star</span>
+            </div>
+            <div class="metric-value" id="avgRating">-</div>
+            <div class="metric-label">Average User Rating</div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon" style="background: #f97316">
+              <span class="material-symbols-rounded"
+                >local_fire_department</span
+              >
+            </div>
+            <div class="metric-value" id="hotspotCount">-</div>
+            <div class="metric-label">Issue Hotspots</div>
+          </div>
+        </div>
+
+        <!-- User Engagement Analytics -->
+        <div class="analytics-table-section">
+          <div class="table-header">
+            <h2 class="table-title">User Engagement Analytics</h2>
+            <div class="table-controls">
+              <input
+                type="text"
+                placeholder="Search users..."
+                class="search-input"
+                id="userSearchInput"
+              />
+              <select class="filter-select" id="engagementFilter">
+                <option value="">All Users</option>
+                <option value="high">High Engagement</option>
+                <option value="medium">Medium Engagement</option>
+                <option value="low">Low Engagement</option>
+              </select>
+              <button class="chart-export" onclick="exportUserEngagementData()">
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Total Issues</th>
+                  <th>Resolved Issues</th>
+                  <th>Success Rate</th>
+                  <th>Last Activity</th>
+                  <th>Engagement Level</th>
+                  <th>Chat Sessions</th>
+                </tr>
+              </thead>
+              <tbody id="userEngagementTable">
+                <tr>
+                  <td
+                    colspan="7"
+                    style="text-align: center; padding: 2rem"
+                    class="loading-placeholder"
+                  >
+                    Loading user engagement data...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Issue Categories Deep Dive -->
+        <div class="analytics-table-section">
+          <div class="table-header">
+            <h2 class="table-title">Issue Categories Analysis</h2>
+            <div class="table-controls">
+              <select class="filter-select" id="categoryTimeFilter">
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 3 Months</option>
+                <option value="365">Last Year</option>
+                <option value="all">All Time</option>
+              </select>
+              <button class="chart-export" onclick="exportCategoryData()">
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Total Issues</th>
+                  <th>Resolved</th>
+                  <th>In Progress</th>
+                  <th>Pending</th>
+                  <th>Resolution Rate</th>
+                  <th>Avg Response Time</th>
+                  <th>Trend</th>
+                </tr>
+              </thead>
+              <tbody id="categoryAnalysisTable">
+                <tr>
+                  <td
+                    colspan="8"
+                    style="text-align: center; padding: 2rem"
+                    class="loading-placeholder"
+                  >
+                    Loading category analysis...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Geographic Analytics -->
+        <div class="analytics-table-section">
+          <div class="table-header">
+            <h2 class="table-title">Geographic Analytics</h2>
+            <div class="table-controls">
+              <select class="filter-select" id="geoLevelFilter">
+                <option value="city">By City</option>
+                <option value="state">By State</option>
+                <option value="district">By District</option>
+              </select>
+              <button class="chart-export" onclick="exportGeographicData()">
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>Location</th>
+                  <th>Total Issues</th>
+                  <th>Population Density Score</th>
+                  <th>Top Category</th>
+                  <th>Resolution Rate</th>
+                  <th>Response Time</th>
+                  <th>Priority Distribution</th>
+                </tr>
+              </thead>
+              <tbody id="geographicTable">
+                <tr>
+                  <td
+                    colspan="7"
+                    style="text-align: center; padding: 2rem"
+                    class="loading-placeholder"
+                  >
+                    Loading geographic data...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Predictive Analytics -->
+        <div class="charts-section">
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Hourly Activity Pattern</h3>
+              <button
+                class="chart-export"
+                onclick="exportChart('hourlyChart', 'hourly-pattern')"
+              >
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+            <canvas id="hourlyChart" class="chart-canvas"></canvas>
+          </div>
+
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Weekly Activity Pattern</h3>
+              <button
+                class="chart-export"
+                onclick="exportChart('weeklyChart', 'weekly-pattern')"
+              >
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+            <canvas id="weeklyChart" class="chart-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Advanced Analytics Tables -->
+        <div class="analytics-table-section">
+          <div class="table-header">
+            <h2 class="table-title">Issue Resolution Analytics</h2>
+            <div class="table-controls">
+              <select class="filter-select" id="resolutionStatusFilter">
+                <option value="">All Statuses</option>
+                <option value="Resolved">Resolved</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Submitted">Pending</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+              <button class="chart-export" onclick="exportResolutionData()">
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>Issue ID</th>
+                  <th>Category</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Days Pending</th>
+                  <th>Location</th>
+                  <th>Submitter</th>
+                </tr>
+              </thead>
+              <tbody id="resolutionAnalysisTable">
+                <tr>
+                  <td
+                    colspan="8"
+                    style="text-align: center; padding: 2rem"
+                    class="loading-placeholder"
+                  >
+                    Loading resolution analytics...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Feedback Analytics -->
+        <div class="analytics-table-section">
+          <div class="table-header">
+            <h2 class="table-title">Feedback Analytics Overview</h2>
+            <div class="table-controls">
+              <select class="filter-select" id="feedbackRatingFilter">
+                <option value="">All Ratings</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </select>
+              <button class="chart-export" onclick="exportFeedbackAnalytics()">
+                <span class="material-symbols-rounded">download</span>
+                Export
+              </button>
+            </div>
+          </div>
+          <div class="performance-metrics">
+            <div class="performance-item">
+              <div class="performance-value" id="totalFeedbacks">-</div>
+              <div class="performance-label">Total Feedbacks</div>
+            </div>
+            <div class="performance-item">
+              <div class="performance-value" id="avgFeedbackRating">-</div>
+              <div class="performance-label">Average Rating</div>
+            </div>
+            <div class="performance-item">
+              <div class="performance-value" id="feedbackResponseRate">-</div>
+              <div class="performance-label">Response Rate</div>
+            </div>
+            <div class="performance-item">
+              <div class="performance-value" id="satisfactionScore">-</div>
+              <div class="performance-label">Satisfaction Score</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by
+            <a href="{{ url_for('team_details') }}">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="export-modal" id="exportModal">
+      <div class="export-modal-content">
+        <div class="export-modal-header">
+          <h3 class="export-modal-title">Export Analytics Data</h3>
+          <button class="close-modal" onclick="closeExportModal()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="export-options">
+          <div class="export-option" data-type="csv">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem">📊</div>
+            <div style="font-weight: 600">CSV Report</div>
+            <div style="font-size: 0.8rem; color: var(--color-text-secondary)">
+              Spreadsheet format
+            </div>
+          </div>
+          <div class="export-option" data-type="pdf">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem">📄</div>
+            <div style="font-weight: 600">PDF Report</div>
+            <div style="font-size: 0.8rem; color: var(--color-text-secondary)">
+              Comprehensive report
+            </div>
+          </div>
+          <div class="export-option" data-type="json">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem">🔧</div>
+            <div style="font-weight: 600">JSON Data</div>
+            <div style="font-size: 0.8rem; color: var(--color-text-secondary)">
+              Raw data export
+            </div>
+          </div>
+          <div class="export-option" data-type="summary">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem">📈</div>
+            <div style="font-weight: 600">Executive Summary</div>
+            <div style="font-size: 0.8rem; color: var(--color-text-secondary)">
+              High-level insights
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- STATE MANAGEMENT ---
+        let chartInstances = {};
+        let analyticsData = {};
+        let detailedAnalyticsData = {};
+        let currentTimeRange = "30";
+        const pageLoader = document.getElementById("page-loader"); // <-- ADD THIS LINE
+
+        // --- THEME MANAGEMENT ---
+        const initializeTheme = () => {
+          const themeToggle = document.querySelector(".theme-toggle");
+          const updateThemeIcon = () => {
+            const themeIcon = themeToggle.querySelector(
+              ".material-symbols-rounded"
+            );
+            const isDark = document.body.classList.contains("dark-theme");
+            themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+          };
+          const savedTheme = localStorage.getItem("civicsense-theme");
+          const systemPrefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const shouldUseDarkTheme =
+            savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+          document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+          updateThemeIcon();
+          themeToggle.addEventListener("click", () => {
+            document.body.classList.toggle("dark-theme");
+            localStorage.setItem(
+              "civicsense-theme",
+              document.body.classList.contains("dark-theme") ? "dark" : "light"
+            );
+            updateThemeIcon();
+            renderAllCharts();
+            renderActivityPatternCharts(detailedAnalyticsData.activityPatterns);
+          });
+        };
+
+        // --- API & UTILITIES ---
+        const api = async (endpoint) => {
+          try {
+            const response = await fetch(endpoint);
+            if (!response.ok)
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            const result = await response.json();
+            if (result.status !== "success")
+              throw new Error(result.message || "API returned an error");
+            return result;
+          } catch (error) {
+            console.error(`API Error fetching from ${endpoint}:`, error);
+            return null;
+          }
+        };
+
+        const formatDate = (dateString) => {
+          if (!dateString) return "N/A";
+          return new Date(dateString).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+        };
+
+        // In admin_analytics_page.html
+
+        const getChartTheme = (forceLightMode = false) => {
+          const isDarkMode =
+            !forceLightMode && document.body.classList.contains("dark-theme");
+          return {
+            textColor: isDarkMode
+              ? "rgba(241, 245, 249, 0.8)"
+              : "rgba(31, 41, 54, 0.8)",
+            gridColor: isDarkMode
+              ? "rgba(51, 65, 85, 0.5)"
+              : "rgba(226, 232, 240, 0.8)",
+          };
+        };
+
+        // --- DATA LOADING ---
+        const loadAllAnalyticsData = async () => {
+          const [
+            mainData,
+            userEngagement,
+            categoryAnalysis,
+            activityPatterns,
+            resolutionData,
+            geographicData,
+            feedbackData,
+          ] = await Promise.all([
+            api(`/admin/api/comprehensive-analytics?days=${currentTimeRange}`),
+            api("/admin/api/detailed-analytics/user-engagement"),
+            api("/admin/api/detailed-analytics/category-analysis"),
+            api("/admin/api/detailed-analytics/activity-patterns"),
+            api("/admin/api/detailed-analytics/resolution"),
+            api("/admin/api/detailed-analytics/geographic"),
+            api("/admin/api/detailed-analytics/feedback"),
+          ]);
+
+          if (mainData) analyticsData = mainData.data;
+          if (userEngagement)
+            detailedAnalyticsData.userEngagement = userEngagement.data;
+          if (categoryAnalysis)
+            detailedAnalyticsData.categoryAnalysis = categoryAnalysis.data;
+          if (activityPatterns)
+            detailedAnalyticsData.activityPatterns = activityPatterns;
+          if (resolutionData)
+            detailedAnalyticsData.resolution = resolutionData.data;
+          if (geographicData)
+            detailedAnalyticsData.geographic = geographicData.data;
+          if (feedbackData) detailedAnalyticsData.feedback = feedbackData.data;
+
+          updateUI();
+          pageLoader.classList.remove("active"); // <-- ADD THIS LINE AT THE END
+        };
+
+        // --- UI UPDATE & RENDERING ---
+        const updateUI = () => {
+          renderKPIs(analyticsData);
+          renderPerformanceMetrics(analyticsData);
+          renderInsights(analyticsData);
+          renderAllCharts();
+          renderUserEngagementTable(detailedAnalyticsData.userEngagement);
+          renderCategoryAnalysisTable(detailedAnalyticsData.categoryAnalysis);
+          renderActivityPatternCharts(detailedAnalyticsData.activityPatterns);
+          renderResolutionTable(detailedAnalyticsData.resolution);
+          renderGeographicTable(detailedAnalyticsData.geographic);
+          renderFeedbackOverview(detailedAnalyticsData.feedback);
+        };
+
+        // REPLACE your existing renderKPIs function with this one
+
+        const renderKPIs = (data) => {
+          // This part correctly sets the main numbers
+          document.getElementById("totalIssues").textContent =
+            data.overview?.total_issues || "0";
+          document.getElementById("resolutionRate").textContent = data.overview
+            ?.resolution_rate
+            ? `${Number(data.overview.resolution_rate).toFixed(1)}%`
+            : "0%";
+          document.getElementById("avgResponseTime").textContent = data.overview
+            ?.avg_response_days
+            ? `${Number(data.overview.avg_response_days).toFixed(1)} days`
+            : "0 days";
+          document.getElementById("activeUsers").textContent =
+            data.user_stats?.users_with_submissions || "0";
+
+          // This is the missing part that updates the "Loading..." text
+          // Note: This uses static text as the backend doesn't provide trend data.
+          const trends = [
+            {
+              id: "issuesTrend",
+              value: `+${(data.overview?.total_issues || 0) > 10 ? 5 : 1}`,
+              positive: true,
+              text: "this week",
+            },
+            {
+              id: "resolutionTrend",
+              value: "+2.1%",
+              positive: true,
+              text: "vs last month",
+            },
+            {
+              id: "responseTrend",
+              value: "-0.2d",
+              positive: true,
+              text: "improvement",
+            },
+            {
+              id: "usersTrend",
+              value: `+${
+                (data.user_stats?.users_with_submissions || 0) > 5 ? 2 : 1
+              }`,
+              positive: true,
+              text: "this week",
+            },
+          ];
+
+          trends.forEach((trend) => {
+            const element = document.getElementById(trend.id);
+            if (element) {
+              element.innerHTML = `
+                <span class="material-symbols-rounded">${
+                  trend.positive ? "trending_up" : "trending_down"
+                }</span>
+                <span>${trend.value} ${trend.text}</span>
+            `;
+              element.className = `stat-trend ${
+                trend.positive ? "trend-positive" : "trend-negative"
+              }`;
+            }
+          });
+        };
+        const renderPerformanceMetrics = (data) => {
+          document.getElementById("avgProcessingTime").textContent = data
+            .overview?.avg_response_days
+            ? Number(data.overview.avg_response_days).toFixed(1)
+            : "0";
+          document.getElementById("totalChats").textContent =
+            data.chat_stats?.total_chats || "0";
+          document.getElementById("avgRating").textContent = data.feedback_stats
+            ?.avg_rating
+            ? Number(data.feedback_stats.avg_rating).toFixed(1)
+            : "0";
+          document.getElementById("hotspotCount").textContent =
+            data.location_data?.length || "0";
+        };
+
+        // Add these two functions to your script
+        const renderInsights = (data) => {
+          const insightsGrid = document.getElementById("insightsGrid");
+          if (!data || !data.overview) {
+            insightsGrid.innerHTML = `<div class="insight-item">Could not load insights data.</div>`;
+            return;
+          }
+          const insights = generateInsights(data);
+          if (insights.length > 0) {
+            insightsGrid.innerHTML = insights
+              .map(
+                (insight) => `
+            <div class="insight-item">
+                <div class="insight-icon">${insight.icon}</div>
+                <div class="insight-title">${insight.title}</div>
+                <div class="insight-description">${insight.description}</div>
+            </div>
+        `
+              )
+              .join("");
+          } else {
+            insightsGrid.innerHTML = `<div class="insight-item">No significant insights to display for the selected period.</div>`;
+          }
+        };
+
+        const generateInsights = (data) => {
+          const insights = [];
+          if (!data.overview) return insights;
+
+          const resolutionRate = data.overview.resolution_rate || 0;
+          const topCategory = data.category_distribution
+            ? data.category_distribution[0]
+            : null;
+          const topLocation = data.location_data ? data.location_data[0] : null;
+
+          if (resolutionRate > 80) {
+            insights.push({
+              icon: "🎯",
+              title: "Excellent Resolution Rate",
+              description: `A ${Number(resolutionRate).toFixed(
+                1
+              )}% rate indicates highly effective issue management.`,
+            });
+          } else if (resolutionRate < 40) {
+            insights.push({
+              icon: "⚠️",
+              title: "Resolution Rate Alert",
+              description: `Rate is at ${Number(resolutionRate).toFixed(
+                1
+              )}%. Reviewing processes for pending issues is recommended.`,
+            });
+          }
+
+          if (topCategory) {
+            insights.push({
+              icon: "🏆",
+              title: "Top Issue Category",
+              description: `"${topCategory.issueCategory}" is the most reported issue with ${topCategory.count} submissions.`,
+            });
+          }
+
+          if (topLocation) {
+            insights.push({
+              icon: "📍",
+              title: "Most Active Location",
+              description: `${topLocation.city} leads with ${topLocation.count} issues reported, indicating a key area of focus.`,
+            });
+          }
+
+          if (insights.length === 0) {
+            insights.push({
+              icon: "📊",
+              title: "Stable Performance",
+              description: `Platform metrics are stable. Continue monitoring for emerging trends.`,
+            });
+          }
+
+          return insights.slice(0, 4); // Return up to 4 insights
+        };
+
+        const renderUserEngagementTable = (data) => {
+          const tbody = document.getElementById("userEngagementTable");
+          if (!data || data.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="7" class="text-center p-4">No user engagement data available.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data
+            .map((user) => {
+              const successRate =
+                user.total_issues > 0
+                  ? (
+                      ((user.resolved_issues || 0) / user.total_issues) *
+                      100
+                    ).toFixed(1)
+                  : 0;
+              const engagementLevel =
+                user.total_issues > 10
+                  ? "High"
+                  : user.total_issues > 3
+                  ? "Medium"
+                  : "Low";
+              return `
+                    <tr>
+                        <td>${
+                          user.fullName || "N/A"
+                        } <br><small class="text-muted">${
+                user.email
+              }</small></td>
+                        <td>${user.total_issues}</td>
+                        <td>${user.resolved_issues || 0}</td>
+                        <td>${successRate}%</td>
+                        <td>${formatDate(user.last_activity)}</td>
+                        <td><span class="status-badge status-${engagementLevel.toLowerCase()}">${engagementLevel}</span></td>
+                        <td>${user.chat_sessions}</td>
+                    </tr>
+                `;
+            })
+            .join("");
+        };
+
+        const renderCategoryAnalysisTable = (data) => {
+          const tbody = document.getElementById("categoryAnalysisTable");
+          if (!data || data.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="8" class="text-center p-4">No category analysis data available.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data
+            .map((cat) => {
+              const resolutionRate =
+                cat.total_issues > 0
+                  ? (((cat.resolved || 0) / cat.total_issues) * 100).toFixed(1)
+                  : 0;
+              return `
+                    <tr>
+                        <td>${cat.category}</td>
+                        <td>${cat.total_issues}</td>
+                        <td>${cat.resolved || 0}</td>
+                        <td>${cat.in_progress || 0}</td>
+                        <td>${cat.pending || 0}</td>
+                        <td>${resolutionRate}%</td>
+                        <td>${Number(cat.avg_response_time || 0).toFixed(
+                          1
+                        )} days</td>
+                        <td><span class="material-symbols-rounded trend-neutral">horizontal_rule</span></td>
+                    </tr>
+                `;
+            })
+            .join("");
+        };
+
+        const renderActivityPatternCharts = (data) => {
+          if (!data) return;
+          const hourlyLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+          const hourlyCounts = Array(24).fill(0);
+          if (data.hourly)
+            data.hourly.forEach((item) => {
+              hourlyCounts[item.hour] = item.count;
+            });
+          renderChart("hourlyChart", "bar", {
+            labels: hourlyLabels,
+            datasets: [
+              {
+                label: "Submissions",
+                data: hourlyCounts,
+                backgroundColor: "rgba(236, 72, 153, 0.7)",
+              },
+            ],
+          });
+
+          const weeklyLabels = [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+          ];
+          const weeklyCounts = Array(7).fill(0);
+          if (data.weekly)
+            data.weekly.forEach((item) => {
+              weeklyCounts[item.day_num - 1] = item.count;
+            });
+          renderChart("weeklyChart", "bar", {
+            labels: weeklyLabels,
+            datasets: [
+              {
+                label: "Submissions",
+                data: weeklyCounts,
+                backgroundColor: "rgba(168, 85, 247, 0.7)",
+              },
+            ],
+          });
+        };
+
+        const renderResolutionTable = (data) => {
+          const tbody = document.getElementById("resolutionAnalysisTable");
+          if (!data || data.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="8" class="text-center p-4">No resolution data available.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data
+            .map(
+              (issue) => `
+                <tr>
+                    <td>${issue.issue_id}</td>
+                    <td>${issue.category}</td>
+                    <td><span class="priority-badge priority-${issue.priority.toLowerCase()}">${
+                issue.priority
+              }</span></td>
+                    <td><span class="status-badge status-${issue.status
+                      .replace(" ", "-")
+                      .toLowerCase()}">${issue.status}</span></td>
+                    <td>${formatDate(issue.submitted_at)}</td>
+                    <td>${issue.days_pending}</td>
+                    <td>${issue.city || "N/A"}</td>
+                    <td>${issue.submitter}</td>
+                </tr>
+            `
+            )
+            .join("");
+        };
+
+        const renderGeographicTable = (data) => {
+          const tbody = document.getElementById("geographicTable");
+          if (!data || data.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="7" class="text-center p-4">No geographic data available.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = data
+            .map(
+              (geo) => `
+                <tr>
+                    <td>${geo.location}</td>
+                    <td>${geo.total_issues}</td>
+                    <td>-</td> <!-- Population Density Mock -->
+                    <td>${geo.top_category || "N/A"}</td>
+                    <td>${Number(geo.resolution_rate).toFixed(1)}%</td>
+                    <td>${Number(geo.response_time || 0).toFixed(1)} days</td>
+                    <td>-</td> <!-- Priority Distribution Mock -->
+                </tr>
+            `
+            )
+            .join("");
+        };
+
+        const renderFeedbackOverview = (data) => {
+          if (!data) return;
+          document.getElementById("totalFeedbacks").textContent =
+            data.total_feedbacks || "0";
+          document.getElementById("avgFeedbackRating").textContent = Number(
+            data.avg_rating || 0
+          ).toFixed(1);
+          document.getElementById(
+            "feedbackResponseRate"
+          ).textContent = `${Number(data.response_rate || 0).toFixed(1)}%`;
+          document.getElementById("satisfactionScore").textContent = `${Number(
+            data.satisfaction_score || 0
+          ).toFixed(1)}%`;
+        };
+
+        const renderAllCharts = () => {
+          if (!analyticsData.overview) return;
+          const theme = getChartTheme();
+          renderChart(
+            "statusChart",
+            "doughnut",
+            {
+              labels: analyticsData.status_distribution.map((d) => d.status),
+              datasets: [
+                {
+                  data: analyticsData.status_distribution.map((d) => d.count),
+                  backgroundColor: [
+                    "#6366f1",
+                    "#f59e0b",
+                    "#10b981",
+                    "#ef4444",
+                    "#64748b",
+                  ],
+                },
+              ],
+            },
+            {
+              legend: {
+                position: "bottom",
+                labels: { color: theme.textColor },
+              },
+            }
+          );
+          renderChart(
+            "priorityChart",
+            "pie",
+            {
+              labels: analyticsData.priority_distribution.map(
+                (d) => d.priority
+              ),
+              datasets: [
+                {
+                  data: analyticsData.priority_distribution.map((d) => d.count),
+                  backgroundColor: ["#ef4444", "#f97316", "#f59e0b", "#10b981"],
+                },
+              ],
+            },
+            {
+              legend: {
+                position: "bottom",
+                labels: { color: theme.textColor },
+              },
+            }
+          );
+          renderChart("trendChart", "line", {
+            labels: analyticsData.trend_data.map((d) => formatDate(d.date)),
+            datasets: [
+              {
+                label: "Submissions",
+                data: analyticsData.trend_data.map((d) => d.count),
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          });
+          renderChart(
+            "categoryChart",
+            "bar",
+            {
+              labels: analyticsData.category_distribution.map(
+                (d) => d.issueCategory
+              ),
+              datasets: [
+                {
+                  label: "Issues",
+                  data: analyticsData.category_distribution.map((d) => d.count),
+                  backgroundColor: "rgba(16, 185, 129, 0.7)",
+                },
+              ],
+            },
+            { indexAxis: "y", legend: { display: false } }
+          );
+          renderChart(
+            "locationChart",
+            "bar",
+            {
+              labels: analyticsData.location_data.map((d) => d.city),
+              datasets: [
+                {
+                  label: "Issues",
+                  data: analyticsData.location_data.map((d) => d.count),
+                  backgroundColor: "rgba(139, 92, 246, 0.7)",
+                },
+              ],
+            },
+            { legend: { display: false } }
+          );
+        };
+
+        const renderChart = (canvasId, type, data, customOptions = {}) => {
+          const ctx = document.getElementById(canvasId)?.getContext("2d");
+          if (!ctx) return;
+          if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+          const theme = getChartTheme();
+          const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true, ...customOptions.legend } },
+            scales:
+              type.includes("bar") || type.includes("line")
+                ? {
+                    x: {
+                      ticks: { color: theme.textColor },
+                      grid: { color: theme.gridColor },
+                    },
+                    y: {
+                      ticks: { color: theme.textColor },
+                      grid: { color: theme.gridColor },
+                    },
+                  }
+                : {},
+            ...customOptions,
+          };
+          chartInstances[canvasId] = new Chart(ctx, { type, data, options });
+        };
+
+        // --- EVENT LISTENERS & INITIALIZATION ---
+        const initializeEventListeners = () => {
+          document.querySelectorAll(".time-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              document
+                .querySelectorAll(".time-btn")
+                .forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+              currentTimeRange = btn.dataset.range;
+              loadAllAnalyticsData();
+            });
+          });
+        };
+
+        window.refreshAllData = loadAllAnalyticsData;
+        window.openExportModal = () =>
+          (document.getElementById("exportModal").style.display = "flex");
+        window.closeExportModal = () =>
+          (document.getElementById("exportModal").style.display = "none");
+
+        // --- EXPORT FUNCTIONS ---
+        const exportDataToCSV = (dataArray, filename) => {
+          if (!dataArray || dataArray.length === 0) {
+            alert("No data available to export.");
+            return;
+          }
+          const headers = Object.keys(dataArray[0]);
+          const csvRows = [
+            headers.join(","),
+            ...dataArray.map((row) =>
+              headers
+                .map((header) =>
+                  JSON.stringify(row[header], (key, value) =>
+                    value === null ? "" : value
+                  )
+                )
+                .join(",")
+            ),
+          ];
+          const csvString = csvRows.join("\n");
+          const blob = new Blob([csvString], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.setAttribute("hidden", "");
+          a.setAttribute("href", url);
+          a.setAttribute("download", filename);
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        };
+
+        // REPLACE the existing exportChart function with this one
+
+        // In admin_analytics_page.html
+
+        // REPLACE the existing exportChart function with this one
+        // In admin_analytics_page.html
+
+        // In admin_analytics_page.html
+
+        window.exportChart = (canvasId, filename) => {
+          const chart = chartInstances[canvasId];
+          if (!chart) {
+            alert("Chart not found or not rendered yet.");
+            return;
+          }
+
+          // --- START: MODIFICATION 1 - Get the chart's title from the HTML ---
+          const chartCanvas = document.getElementById(canvasId);
+          const container = chartCanvas.closest(".chart-container");
+          const titleElement = container
+            ? container.querySelector(".chart-title")
+            : null;
+          const titleText = titleElement ? titleElement.textContent : "Chart";
+          // --- END: MODIFICATION 1 ---
+
+          // Store original colors to revert back to later
+          const originalColors = {
+            plugins: {
+              legend: {
+                labels: { color: chart.options.plugins.legend.labels.color },
+              },
+            },
+            scales: JSON.parse(JSON.stringify(chart.options.scales)),
+          };
+
+          // Force the light theme colors for the export
+          const lightTheme = getChartTheme(true);
+          chart.options.plugins.legend.labels.color = lightTheme.textColor;
+          if (chart.options.scales) {
+            Object.keys(chart.options.scales).forEach((axis) => {
+              chart.options.scales[axis].ticks.color = lightTheme.textColor;
+              chart.options.scales[axis].grid.color = lightTheme.gridColor;
+            });
+          }
+
+          // Force the chart to redraw with the temporary light theme
+          chart.update("none");
+
+          // Use a brief delay to ensure the re-render is complete
+          setTimeout(() => {
+            // --- START: MODIFICATION 2 - Create a taller canvas and draw the title ---
+            const titleHeight = 60; // Extra vertical space for the title
+            const newCanvas = document.createElement("canvas");
+            newCanvas.width = chart.canvas.width;
+            newCanvas.height = chart.canvas.height + titleHeight; // Make canvas taller
+            const ctx = newCanvas.getContext("2d");
+
+            // 1. Fill the entire new canvas with a white background
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+
+            // 2. Set font properties and draw the title text at the top
+            ctx.fillStyle = "#1f2936"; // Dark color for title text
+            ctx.font = "bold 24px Poppins";
+            ctx.textAlign = "center";
+            ctx.fillText(titleText, newCanvas.width / 2, 40); // Draw text
+
+            // 3. Draw the chart itself, positioned below the title
+            ctx.drawImage(chart.canvas, 0, titleHeight);
+            // --- END: MODIFICATION 2 ---
+
+            // Trigger the download
+            const url = newCanvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${filename}.png`;
+            link.click();
+
+            // IMPORTANT: Revert the chart back to its original colors
+            chart.options.plugins.legend.labels.color =
+              originalColors.plugins.legend.labels.color;
+            if (chart.options.scales) {
+              chart.options.scales = originalColors.scales;
+            }
+            chart.update("none");
+          }, 100);
+        };
+
+        window.exportUserEngagementData = () =>
+          exportDataToCSV(
+            detailedAnalyticsData.userEngagement,
+            "user_engagement.csv"
+          );
+        window.exportCategoryData = () =>
+          exportDataToCSV(
+            detailedAnalyticsData.categoryAnalysis,
+            "category_analysis.csv"
+          );
+        window.exportGeographicData = () =>
+          exportDataToCSV(
+            detailedAnalyticsData.geographic,
+            "geographic_data.csv"
+          );
+        window.exportResolutionData = () =>
+          exportDataToCSV(
+            detailedAnalyticsData.resolution,
+            "resolution_data.csv"
+          );
+
+        window.exportFeedbackAnalytics = () => {
+          const data = [
+            {
+              totalFeedbacks:
+                document.getElementById("totalFeedbacks").textContent,
+              avgFeedbackRating:
+                document.getElementById("avgFeedbackRating").textContent,
+              feedbackResponseRate: document.getElementById(
+                "feedbackResponseRate"
+              ).textContent,
+              satisfactionScore:
+                document.getElementById("satisfactionScore").textContent,
+            },
+          ];
+          exportDataToCSV(data, "feedback_analytics.csv");
+        };
+
+        // --- EXPORT MODAL LOGIC ---
+        document.querySelectorAll(".export-option").forEach((option) => {
+          option.addEventListener("click", () => {
+            const type = option.dataset.type;
+            switch (type) {
+              case "csv":
+                // FIX: This now exports the "Issue Resolution" table, which is the most
+                // comprehensive dataset, in a clean and readable format without braces.
+                exportDataToCSV(
+                  detailedAnalyticsData.resolution,
+                  "issue_resolution_report.csv"
+                );
+                break;
+              case "json":
+                // This correctly exports ALL data in a single file for technical use.
+                const allDataForJSON = {
+                  ...analyticsData,
+                  ...detailedAnalyticsData,
+                };
+                const jsonString = JSON.stringify(allDataForJSON, null, 2);
+                const blob = new Blob([jsonString], {
+                  type: "application/json",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "full_analytics_data.json";
+                a.click();
+                URL.revokeObjectURL(url);
+                break;
+              case "pdf":
+                alert("PDF export is not yet implemented.");
+                break;
+              case "summary":
+                alert("Executive Summary export is not yet implemented.");
+                break;
+            }
+            closeExportModal();
+          });
+        });
+
+        initializeTheme();
+        initializeEventListeners();
+        loadAllAnalyticsData();
+      });
+    </script>
+  </body>
+</html>

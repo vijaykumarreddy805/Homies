@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Civicsense AI</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background-color: #f5f5f5;
+      }
+
+      .main-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .content-section {
+        flex: 1;
+        padding: 2rem 0;
+      }
+
+      @media (max-width: 768px) {
+        .content-section {
+          padding: 0;
+        }
+        .mobile-logo-container {
+          background: white;
+          padding: 20px;
+          text-align: center;
+          border-bottom: 1px solid #eee;
+        }
+        .mobile-image-container {
+          padding: 20px;
+          background: white;
+        }
+        .mobile-form-container {
+          padding: 20px;
+        }
+      }
+
+      .footer-section {
+        margin-top: auto;
+        flex-shrink: 0;
+      }
+
+      .desktop-logo-container {
+        position: absolute;
+        top: 20px;
+        left: 50px;
+        z-index: 1000;
+      }
+
+      .desktop-logo-img {
+        max-height: 150px;
+        width: auto;
+      }
+
+      .logo-img {
+        max-height: 80px;
+        width: auto;
+        margin-bottom: 1rem;
+      }
+
+      .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+      }
+
+      .register-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .register-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin: 2rem 0;
+      }
+
+      footer {
+        margin-top: auto;
+      }
+
+      @media (max-width: 768px) {
+        .register-title {
+          font-size: 1.5rem;
+        }
+        .register-card {
+          padding: 1.5rem;
+          margin: 1rem 0;
+        }
+        .content-section {
+          padding: 1rem 0;
+        }
+      }
+      .password-requirements {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+        display: none; /* Hide by default */
+        transition: opacity 0.3s ease-in-out;
+      }
+      .password-requirements.visible {
+        display: block; /* Show when needed */
+      }
+
+      .form-outline .form-label::after {
+        content: " *";
+        color: red;
+      }
+      .form-check-label::after {
+        content: " *";
+        color: red;
+      }
+
+      /* --- CSS FOR FLOATING TOAST MESSAGES --- */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1055; /* High z-index to appear above other content */
+      }
+      .toast-container .alert {
+        min-width: 250px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ====== THIS IS THE FIX - ADDED MESSAGE CONTAINER ====== -->
+    <div class="toast-container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+    <!-- ====== END OF FIX ====== -->
+
+    <div class="main-wrapper">
+      <section class="content-section">
+        <div class="container-fluid">
+          <!-- Mobile Layout -->
+          <div class="d-block d-md-none">
+            <div class="mobile-logo-container">
+              <img
+                src="{{ url_for('static', filename='images/Civicsense.png') }}"
+                alt="Civicsense AI Logo"
+                class="logo-img"
+              />
+            </div>
+            <div class="mobile-image-container text-center">
+              <img
+                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                class="img-fluid"
+                alt="Sample image"
+                style="max-width: 300px"
+              />
+            </div>
+            <div class="mobile-form-container">
+              <div class="register-card">
+                <form id="registerFormMobile" action="/register" method="POST">
+                  <h2
+                    class="register-title"
+                    style="
+                      color: #0d47a1;
+                      font-family: 'Britannic Bold', cursive;
+                      text-align: center;
+                    "
+                  >
+                    Create Account
+                  </h2>
+                  <div
+                    id="error-message-mobile"
+                    class="alert alert-danger"
+                    style="display: none"
+                  ></div>
+                  <!-- First Name input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="text"
+                      id="firstNameMobile"
+                      name="first_name"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="firstNameMobile"
+                      >First Name</label
+                    >
+                  </div>
+                  <!-- Last Name input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="text"
+                      id="lastNameMobile"
+                      name="last_name"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="lastNameMobile"
+                      >Last Name</label
+                    >
+                  </div>
+                  <!-- Email input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="email"
+                      id="emailMobile"
+                      name="email"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="emailMobile"
+                      >Email address</label
+                    >
+                  </div>
+                  <!-- Password input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="password"
+                      id="passwordMobile"
+                      name="password"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="passwordMobile"
+                      >Password</label
+                    >
+                  </div>
+                  <div class="password-requirements">
+                    Password must be at least 8 characters long, contain
+                    uppercase, lowercase, number, and a special character.
+                  </div>
+                  <!-- Confirm Password input -->
+                  <div data-mdb-input-init class="form-outline mb-3">
+                    <input
+                      type="password"
+                      id="confirmPasswordMobile"
+                      name="confirm_password"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="confirmPasswordMobile"
+                      >Confirm Password</label
+                    >
+                  </div>
+                  <!-- Checkbox -->
+                  <div class="form-check mb-3">
+                    <input
+                      class="form-check-input me-2"
+                      type="checkbox"
+                      value=""
+                      id="termsMobile"
+                      required
+                    />
+                    <label class="form-check-label" for="termsMobile">
+                      I agree to the
+                      <a
+                        href="#"
+                        data-bs-toggle="modal"
+                        data-bs-target="#termsModal"
+                        >Terms and Conditions</a
+                      >
+                    </label>
+                  </div>
+                  <div class="text-center text-lg-start mt-4 pt-2">
+                    <button
+                      type="submit"
+                      data-mdb-button-init
+                      data-mdb-ripple-init
+                      class="btn btn-primary btn-lg w-100 mb-3"
+                      style="padding: 12px"
+                    >
+                      Register
+                    </button>
+                    <p class="small fw-bold mt-2 pt-1 mb-0 text-center">
+                      Already have an account?
+                      <a href="{{ url_for('login') }}" class="link-danger"
+                        >Login</a
+                      >
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop Layout -->
+          <div
+            class="row d-none d-md-flex justify-content-center align-items-center min-vh-100"
+          >
+            <div class="col-md-9 col-lg-6 col-xl-5">
+              <div class="desktop-logo-container">
+                <img
+                  src="{{ url_for('static', filename='images/Civicsense.png') }}"
+                  alt="Civicsense AI Logo"
+                  class="desktop-logo-img"
+                />
+              </div>
+              <img
+                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                class="img-fluid"
+                alt="Sample image"
+              />
+            </div>
+            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+              <div class="register-card">
+                <form id="registerFormDesktop" action="/register" method="POST">
+                  <h2
+                    class="register-title"
+                    style="
+                      color: #0d47a1;
+                      font-family: 'Britannic Bold', cursive;
+                      text-align: center;
+                    "
+                  >
+                    Create Account
+                  </h2>
+                  <div
+                    id="error-message-desktop"
+                    class="alert alert-danger"
+                    style="display: none"
+                  ></div>
+                  <!-- First Name input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="text"
+                      id="firstNameDesktop"
+                      name="first_name"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="firstNameDesktop"
+                      >First Name</label
+                    >
+                  </div>
+                  <!-- Last Name input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="text"
+                      id="lastNameDesktop"
+                      name="last_name"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="lastNameDesktop"
+                      >Last Name</label
+                    >
+                  </div>
+                  <!-- Email input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="email"
+                      id="emailDesktop"
+                      name="email"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="emailDesktop"
+                      >Email address</label
+                    >
+                  </div>
+                  <!-- Password input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      type="password"
+                      id="passwordDesktop"
+                      name="password"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="passwordDesktop"
+                      >Password</label
+                    >
+                  </div>
+                  <div class="password-requirements">
+                    Password must be at least 8 characters long, contain
+                    uppercase, lowercase, number, and a special character.
+                  </div>
+                  <!-- Confirm Password input -->
+                  <div data-mdb-input-init class="form-outline mb-3">
+                    <input
+                      type="password"
+                      id="confirmPasswordDesktop"
+                      name="confirm_password"
+                      class="form-control form-control-lg"
+                      required
+                    />
+                    <label class="form-label" for="confirmPasswordDesktop"
+                      >Confirm Password</label
+                    >
+                  </div>
+                  <!-- Checkbox -->
+                  <div class="form-check mb-3">
+                    <input
+                      class="form-check-input me-2"
+                      type="checkbox"
+                      value=""
+                      id="termsDesktop"
+                      required
+                    />
+                    <label class="form-check-label" for="termsDesktop">
+                      I agree to the
+                      <a
+                        href="#"
+                        data-bs-toggle="modal"
+                        data-bs-target="#termsModal"
+                        >Terms and Conditions</a
+                      >
+                    </label>
+                  </div>
+                  <div class="text-center text-lg-start mt-4 pt-2">
+                    <button
+                      type="submit"
+                      data-mdb-button-init
+                      data-mdb-ripple-init
+                      class="btn btn-primary btn-lg w-100 mb-3"
+                      style="padding: 12px"
+                    >
+                      Register
+                    </button>
+                    <p class="small fw-bold mt-2 pt-1 mb-0 text-center">
+                      Already have an account?
+                      <a href="{{ url_for('login') }}" class="link-danger"
+                        >Login</a
+                      >
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div
+        class="modal fade"
+        id="termsModal"
+        tabindex="-1"
+        aria-labelledby="termsModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="termsModalLabel">
+                Terms and Conditions
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p><strong>1. Introduction</strong></p>
+              <p>
+                Welcome to Civicsense AI. These terms and conditions outline the
+                rules and regulations for the use of our website and services.
+              </p>
+
+              <p><strong>2. Intellectual Property Rights</strong></p>
+              <p>
+                Other than the content you own, under these Terms, Civicsense AI
+                and/or its licensors own all the intellectual property rights
+                and materials contained in this Website.
+              </p>
+
+              <p><strong>3. Restrictions</strong></p>
+              <p>You are specifically restricted from all of the following:</p>
+              <ul>
+                <li>Publishing any Website material in any other media.</li>
+                <li>
+                  Selling, sublicensing and/or otherwise commercializing any
+                  Website material.
+                </li>
+                <li>
+                  Publicly performing and/or showing any Website material.
+                </li>
+                <li>
+                  Using this Website in any way that is or may be damaging to
+                  this Website.
+                </li>
+              </ul>
+
+              <p><strong>4. Your Content</strong></p>
+              <p>
+                In these Website Standard Terms and Conditions, “Your Content”
+                shall mean any audio, video text, images or other material you
+                choose to display on this Website. By displaying Your Content,
+                you grant Civicsense AI a non-exclusive, worldwide irrevocable,
+                sub-licensable license to use, reproduce, adapt, publish,
+                translate and distribute it in any and all media.
+              </p>
+
+              <p><strong>5. No warranties</strong></p>
+              <p>
+                This Website is provided “as is,” with all faults, and
+                Civicsense AI express no representations or warranties, of any
+                kind related to this Website or the materials contained on this
+                Website.
+              </p>
+
+              <p><strong>6. Limitation of liability</strong></p>
+              <p>
+                In no event shall Civicsense AI, nor any of its officers,
+                directors and employees, shall be held liable for anything
+                arising out of or in any way connected with your use of this
+                Website whether such liability is under contract.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-section bg-secondary">
+        <div
+          class="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5"
+        >
+          <div class="text-dark mb-3 mb-md-0">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="text-dark">
+            Developed by
+            <a
+              href="team-details"
+              style="color: #0d47a1; font-weight: bold; text-decoration: none"
+            >
+              Team UNIQUE
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"></script>
+    <script>
+      function validatePassword(password) {
+        const re =
+          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,}$/;
+        return re.test(password);
+      }
+
+      function handleFormSubmit(formId, errorContainerId) {
+        const form = document.getElementById(formId);
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const errorContainer = document.getElementById(errorContainerId);
+          errorContainer.style.display = "none";
+          errorContainer.textContent = "";
+
+          const password = form.querySelector('input[name="password"]').value;
+          const confirmPassword = form.querySelector(
+            'input[name="confirm_password"]'
+          ).value;
+          const terms = form.querySelector('input[type="checkbox"]').checked;
+
+          if (!validatePassword(password)) {
+            errorContainer.textContent =
+              "Password does not meet the requirements.";
+            errorContainer.style.display = "block";
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            errorContainer.textContent = "Passwords do not match.";
+            errorContainer.style.display = "block";
+            return;
+          }
+
+          if (!terms) {
+            errorContainer.textContent =
+              "You must agree to the Terms and Conditions.";
+            errorContainer.style.display = "block";
+            return;
+          }
+          form.querySelector('input[name="email"]').value = form
+            .querySelector('input[name="email"]')
+            .value.toLowerCase();
+
+          // If validation passes, submit the form
+          form.submit();
+        });
+      }
+
+      handleFormSubmit("registerFormMobile", "error-message-mobile");
+      handleFormSubmit("registerFormDesktop", "error-message-desktop");
+
+      // To display server-side errors
+      const urlParams = new URLSearchParams(window.location.search);
+      const error = urlParams.get("error");
+      if (error) {
+        const errorMessage = decodeURIComponent(error);
+        const errorDesktop = document.getElementById("error-message-desktop");
+        const errorMobile = document.getElementById("error-message-mobile");
+        errorDesktop.textContent = errorMessage;
+        errorDesktop.style.display = "block";
+        errorMobile.textContent = errorMessage;
+        errorMobile.style.display = "block";
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const passwordInputs = document.querySelectorAll(
+          'input[name="password"]'
+        );
+
+        passwordInputs.forEach((input) => {
+          const requirementsDiv = input.parentElement.nextElementSibling;
+
+          if (
+            requirementsDiv &&
+            requirementsDiv.classList.contains("password-requirements")
+          ) {
+            input.addEventListener("focus", () => {
+              requirementsDiv.classList.add("visible");
+            });
+
+            input.addEventListener("blur", () => {
+              requirementsDiv.classList.remove("visible");
+            });
+          }
+        });
+
+        // --- NEW: Logic for auto-hiding toast messages ---
+        const alerts = document.querySelectorAll(".toast-container .alert");
+        alerts.forEach(function (alert) {
+          setTimeout(function () {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+          }, 3000); // 3 seconds
+        });
+      });
+    </script>
+  </body>
+</html>

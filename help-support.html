@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Help & Support - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      :root {
+        /* Light theme colors */
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+
+      body.dark-theme {
+        /* Dark theme colors */
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border-hr: #334155;
+        --color-shadow: rgba(0, 0, 0, 0.3);
+        --color-hover-secondary: #334155;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-bg-primary);
+        display: flex;
+        flex-direction: column;
+        color: var(--color-text-primary);
+      }
+
+      /* --- Sidebar Styles --- */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center; /* centers horizontally */
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .menu-section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        padding: 0 12px;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-hover-primary);
+
+        z-index: -1;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      /* Replace it with this code */
+      .menu-link:not(.logout-menu-link):not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      /* Logout button hover + active styles */
+      .logout-menu-link::before {
+        display: none !important; /* remove sliding hover animation background */
+      }
+
+      .logout-menu-link:hover,
+      .logout-menu-link.active {
+        background: rgba(
+          239,
+          68,
+          68,
+          0.1
+        ) !important; /* Very light red background */
+        color: var(--color-error) !important; /* Solid red text */
+        font-weight: 600;
+      }
+      .divider {
+        height: 1px;
+        background: var(--color-border-hr);
+        margin: 16px 0;
+      }
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-bg-secondary);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      /* --- Main Content & Page Styles --- */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1;
+        padding: 30px;
+        max-width: 1000px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .page-header {
+        margin-bottom: 30px;
+        padding: 30px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #23c094 0%, #632c98 100%);
+        color: white;
+        box-shadow: 0 4px 20px var(--color-shadow);
+      }
+      .page-header .page-title,
+      .page-header .page-title .material-symbols-rounded,
+      .page-header .page-subtitle {
+        color: white;
+      }
+      .page-header .page-subtitle {
+        opacity: 0.9;
+      }
+      .page-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .page-subtitle {
+        font-size: 1.1rem;
+        margin-top: 4px;
+      }
+      .support-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        align-items: flex-start;
+      }
+      .faq-section {
+        background: var(--color-bg-sidebar);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid var(--color-border-hr);
+      }
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--color-border-hr);
+      }
+      .faq-search {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--color-border-hr);
+        margin-bottom: 20px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .faq-item {
+        border-bottom: 1px solid var(--color-border-hr);
+      }
+      .faq-item:last-child {
+        border-bottom: none;
+      }
+      .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1.05rem;
+      }
+      .faq-question .material-symbols-rounded {
+        transition: transform 0.3s ease;
+      }
+      .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        color: var(--color-text-secondary);
+        line-height: 1.6;
+      }
+      .faq-item.active .faq-question .material-symbols-rounded {
+        transform: rotate(180deg);
+      }
+      .faq-item.active .faq-answer {
+        padding-bottom: 16px;
+      }
+      .contact-section {
+        background: var(--color-bg-sidebar);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid var(--color-border-hr);
+      }
+      .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .contact-item .material-symbols-rounded {
+        color: var(--color-hover-primary);
+      }
+
+      /* --- New Footer Styles --- */
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        margin-top: auto;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+      }
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        gap: 12px;
+      }
+      .footer-copyright {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      .footer-developer a:hover {
+        color: var(--color-hover-primary);
+      }
+
+      /* --- Responsive Styles --- */
+      @media (max-width: 992px) {
+        .main-content {
+          margin-left: 0;
+        }
+      }
+      @media (max-width: 768px) {
+        .main-content-inner {
+          padding: 20px;
+        }
+        .support-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (min-width: 768px) {
+        .footer-content {
+          flex-direction: row;
+          text-align: left;
+        }
+      }
+
+      /* --- NEW: Sidebar Profile Picture Styles --- */
+      .sidebar-profile-pic {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--color-border-hr);
+        /* Placeholder background color */
+        background-color: var(--color-bg-secondary);
+      }
+
+      /* By default, hide the dark mode logo */
+      .dark-mode-logo {
+        display: none;
+      }
+
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar); /* Match the dark sidebar color */
+      }
+
+      /* When dark mode is on, hide the light logo... */
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+
+      /* ...and show the dark logo */
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(10px); /* ⬅ adjust this value as per your need */
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <!-- Main Menu -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="dashboard" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >dashboard</span
+                >
+                <span class="menu-label">Dashboard</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="report-issue" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >report_problem</span
+                >
+                <span class="menu-label">Report an Issue</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="my-submissions" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >description</span
+                >
+                <span class="menu-label">My Submissions</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="check-status" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">task_alt</span>
+                <span class="menu-label">Check Status</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- AI & Analytics -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="chatbot" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >smart_toy</span
+                >
+                <span class="menu-label">AI Chatbot</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="analytics" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >trending_up</span
+                >
+                <span class="menu-label">Analytics & Trends</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="feedback" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >star_rate</span
+                >
+                <span class="menu-label">Feedback & Rating</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="help-support" class="menu-link active">
+                <span class="material-symbols-rounded menu-icon">help</span>
+                <span class="menu-label">Help/Support</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="about-us" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">info</span>
+                <span class="menu-label">About Us</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Account -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="my-profile" class="menu-link">
+                <img
+                  src=""
+                  alt="My Profile"
+                  id="sidebarProfilePic"
+                  class="sidebar-profile-pic"
+                />
+                <span class="menu-label">My Profile</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="logout" class="menu-link logout-menu-link">
+                <span class="material-symbols-rounded menu-icon">logout</span>
+                <span class="menu-label">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span>
+            <span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">
+              <span class="material-symbols-rounded">help</span>
+              Help & Support
+            </h1>
+            <p class="page-subtitle">
+              Find answers to your questions and get in touch with our team.
+            </p>
+          </div>
+        </header>
+        <div class="support-grid">
+          <div class="faq-section">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <input
+              type="text"
+              id="faqSearch"
+              class="faq-search"
+              placeholder="Search for a question..."
+            />
+            <div id="faq-list">
+              <div class="faq-item">
+                <div class="faq-question">
+                  <span>How do I report a new issue?</span>
+                  <span class="material-symbols-rounded">expand_more</span>
+                </div>
+                <div class="faq-answer">
+                  <p>
+                    To report a new issue, navigate to the "Report an Issue"
+                    page from the sidebar. Fill in all the required details in
+                    the form, including your personal information, issue
+                    details, location, and a photo if possible. Once you submit,
+                    you'll receive a unique Issue ID to track its progress.
+                  </p>
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question">
+                  <span>How can I check the status of my submission?</span>
+                  <span class="material-symbols-rounded">expand_more</span>
+                </div>
+                <div class="faq-answer">
+                  <p>
+                    You can track your submissions in two ways. Go to the "My
+                    Submissions" page to see a list of all issues you've
+                    reported. Alternatively, use the "Check Status" page and
+                    enter your unique Issue ID to see the detailed status and
+                    history for a specific report.
+                  </p>
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question">
+                  <span>What do the different statuses mean?</span>
+                  <span class="material-symbols-rounded">expand_more</span>
+                </div>
+                <div class="faq-answer">
+                  <ul>
+                    <li>
+                      <strong>Submitted:</strong> Your report has been
+                      successfully received by our system.
+                    </li>
+                    <li>
+                      <strong>In Progress:</strong> Acknowledged by the
+                      authorities and is currently being investigated or
+                      addressed.
+                    </li>
+                    <li>
+                      <strong>Resolved:</strong> The issue has been fixed and
+                      the case is closed.
+                    </li>
+                    <li>
+                      <strong>Rejected:</strong> The submission was found to be
+                      invalid, a duplicate, or outside the scope of our
+                      services.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question">
+                  <span
+                    >Can I edit or delete an issue after submitting it?</span
+                  >
+                  <span class="material-symbols-rounded">expand_more</span>
+                </div>
+                <div class="faq-answer">
+                  <p>
+                    Once an issue is submitted, you cannot edit or delete it
+                    directly to maintain the integrity of the report. If you
+                    have made a mistake or need to provide additional
+                    information, please contact our support team with your Issue
+                    ID, and they will be able to assist you.
+                  </p>
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question">
+                  <span>Is my personal information kept private?</span>
+                  <span class="material-symbols-rounded">expand_more</span>
+                </div>
+                <div class="faq-answer">
+                  <p>
+                    Absolutely. We take your privacy very seriously. Your
+                    personal information is used solely for the purpose of
+                    communicating updates about your reported issue and is
+                    shared only with the relevant municipal authorities for
+                    resolution. We comply with all applicable data protection
+                    laws.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="contact-section">
+            <h2 class="section-title">Contact Support</h2>
+            <p style="color: var(--color-text-secondary); margin-bottom: 20px">
+              If you can't find an answer in the FAQ, please reach out to us.
+            </p>
+
+            <div id="developer-contacts"></div>
+
+            <div class="contact-item">
+              <span class="material-symbols-rounded">schedule</span>
+              <span>Mon - Fri, 9:00 AM - 6:00 PM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by <a href="team-details">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const themeToggle = document.querySelector(".theme-toggle");
+        const themeIcon = themeToggle.querySelector(
+          ".material-symbols-rounded"
+        );
+        // --- FAQ Accordion Logic ---
+        const faqItems = document.querySelectorAll(".faq-item");
+        faqItems.forEach((item) => {
+          const question = item.querySelector(".faq-question");
+          question.addEventListener("click", () => {
+            const answer = item.querySelector(".faq-answer");
+            const currentlyActive = item.classList.contains("active");
+
+            if (currentlyActive) {
+              item.classList.remove("active");
+              answer.style.maxHeight = null;
+            } else {
+              item.classList.add("active");
+              answer.style.maxHeight = answer.scrollHeight + "px";
+            }
+          });
+        });
+
+        // --- FAQ Search Logic ---
+        const faqSearch = document.getElementById("faqSearch");
+        faqSearch.addEventListener("keyup", (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          faqItems.forEach((item) => {
+            const questionText = item
+              .querySelector(".faq-question span")
+              .textContent.toLowerCase();
+            if (questionText.includes(searchTerm)) {
+              item.style.display = "block";
+            } else {
+              item.style.display = "none";
+            }
+          });
+        });
+
+        // --- START: Auto-scroll sidebar to active link ---
+        const activeMenuLink = document.querySelector(
+          ".sidebar .menu-link.active"
+        );
+
+        if (activeMenuLink) {
+          // This function scrolls the sidebar so the active link is in the middle
+          activeMenuLink.scrollIntoView({
+            behavior: "smooth", // Optional: for a smooth scrolling animation
+            block: "center", // This aligns the link to the center of the view
+          });
+        }
+        // --- END: Auto-scroll sidebar to active link ---
+
+        // --- START: Load Profile Picture into Sidebar ---
+        async function loadSidebarProfilePic() {
+          const sidebarPicElement =
+            document.getElementById("sidebarProfilePic");
+          if (!sidebarPicElement) return;
+
+          try {
+            const response = await fetch("/api/user/profile");
+            if (!response.ok) return; // Fail silently if not logged in or error
+
+            const data = await response.json();
+            if (data.photo_url) {
+              sidebarPicElement.src = data.photo_url;
+            }
+          } catch (error) {
+            console.error("Could not load sidebar profile picture:", error);
+          }
+        }
+
+        // Call the function to load the picture
+        loadSidebarProfilePic();
+        // --- END: Load Profile Picture into Sidebar ---
+
+        // --- NEW: FUNCTION TO LOAD DEVELOPER CONTACTS ---
+        async function loadDeveloperContacts() {
+          const contactsContainer =
+            document.getElementById("developer-contacts");
+          if (!contactsContainer) return; // Exit if container not found
+
+          try {
+            // Fetch data from your API endpoint that returns developer info
+            const response = await fetch("/api/developers");
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            const developers = await response.json();
+
+            // Clear any placeholder content
+            contactsContainer.innerHTML = "";
+
+            // Loop through the developers and create HTML for each email
+            developers.forEach((developer) => {
+              if (developer.email) {
+                const contactItem = document.createElement("div");
+                contactItem.className = "contact-item";
+                contactItem.innerHTML = `
+                  <span class="material-symbols-rounded">mail</span>
+                  <span>${developer.email}</span>
+                `;
+                contactsContainer.appendChild(contactItem);
+              }
+            });
+          } catch (error) {
+            console.error("Could not load developer contacts:", error);
+            // Optional: Display an error message to the user
+            contactsContainer.innerHTML = `<div class="contact-item"><span>Could not load contacts.</span></div>`;
+          }
+        }
+        // --- END: NEW FUNCTION ---
+
+        // ... (existing code for theme management) ...
+
+        // --- CALL THE NEW FUNCTION ON PAGE LOAD ---
+        loadDeveloperContacts();
+
+        // Theme Management
+        const updateThemeIcon = () => {
+          const isDark = document.body.classList.contains("dark-theme");
+          themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+        };
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem("civicsense-theme");
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const shouldUseDarkTheme =
+          savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+
+        document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+        updateThemeIcon();
+
+        // Theme toggle functionality
+        themeToggle.addEventListener("click", () => {
+          const isDark = document.body.classList.toggle("dark-theme");
+          localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+          updateThemeIcon();
+        });
+      });
+    </script>
+  </body>
+</html>

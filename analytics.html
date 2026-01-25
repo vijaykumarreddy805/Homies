@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics & Trends - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      :root {
+        /* Light theme colors */
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+
+      body.dark-theme {
+        /* Dark theme colors */
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border-hr: #334155;
+        --color-shadow: rgba(0, 0, 0, 0.3);
+        --color-hover-secondary: #334155;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-bg-primary);
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* --- Sidebar Styles --- */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center; /* centers horizontally */
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .menu-section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        padding: 0 12px;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-hover-primary);
+
+        z-index: -1;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      /* Replace it with this code */
+      .menu-link:not(.logout-menu-link):not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      /* Logout button hover + active styles */
+      .logout-menu-link::before {
+        display: none !important; /* remove sliding hover animation background */
+      }
+
+      .logout-menu-link:hover,
+      .logout-menu-link.active {
+        background: rgba(
+          239,
+          68,
+          68,
+          0.1
+        ) !important; /* Very light red background */
+        color: var(--color-error) !important; /* Solid red text */
+        font-weight: 600;
+      }
+      .divider {
+        height: 1px;
+        background: var(--color-border-hr);
+        margin: 16px 0;
+      }
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-bg-secondary);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      /* --- Main Content & Page Styles --- */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1;
+        padding: 30px;
+      }
+      .page-header {
+        margin-bottom: 30px;
+        padding: 30px;
+        border-radius: 20px;
+        background: linear-gradient(
+          135deg,
+          #2dd4bf 0%,
+          #0d9488 100%
+        ); /* Teal Gradient */
+        color: white;
+        box-shadow: 0 4px 20px var(--color-shadow);
+      }
+      .page-header .page-title,
+      .page-header .page-title .material-symbols-rounded,
+      .page-header .page-subtitle {
+        color: white;
+      }
+      .page-header .page-subtitle {
+        opacity: 0.9;
+      }
+      .page-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .page-subtitle {
+        font-size: 1.1rem;
+        color: var(--color-text-secondary);
+        margin-top: 4px;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(12, 1fr);
+      }
+
+      .kpi-card {
+        grid-column: span 4;
+        background: var(--color-bg-sidebar);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid var(--color-border-hr);
+        box-shadow: 0 2px 12px var(--color-shadow);
+      }
+
+      .kpi-title {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+      }
+
+      .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--color-text-primary);
+      }
+
+      .chart-card {
+        background: var(--color-bg-sidebar);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid var(--color-border-hr);
+        box-shadow: 0 2px 12px var(--color-shadow);
+      }
+
+      .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--color-text-primary);
+      }
+
+      #statusChartContainer {
+        grid-column: span 5;
+      }
+      #categoryChartContainer {
+        grid-column: span 7;
+      }
+      #trendChartContainer {
+        grid-column: span 12;
+      }
+      #insightsContainer {
+        grid-column: span 12;
+      }
+
+      .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+      .insight-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background-color: var(--color-bg-primary);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--color-border-hr);
+      }
+      .insight-icon {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+      }
+      .insight-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--color-text-primary); /* ⬅️ ADD THIS LINE */
+      }
+      .insight-description {
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+      }
+
+      .loading-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        color: var(--color-text-secondary);
+      }
+      .loader {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--color-bg-secondary);
+        border-top-color: var(--color-hover-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        margin-top: auto;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+      }
+
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        gap: 12px;
+      }
+
+      .footer-copyright {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .footer-developer a:hover {
+        color: var(--color-hover-primary);
+      }
+
+      @media (min-width: 768px) {
+        .footer-content {
+          flex-direction: row;
+          text-align: left;
+        }
+      }
+      /* --- NEW: Sidebar Profile Picture Styles --- */
+      .sidebar-profile-pic {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--color-border-hr);
+        /* Placeholder background color */
+        background-color: var(--color-bg-secondary);
+      }
+      /* By default, hide the dark mode logo */
+      .dark-mode-logo {
+        display: none;
+      }
+
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar); /* Match the dark sidebar color */
+      }
+
+      /* When dark mode is on, hide the light logo... */
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+
+      /* ...and show the dark logo */
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(10px); /* ⬅ adjust this value as per your need */
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <!-- Main Menu -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="dashboard" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >dashboard</span
+                >
+                <span class="menu-label">Dashboard</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="report-issue" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >report_problem</span
+                >
+                <span class="menu-label">Report an Issue</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="my-submissions" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >description</span
+                >
+                <span class="menu-label">My Submissions</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="check-status" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">task_alt</span>
+                <span class="menu-label">Check Status</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- AI & Analytics -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="chatbot" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >smart_toy</span
+                >
+                <span class="menu-label">AI Chatbot</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="analytics" class="menu-link active">
+                <span class="material-symbols-rounded menu-icon"
+                  >trending_up</span
+                >
+                <span class="menu-label">Analytics & Trends</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="feedback" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >star_rate</span
+                >
+                <span class="menu-label">Feedback & Rating</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="help-support" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">help</span>
+                <span class="menu-label">Help/Support</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="about-us" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">info</span>
+                <span class="menu-label">About Us</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Account -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="my-profile" class="menu-link">
+                <img
+                  src=""
+                  alt="My Profile"
+                  id="sidebarProfilePic"
+                  class="sidebar-profile-pic"
+                />
+                <span class="menu-label">My Profile</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="logout" class="menu-link logout-menu-link">
+                <span class="material-symbols-rounded menu-icon">logout</span>
+                <span class="menu-label">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span>
+            <span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">
+              <span class="material-symbols-rounded">trending_up</span>
+              Analytics & Trends
+            </h1>
+            <p class="page-subtitle">
+              Visualizing civic engagement and issue resolution data.
+            </p>
+          </div>
+        </header>
+
+        <div class="dashboard-grid">
+          <div class="kpi-card">
+            <div class="kpi-title">Total Issues Reported</div>
+            <div class="kpi-value" id="totalIssuesStat">...</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-title">Issues This Month</div>
+            <div class="kpi-value" id="monthlyIssuesStat">...</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-title">Avg. Resolution Time</div>
+            <div class="kpi-value" id="avgResolutionStat">...</div>
+          </div>
+
+          <div class="chart-card" id="statusChartContainer">
+            <h3 class="chart-title">Issue Status Distribution</h3>
+            <div class="chart-inner">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card" id="categoryChartContainer">
+            <h3 class="chart-title">Top Issue Categories</h3>
+            <div class="chart-inner">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card" id="trendChartContainer">
+            <h3 class="chart-title">30-Day Submission Trend</h3>
+            <div class="chart-inner">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card" id="insightsContainer">
+            <h3 class="chart-title">AI-Powered Insights</h3>
+            <div id="insightsGrid" class="insights-grid">
+              <div class="loading-placeholder"><div class="loader"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Footer -->
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by <a href="team-details">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const themeToggle = document.querySelector(".theme-toggle");
+        const themeIcon = themeToggle.querySelector(
+          ".material-symbols-rounded"
+        );
+        // --- Chart Configuration ---
+        const chartOptions = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                font: { family: "'Poppins', sans-serif" },
+              },
+            },
+          },
+          scales: {
+            x: { ticks: { font: { family: "'Poppins', sans-serif" } } },
+            y: { ticks: { font: { family: "'Poppins', sans-serif" } } },
+          },
+        };
+
+        const chartColors = {
+          status: ["#3b82f6", "#f59e0b", "#10b981", "#ef4444", "#64748b"],
+          category: [
+            "#8b5cf6",
+            "#ec4899",
+            "#f97316",
+            "#06b6d4",
+            "#14b8a6",
+            "#65a30d",
+            "#ca8a04",
+            "#db2777",
+            "#4f46e5",
+            "#2563eb",
+          ],
+          trend: "#3b82f6",
+        };
+
+        let statusChartInstance, categoryChartInstance, trendChartInstance;
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderOverviewStats(data) {
+          document.getElementById("totalIssuesStat").textContent =
+            data.total_issues || 0;
+          document.getElementById("monthlyIssuesStat").textContent =
+            data.monthly_issues || 0;
+          document.getElementById("avgResolutionStat").textContent = `${
+            data.avg_response_time || 0
+          } Days`;
+        }
+
+        // --- START: Auto-scroll sidebar to active link ---
+        const activeMenuLink = document.querySelector(
+          ".sidebar .menu-link.active"
+        );
+
+        if (activeMenuLink) {
+          // This function scrolls the sidebar so the active link is in the middle
+          activeMenuLink.scrollIntoView({
+            behavior: "smooth", // Optional: for a smooth scrolling animation
+            block: "center", // This aligns the link to the center of the view
+          });
+        }
+        // --- END: Auto-scroll sidebar to active link ---
+
+        // --- START: Load Profile Picture into Sidebar ---
+        async function loadSidebarProfilePic() {
+          const sidebarPicElement =
+            document.getElementById("sidebarProfilePic");
+          if (!sidebarPicElement) return;
+
+          try {
+            const response = await fetch("/api/user/profile");
+            if (!response.ok) return; // Fail silently if not logged in or error
+
+            const data = await response.json();
+            if (data.photo_url) {
+              sidebarPicElement.src = data.photo_url;
+            }
+          } catch (error) {
+            console.error("Could not load sidebar profile picture:", error);
+          }
+        }
+
+        // Call the function to load the picture
+        loadSidebarProfilePic();
+        // --- END: Load Profile Picture into Sidebar ---
+
+        function renderStatusChart(data) {
+          const ctx = document.getElementById("statusChart").getContext("2d");
+          if (statusChartInstance) statusChartInstance.destroy();
+          statusChartInstance = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              labels: data.map((d) => d.status),
+              datasets: [
+                {
+                  label: "Issue Status",
+                  data: data.map((d) => d.count),
+                  backgroundColor: chartColors.status,
+                  borderColor: document.body.classList.contains("dark-theme")
+                    ? "#0f172a"
+                    : "#ffffff",
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              ...chartOptions,
+              plugins: { legend: { position: "right" } },
+            },
+          });
+        }
+
+        function renderCategoryChart(data) {
+          const ctx = document.getElementById("categoryChart").getContext("2d");
+          if (categoryChartInstance) categoryChartInstance.destroy();
+          categoryChartInstance = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: data.map((d) => d.issueCategory),
+              datasets: [
+                {
+                  label: "Number of Issues",
+                  data: data.map((d) => d.count),
+                  backgroundColor: chartColors.category,
+                },
+              ],
+            },
+            options: chartOptions,
+          });
+        }
+
+        function renderTrendChart(data) {
+          const ctx = document.getElementById("trendChart").getContext("2d");
+          if (trendChartInstance) trendChartInstance.destroy();
+          trendChartInstance = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: data.map((d) =>
+                new Date(d.date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+              ),
+              datasets: [
+                {
+                  label: "Issues Submitted",
+                  data: data.map((d) => d.count),
+                  borderColor: chartColors.trend,
+                  backgroundColor: "rgba(59, 130, 246, 0.1)",
+                  fill: true,
+                  tension: 0.3,
+                },
+              ],
+            },
+            options: chartOptions,
+          });
+        }
+
+        function renderInsights(data) {
+          const grid = document.getElementById("insightsGrid");
+          grid.innerHTML = ""; // Clear loader
+          if (data && data.length > 0) {
+            data.forEach((item) => {
+              const card = document.createElement("div");
+              card.className = "insight-card";
+              card.innerHTML = `
+                            <div class="insight-icon"><span class="material-symbols-rounded">${item.icon}</span></div>
+                            <div>
+                                <div class="insight-title">${item.title}</div>
+                                <div class="insight-description">${item.description}</div>
+                            </div>
+                        `;
+              grid.appendChild(card);
+            });
+          } else {
+            grid.innerHTML = "<p>No insights available at the moment.</p>";
+          }
+        }
+
+        // --- DATA FETCHING ---
+
+        async function loadAnalyticsData() {
+          try {
+            const [overviewRes, predictionsRes] = await Promise.all([
+              fetch("/api/analytics/overview"),
+              fetch("/api/analytics/predictions"),
+            ]);
+
+            if (!overviewRes.ok || !predictionsRes.ok) {
+              throw new Error("Failed to fetch analytics data");
+            }
+
+            const overviewData = await overviewRes.json();
+            const predictionsData = await predictionsRes.json();
+
+            if (overviewData.status === "success") {
+              renderOverviewStats(overviewData.data.overview);
+              renderStatusChart(overviewData.data.status_distribution);
+              renderCategoryChart(overviewData.data.category_distribution);
+              renderTrendChart(overviewData.data.trend_data);
+            }
+
+            if (predictionsData.status === "success") {
+              renderInsights(predictionsData.data.insights);
+            }
+          } catch (error) {
+            console.error("Error loading analytics:", error);
+            document.getElementById("insightsGrid").innerHTML =
+              "<p>Could not load analytics data.</p>";
+          }
+        }
+
+        loadAnalyticsData();
+
+        // Theme Management
+        const updateThemeIcon = () => {
+          const isDark = document.body.classList.contains("dark-theme");
+          themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+        };
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem("civicsense-theme");
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const shouldUseDarkTheme =
+          savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+
+        document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+        updateThemeIcon();
+
+        // Theme toggle functionality
+        themeToggle.addEventListener("click", () => {
+          const isDark = document.body.classList.toggle("dark-theme");
+          localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+          updateThemeIcon();
+        });
+      });
+    </script>
+  </body>
+</html>

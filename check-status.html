@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check Status - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      :root {
+        /* Light theme colors */
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+
+      body.dark-theme {
+        /* Dark theme colors */
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border-hr: #334155;
+        --color-shadow: rgba(0, 0, 0, 0.3);
+        --color-hover-secondary: #334155;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-bg-primary);
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* --- Sidebar Styles --- */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: var(--color-bg-sidebar);
+        color: #0d47a1;
+        position: relative;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center; /* centers horizontally */
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .menu-section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        padding: 0 12px;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-hover-primary);
+
+        z-index: -1;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      /* Replace it with this code */
+      .menu-link:not(.logout-menu-link):not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      /* Logout button hover + active styles */
+      .logout-menu-link::before {
+        display: none !important; /* remove sliding hover animation background */
+      }
+
+      .logout-menu-link:hover,
+      .logout-menu-link.active {
+        background: rgba(
+          239,
+          68,
+          68,
+          0.1
+        ) !important; /* Very light red background */
+        color: var(--color-error) !important; /* Solid red text */
+        font-weight: 600;
+      }
+      .divider {
+        height: 1px;
+        background: var(--color-border-hr);
+        margin: 16px 0;
+      }
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-bg-secondary);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      /* --- Main Content & Page Specific Styles --- */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1;
+        padding: 30px;
+      }
+
+      .page-header {
+        margin-bottom: 30px;
+        padding: 30px;
+        border-radius: 20px;
+        background: linear-gradient(
+          135deg,
+          #4b5563 0%,
+          #1f2937 100%
+        ); /* Dark Slate Gradient */
+        color: white;
+        box-shadow: 0 4px 20px var(--color-shadow);
+      }
+
+      .page-header .page-title,
+      .page-header .page-title .material-symbols-rounded,
+      .page-header .page-subtitle {
+        color: white;
+      }
+      .page-header .page-subtitle {
+        opacity: 0.8;
+      }
+
+      .page-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .page-subtitle {
+        font-size: 1.1rem;
+        color: var(--color-text-secondary);
+        margin-top: 4px;
+      }
+      .status-checker-container {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border-hr);
+      }
+      .search-form {
+        display: flex;
+        gap: 16px;
+      }
+      .search-input-wrapper {
+        flex-grow: 1;
+        position: relative;
+      }
+      .search-input-icon {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        transform: translateY(-50%);
+        color: var(--color-text-secondary);
+      }
+      #issueIdInput {
+        width: 100%;
+        padding: 14px 16px 14px 50px;
+        font-size: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--color-border-hr);
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .search-button {
+        padding: 0 24px;
+        font-weight: 600;
+        border-radius: 12px;
+        border: none;
+        background: var(--color-accent);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .loader {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .message-box {
+        padding: 16px;
+        border-radius: 12px;
+        margin-top: 24px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .message-box.error {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--color-error);
+      }
+      .message-box.initial {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: var(--color-warning);
+      }
+      .status-result-container {
+        margin-top: 32px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+        display: none;
+      }
+      .status-result-container.visible {
+        opacity: 1;
+        transform: translateY(0);
+        display: block;
+      }
+      .results-layout-grid {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 32px;
+        align-items: flex-start;
+      }
+      .results-section-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      #details-panel {
+        background: var(--color-bg-sidebar);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid var(--color-border-hr);
+      }
+      .issue-details-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .detail-item {
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--color-border-hr);
+      }
+      .detail-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .detail-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--color-text-secondary);
+        margin-bottom: 4px;
+      }
+      .detail-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .status-badge.Submitted {
+        background-color: #e0e7ff;
+        color: #4338ca;
+      }
+      .status-badge.Acknowledged {
+        background-color: #cffafe;
+        color: #0891b2;
+      }
+      .status-badge.InProgress {
+        background-color: #fef3c7;
+        color: #b45309;
+      }
+      .status-badge.Resolved {
+        background-color: #dcfce7;
+        color: #15803d;
+      }
+      .status-badge.Rejected {
+        background-color: #fee2e2;
+        color: #b91c1c;
+      }
+      .timeline-header {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .timeline {
+        position: relative;
+        padding-left: 20px;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 9px; /* This is the corrected value */
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: var(--color-border-hr);
+      }
+      .timeline-item {
+        position: relative;
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+        margin-bottom: 24px;
+      }
+      .timeline-item:last-child {
+        margin-bottom: 0;
+      }
+      .timeline-dot {
+        position: relative;
+        left: -32px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--color-bg-primary);
+        z-index: 1;
+        flex-shrink: 0;
+        color: white;
+      }
+      .timeline-dot.Submitted {
+        background-color: var(--color-hover-primary);
+      }
+      .timeline-dot.Acknowledged {
+        background-color: #0e7490;
+      }
+      .timeline-dot.InProgress {
+        background-color: var(--color-warning);
+      }
+      .timeline-dot.Resolved {
+        background-color: var(--color-accent);
+      }
+      .timeline-dot.Rejected {
+        background-color: var(--color-error);
+      }
+      .timeline-card {
+        flex-grow: 1;
+        border: 1px solid var(--color-border-hr);
+        background: var(--color-bg-sidebar);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: -4px;
+      }
+      .timeline-status {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+
+      /* Add these lines to fix dark mode text colors */
+
+      #issueIdInput::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.7;
+      }
+
+      .timeline-status {
+        color: var(--color-text-primary);
+      }
+
+      .timeline-notes {
+        color: var(--color-text-primary);
+      }
+
+      .results-section-header {
+        color: var(--color-text-primary);
+      }
+
+      .timeline-header {
+        color: var(--color-text-primary);
+      }
+      .timeline-date {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        margin-top: 4px;
+      }
+      .timeline-notes {
+        font-size: 0.95rem;
+        color: var(--color-text-primary);
+      }
+
+      /* --- Restored Footer Styles --- */
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        margin-top: auto;
+        padding: 10px 0;
+      }
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        gap: 12px;
+      }
+      .footer-copyright {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      .footer-developer a:hover {
+        color: var(--color-hover-primary);
+      }
+
+      @media (min-width: 768px) {
+        .footer-content {
+          flex-direction: row;
+          text-align: left;
+        }
+      }
+      @media (max-width: 1024px) {
+        .results-layout-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 768px) {
+        .search-form {
+          flex-direction: column;
+        }
+      }
+
+      /* --- NEW: Sidebar Profile Picture Styles --- */
+      .sidebar-profile-pic {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--color-border-hr);
+        /* Placeholder background color */
+        background-color: var(--color-bg-secondary);
+      }
+
+      /* By default, hide the dark mode logo */
+      .dark-mode-logo {
+        display: none;
+      }
+
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar); /* Match the dark sidebar color */
+      }
+
+      /* When dark mode is on, hide the light logo... */
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+
+      /* ...and show the dark logo */
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(10px); /* ⬅ adjust this value as per your need */
+      }
+
+      /* By default, hide the dark mode logo */
+      .dark-mode-logo {
+        display: none;
+      }
+
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar); /* Match the dark sidebar color */
+      }
+
+      /* When dark mode is on, hide the light logo... */
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+
+      /* ...and show the dark logo */
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(10px); /* ⬅ adjust this value as per your need */
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <!-- Main Menu -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="dashboard" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >dashboard</span
+                >
+                <span class="menu-label">Dashboard</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="report-issue" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >report_problem</span
+                >
+                <span class="menu-label">Report an Issue</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="my-submissions" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >description</span
+                >
+                <span class="menu-label">My Submissions</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="check-status" class="menu-link active">
+                <span class="material-symbols-rounded menu-icon">task_alt</span>
+                <span class="menu-label">Check Status</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- AI & Analytics -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="chatbot" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >smart_toy</span
+                >
+                <span class="menu-label">AI Chatbot</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="analytics" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >trending_up</span
+                >
+                <span class="menu-label">Analytics & Trends</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="feedback" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >star_rate</span
+                >
+                <span class="menu-label">Feedback & Rating</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="help-support" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">help</span>
+                <span class="menu-label">Help/Support</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="about-us" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">info</span>
+                <span class="menu-label">About Us</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Account -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="my-profile" class="menu-link">
+                <img
+                  src=""
+                  alt="My Profile"
+                  id="sidebarProfilePic"
+                  class="sidebar-profile-pic"
+                />
+                <span class="menu-label">My Profile</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="logout" class="menu-link logout-menu-link">
+                <span class="material-symbols-rounded menu-icon">logout</span>
+                <span class="menu-label">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span>
+            <span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">
+              <span class="material-symbols-rounded">task_alt</span>
+              Check Issue Status
+            </h1>
+            <p class="page-subtitle">
+              Enter an Issue ID to track its progress in real-time.
+            </p>
+          </div>
+        </header>
+
+        <section class="status-checker-container">
+          <form id="statusCheckForm" class="search-form">
+            <div class="search-input-wrapper">
+              <span class="material-symbols-rounded search-input-icon"
+                >confirmation_number</span
+              >
+              <input
+                type="text"
+                id="issueIdInput"
+                placeholder="e.g., CS-20250725-ABC123D4"
+                required
+                value="{{ issue_id or '' }}"
+              />
+            </div>
+            <button type="submit" id="searchBtn" class="search-button">
+              <span id="btn-text">Track Status</span>
+              <div id="btn-loader" class="loader" style="display: none"></div>
+            </button>
+          </form>
+          <div id="messageBox"></div>
+        </section>
+
+        <section id="statusResultContainer" class="status-result-container">
+          <div class="results-layout-grid">
+            <div id="details-panel">
+              <h2 class="results-section-header">
+                <span class="material-symbols-rounded">summarize</span>
+                Issue Details
+              </h2>
+              <div id="detailsList" class="issue-details-list"></div>
+            </div>
+            <div class="timeline-container">
+              <h2 class="timeline-header">
+                <span class="material-symbols-rounded">manage_history</span>
+                Status History
+              </h2>
+              <div id="timeline" class="timeline"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by <a href="team-details">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const statusCheckForm = document.getElementById("statusCheckForm");
+        const issueIdInput = document.getElementById("issueIdInput");
+        const searchBtn = document.getElementById("searchBtn");
+        const messageBox = document.getElementById("messageBox");
+        const statusResultContainer = document.getElementById(
+          "statusResultContainer"
+        );
+        const detailsList = document.getElementById("detailsList");
+        const timeline = document.getElementById("timeline");
+
+        const statusIcons = {
+          Submitted: "flag",
+          Acknowledged: "visibility",
+          "In Progress": "build",
+          Resolved: "task_alt",
+          Rejected: "cancel",
+          default: "hourglass_empty",
+        };
+
+        const toggleLoading = (isLoading) => {
+          const btnText = searchBtn.querySelector("#btn-text");
+          const btnLoader = searchBtn.querySelector("#btn-loader");
+          searchBtn.disabled = isLoading;
+          if (btnText) btnText.style.display = isLoading ? "none" : "inline";
+          if (btnLoader) btnLoader.style.display = isLoading ? "block" : "none";
+        };
+
+        const showMessage = (message, type) => {
+          messageBox.innerHTML = `<div class="message-box ${type}"><span class="material-symbols-rounded">${
+            type === "error" ? "error" : "info"
+          }</span><span>${message}</span></div>`;
+        };
+
+        const clearMessage = () => {
+          messageBox.innerHTML = "";
+        };
+
+        const setInitialMessage = () => {
+          showMessage(
+            "Enter an Issue ID to track its progress. Your results will appear here.",
+            "initial"
+          );
+        };
+
+        // --- START: Auto-scroll sidebar to active link ---
+        const activeMenuLink = document.querySelector(
+          ".sidebar .menu-link.active"
+        );
+
+        if (activeMenuLink) {
+          // This function scrolls the sidebar so the active link is in the middle
+          activeMenuLink.scrollIntoView({
+            behavior: "smooth", // Optional: for a smooth scrolling animation
+            block: "center", // This aligns the link to the center of the view
+          });
+        }
+        // --- END: Auto-scroll sidebar to active link ---
+        // --- START: Load Profile Picture into Sidebar ---
+        async function loadSidebarProfilePic() {
+          const sidebarPicElement =
+            document.getElementById("sidebarProfilePic");
+          if (!sidebarPicElement) return;
+
+          try {
+            const response = await fetch("/api/user/profile");
+            if (!response.ok) return; // Fail silently if not logged in or error
+
+            const data = await response.json();
+            if (data.photo_url) {
+              sidebarPicElement.src = data.photo_url;
+            }
+          } catch (error) {
+            console.error("Could not load sidebar profile picture:", error);
+          }
+        }
+
+        // Call the function to load the picture
+        loadSidebarProfilePic();
+        // --- END: Load Profile Picture into Sidebar ---
+
+        const renderStatusDetails = (data) => {
+          const { details, history } = data;
+          detailsList.innerHTML = `
+              <div class="detail-item"><div class="detail-label">Issue ID</div><div class="detail-value">${
+                details.issue_id
+              }</div></div>
+              <div class="detail-item"><div class="detail-label">Category</div><div class="detail-value">${
+                details.customIssueType || details.issueCategory
+              }</div></div>
+              <div class="detail-item"><div class="detail-label">Location</div><div class="detail-value">${
+                details.locationAddress || "N/A"
+              }</div></div>
+              <div class="detail-item"><div class="detail-label">Submitted On</div><div class="detail-value">${
+                details.submitted_at
+              }</div></div>
+              <div class="detail-item"><div class="detail-label">Priority</div><div class="detail-value">${
+                details.priority
+              }</div></div>
+              <div class="detail-item"><div class="detail-label">Current Status</div><div class="detail-value"><span class="status-badge ${details.status.replace(
+                " ",
+                ""
+              )}">${details.status}</span></div></div>
+          `;
+
+          timeline.innerHTML = history
+            .map((item) => {
+              const icon = statusIcons[item.status] || statusIcons["default"];
+              const statusClass = item.status.replace(" ", "");
+              return `
+              <div class="timeline-item">
+                  <div class="timeline-dot ${statusClass}"><span class="material-symbols-rounded">${icon}</span></div>
+                  <div class="timeline-card">
+                      <h3 class="timeline-status">${item.status}</h3>
+                      <p class="timeline-date">${item.created_at}</p>
+                      <p class="timeline-notes">${item.notes || ""}</p>
+                  </div>
+              </div>
+            `;
+            })
+            .join("");
+          statusResultContainer.classList.add("visible");
+        };
+
+        const fetchStatusById = async (issueId) => {
+          toggleLoading(true);
+          clearMessage();
+          statusResultContainer.classList.remove("visible");
+
+          try {
+            const response = await fetch("/api/check-status", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ issueId }),
+            });
+            const data = await response.json();
+            if (!response.ok)
+              throw new Error(data.error || "An unknown error occurred.");
+            renderStatusDetails(data);
+          } catch (error) {
+            showMessage(error.message, "error");
+          } finally {
+            toggleLoading(false);
+          }
+        };
+
+        if (statusCheckForm) {
+          statusCheckForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const issueId = issueIdInput.value.trim();
+            if (issueId) fetchStatusById(issueId);
+          });
+
+          if (issueIdInput.value) {
+            fetchStatusById(issueIdInput.value.trim());
+          } else {
+            setInitialMessage();
+          }
+        }
+
+        const themeToggleBtn = document.querySelector(".theme-toggle");
+        if (themeToggleBtn) {
+          // Function to apply theme based on localStorage
+          const applyInitialTheme = () => {
+            const savedTheme = localStorage.getItem("civicsense-theme"); // <-- Correct key
+            const systemPrefersDark = window.matchMedia(
+              "(prefers-color-scheme: dark)"
+            ).matches;
+            const shouldUseDarkTheme =
+              savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+            document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+          };
+
+          // Event listener for the toggle button
+          themeToggleBtn.addEventListener("click", () => {
+            const isDark = document.body.classList.toggle("dark-theme");
+            localStorage.setItem("civicsense-theme", isDark ? "dark" : "light"); // <-- Correct key
+          });
+
+          // Apply the theme when the page loads
+          applyInitialTheme();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Civicsense AI</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+       <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background-color: #f5f5f5;
+      }
+
+      .divider:after,
+      .divider:before {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #eee;
+      }
+
+      .main-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .content-section {
+        flex: 1;
+        padding: 2rem 0;
+      }
+
+      /* Mobile content adjustments */
+      @media (max-width: 768px) {
+        .content-section {
+          padding: 0;
+        }
+
+        .mobile-logo-container {
+          background: white;
+          padding: 20px;
+          text-align: center;
+          border-bottom: 1px solid #eee;
+        }
+
+        .mobile-image-container {
+          padding: 20px;
+          background: white;
+        }
+
+        .mobile-form-container {
+          padding: 20px;
+        }
+      }
+
+      .footer-section {
+        margin-top: auto;
+        flex-shrink: 0;
+      }
+
+      /* Desktop logo styling */
+      .desktop-logo-container {
+        position: absolute;
+        top: 20px;
+        left: 50px;
+        z-index: 1000;
+      }
+
+      .desktop-logo-img {
+        max-height: 150px;
+        width: auto;
+      }
+
+      /* Logo styling */
+      .logo-img {
+        max-height: 80px;
+        width: auto;
+        margin-bottom: 1rem;
+      }
+
+      .logo-container {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .mobile-logo-container .logo-img {
+        max-height: 80px;
+      }
+
+      .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+      }
+
+      .sign-in-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      /* New styles for card background */
+      .login-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin: 2rem 0;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #4a5568;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .divider span {
+        padding: 0 0.75rem;
+      }
+
+      /* Updated Google button style */
+      .google-btn {
+        width: 100%;
+        padding: 12px 16px;
+        background: white;
+        color: #666;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        text-decoration: none;
+        margin-top: 1rem;
+      }
+
+      .google-btn:hover {
+        background: #f8f9fa;
+        border-color: #4285f4;
+        color: #666;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .google-icon {
+        width: 20px;
+        height: 20px;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjc5IDIyLjM2IDEwLjA5SDE3VjE0LjI1SDIwLjMzQzIwLjE2IDE1LjQgMTkuNjUgMTYuMzkgMTguOTQgMTcuMDlWMTkuNUgyMC45NkMyMS42NiAxNy45MyAyMi41NiAxNS4yNSAyMi41NiAxMi4yNVoiIGZpbGw9IiM0Mjg1RjQiLz4KPHBhdGggZD0iTTEyIDIzQzE1LjA0IDIzIDE3LjU5IDIxLjkyIDIwIDIwTDE5IDIwSDE1VjE4SDE4VjE2SDE1VjE0SDE4VjEySDE1VjEwSDE4VjhIMTVWNkgxOFY0SDE1VjJIMTdWMEgxMkM3LjU2IDAgNCA0IDQgOFYxNkM0IDIwIDcuNTYgMjMgMTIgMjNaIiBmaWxsPSIjRkZGIi8+CjxwYXRoIGQ9Ik0xMiAxLjVDMTQuMzMgMS41IDE2LjMzIDIuNTMgMTcuODMgNEwxNC45IDYuNTlDMTQuMTUgNS42MiAxMy4xNyA1IDEyIDVDOS42OCA1IDcuNzYgNi4zNyA3LjA3IDguMzJMMy45NiA2LjE5QzUuNTMgMy4xNSA4LjUgMS41IDEyIDEuNVoiIGZpbGw9IiNFQTQzMzUiLz4KPHBhdGggZD0iTTEyIDIzQzguNDQgMjMgNS40IDIwLjg1IDMuOTYgMTcuODFMNy4wNyAxNS42OEM3Ljc2IDE3LjYzIDkuNjggMTkgMTIgMTlDMTMuMTcgMTkgMTQuMTUgMTguMzggMTQuOSAxNy40MUwxNy44MyAyMEMxNi4zMyAyMS40NyAxNC4zMyAyMy4xNSAxMiAyM1oiIGZpbGw9IiMzNEE4NTMiLz4KPHBhdGggZD0iTTUgMTJDNSAxMC44IDUuMjMgOS42OCA1LjY2IDguNjFMOC4yMiA5LjU5QzguMDYgMTAuMzUgNy45NiAxMS4xNSA3Ljk2IDEyQzcuOTYgMTIuODUgOC4wNiAxMy42NSA4LjIyIDE0LjQxTDUuNjYgMTUuMzlDNS4yMyAxNC4zMiA1IDEzLjIgNSAxMloiIGZpbGw9IiNGQkJDMDQiLz4KPC9zdmc+");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      /* Ensure footer stays at bottom */
+      footer {
+        margin-top: auto;
+      }
+
+      @media (max-width: 768px) {
+        .sign-in-title {
+          font-size: 1.5rem;
+        }
+
+        .login-card {
+          padding: 1.5rem;
+          margin: 1rem 0;
+        }
+
+        .content-section {
+          padding: 1rem 0;
+        }
+      }
+
+      /* --- ADD THIS TO YOUR <style> TAG --- */
+
+/* This styles and positions the eye icon on the right */
+.password-toggle-icon {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6c757d;
+  z-index: 10;
+  display: none; /* Hide the icon by default */
+}
+
+/* This class will be added by JavaScript to show the icon */
+.password-toggle-icon.visible {
+  display: block;
+}
+
+/* Adds padding on the right of the password field to make space for the icon */
+.password-field {
+  padding-right: 2.75rem !important;
+}
+/* Hides the default password reveal eye icon from the browser */
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+
+/* --- CSS FOR FLOATING TOAST MESSAGES --- */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1055; /* High z-index to appear above other content */
+      }
+      .toast-container .alert {
+        min-width: 250px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Container for floating messages -->
+    <div class="toast-container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <!-- The alert is dismissible so Bootstrap JS can target it -->
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+    <div class="main-wrapper">
+      <section class="content-section">
+        <div class="container-fluid">
+          <!-- Mobile Layout -->
+          <div class="d-block d-md-none">
+            <!-- Mobile Logo -->
+            <div class="mobile-logo-container">
+              <img
+                src="{{ url_for('static', filename='images/Civicsense.png') }}"
+                alt="Civicsense AI Logo"
+                class="logo-img"
+              />
+            </div>
+
+            <!-- Mobile Image -->
+            <div class="mobile-image-container text-center">
+              <img
+                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                class="img-fluid"
+                alt="Sample image"
+                style="max-width: 300px"
+              />
+            </div>
+
+            <!-- Mobile Form -->
+            <div class="mobile-form-container">
+              <div class="login-card">
+          
+                <form action="{{ url_for('login') }}" method="POST">
+                  <h2
+                    class="sign-in-title"
+                    style="
+                      color: #0d47a1;
+                      font-family: 'Britannic Bold', cursive;
+                      text-align: center;
+                    "
+                  >
+                    User Login
+                  </h2>
+
+                  <!-- Email input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      name="email" 
+                      type="email"
+                      id="form3Example3"
+                      class="form-control form-control-lg"
+                      placeholder="Enter email address" required
+                    />
+                    <label class="form-label" for="form3Example3"
+                      >Email address</label
+                    >
+                  </div>
+
+                  <!-- Password input -->
+                 <div style="position: relative;">
+  <div data-mdb-input-init class="form-outline mb-3">
+    <input
+      name="password"
+      type="password"
+      id="form3Example4"
+      class="form-control form-control-lg password-field"
+      placeholder="Enter password" required
+    />
+    <label class="form-label" for="form3Example4">Password</label>
+  </div>
+  <i class="fas fa-eye password-toggle-icon" data-target-input="form3Example4"></i>
+</div>
+
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <!-- Checkbox -->
+                    <div class="form-check mb-0">
+                      <input
+                        class="form-check-input me-2"
+                        type="checkbox"
+                        value=""
+                        id="form2Example3"
+                      />
+                      <label class="form-check-label" for="form2Example3">
+                        Remember me
+                      </label>
+                    </div>
+                    <a
+                      href="#!"
+                      class="text-body"
+                      style="text-decoration: underline"
+                      >Forgot password?</a
+                    >
+                  </div>
+
+                  <div class="text-center text-lg-start mt-4 pt-2">
+                    <button
+                      type="submit"
+                      data-mdb-button-init
+                      data-mdb-ripple-init
+                      class="btn btn-primary btn-lg w-100 mb-3"
+                      style="padding: 12px"
+                    >
+                      Login
+                    </button>
+                    <p class="small fw-bold mt-2 pt-1 mb-0 text-center">
+                      Don't have an account?
+                      <a href="{{ url_for('register') }}"  class="link-danger">Register</a>
+                    </p>
+                  </div>
+
+                  <!-- Social Media Login Section -->
+                  <div class="social-login-section">
+                    <div class="d-flex justify-content-center">
+                      <a href="#!" class="google-btn" id="google-btn">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 48 48"
+                          style="margin-right: 10px"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fill="#EA4335"
+                            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                          />
+                          <path
+                            fill="#4285F4"
+                            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                          />
+                        </svg>
+                        Sign in with Google
+                      </a>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div
+  class="modal fade"
+  id="forgotPasswordModal"
+  tabindex="-1"
+  aria-labelledby="forgotPasswordModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="forgotPasswordModalLabel">
+          <i class="fas fa-lock me-2"></i> Reset Password
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          For security reasons, password resets must be handled by an
+          administrator.
+        </p>
+        <p class="mb-0">
+          <strong>Please contact the system administrator</strong> to request a
+          password change.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+          Understood
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+          <!-- Desktop Layout -->
+          <div
+            class="row d-none d-md-flex justify-content-center align-items-center min-vh-100"
+          >
+            <div class="col-md-9 col-lg-6 col-xl-5">
+              <!-- Logo positioned at top left of the left column -->
+              <div class="desktop-logo-container">
+                <img
+                 src="{{ url_for('static', filename='images/Civicsense.png') }}"
+                  alt="Civicsense AI Logo"
+                  class="desktop-logo-img"
+                />
+              </div>
+              <img
+                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                class="img-fluid"
+                alt="Sample image"
+              />
+            </div>
+            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+              <div class="login-card">
+                
+                <form action="{{ url_for('login') }}" method="POST">
+                  <h2
+  class="sign-in-title"
+  style="
+    color: #0d47a1;
+    font-family: 'Britannic Bold', cursive;
+    text-align: center;
+  "
+>
+  User Login
+</h2>
+
+
+                  <!-- Email input -->
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input
+                      name="email" 
+                      type="email"
+                      id="form3Example3_desktop"
+                      class="form-control form-control-lg"
+                      placeholder="Enter email address" required
+                    />
+                    <label class="form-label" for="form3Example3_desktop"
+                      >Email address</label
+                    >
+                  </div>
+
+                  <!-- Password input -->
+                  <div style="position: relative;">
+  <div data-mdb-input-init class="form-outline mb-3">
+    <input
+      name="password"
+      type="password"
+      id="form3Example4_desktop"
+      class="form-control form-control-lg password-field"
+      placeholder="Enter password" required
+    />
+    <label class="form-label" for="form3Example4_desktop">Password</label>
+  </div>
+  <i class="fas fa-eye password-toggle-icon" data-target-input="form3Example4_desktop"></i>
+</div>
+
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <!-- Checkbox -->
+                    <div class="form-check mb-0">
+                      <input
+                        class="form-check-input me-2"
+                        type="checkbox"
+                        value=""
+                        id="form2Example3_desktop"
+                      />
+                      <label
+                        class="form-check-label"
+                        for="form2Example3_desktop"
+                      >
+                        Remember me
+                      </label>
+                    </div>
+                    <a
+  href="#"
+  class="text-body"
+  style="text-decoration: underline"
+  data-bs-toggle="modal"
+  data-bs-target="#forgotPasswordModal"
+  >Forgot password?</a
+>
+                  </div>
+
+                  <div class="text-center text-lg-start mt-4 pt-2">
+                    <button
+                      type="submit"
+                      data-mdb-button-init
+                      data-mdb-ripple-init
+                      class="btn btn-primary btn-lg w-100 mb-3"
+                      style="padding: 12px"
+                    >
+                      Login
+                    </button>
+                    <p class="small fw-bold mt-2 pt-1 mb-0 text-center">
+                      Don't have an account?
+                      <a href="{{ url_for('register') }}"  class="link-danger">Register</a>
+                    </p>
+                  </div>
+                    
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+     <footer class="footer-section bg-secondary">
+        <div
+          class="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5"
+        >
+          <!-- Copyright -->
+          <div class="text-dark mb-3 mb-md-0">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <!-- Copyright -->
+
+        <!-- Right -->
+<div class="text-dark">
+  Developed by
+  <a href="team-details" style="color: #0D47A1; font-weight: bold; text-decoration: none;">
+    Team UNIQUE
+  </a>
+</div>
+<!-- Right -->
+
+      </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Select all password fields and toggle icons
+    const passwordFields = document.querySelectorAll('.password-field');
+    const toggleIcons = document.querySelectorAll('.password-toggle-icon');
+
+    // Logic to show/hide icon based on input
+    passwordFields.forEach(field => {
+        field.addEventListener('input', function() {
+            const icon = this.parentElement.nextElementSibling;
+            if (this.value.length > 0) {
+                icon.classList.add('visible');
+            } else {
+                icon.classList.remove('visible');
+            }
+        });
+    });
+
+    // Logic to toggle password visibility on icon click
+    toggleIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+            const targetInputId = this.getAttribute('data-target-input');
+            const passwordInput = document.getElementById(targetInputId);
+
+            if (passwordInput) {
+                // Toggle the input type
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle the icon's appearance
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            }
+        });
+    });
+});
+
+ // --- NEW: Logic for auto-hiding toast messages ---
+          const alerts = document.querySelectorAll('.toast-container .alert');
+          alerts.forEach(function(alert) {
+            setTimeout(function() {
+              // Use Bootstrap's built-in close method
+              const bsAlert = new bootstrap.Alert(alert);
+              bsAlert.close();
+            }, 3000); // 3000 milliseconds = 3 seconds
+          });
+</script>
+  </body>
+</html>

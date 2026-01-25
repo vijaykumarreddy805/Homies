@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team UNIQUE - Team</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f5f5;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .main-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .content-section {
+        flex: 1;
+        padding: 2rem 0;
+      }
+
+      /* Header Section */
+      .header-section {
+        background: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        padding: 1rem 0;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .logo-img {
+        max-height: 90px;
+        width: auto;
+      }
+
+      .brand-text {
+        color: #0d47a1;
+        font-size: 1.5rem;
+        font-weight: 700;
+        font-family: "Britannic Bold", cursive;
+      }
+
+      .back-btn {
+        background: #007bff;
+        border: 1px solid #007bff;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      .back-btn:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+        color: white;
+      }
+
+      /* Hero Section */
+      .hero-section {
+        padding: 3rem 0;
+        background: white;
+        margin-bottom: 2rem;
+      }
+
+      .hero-content {
+        text-align: center;
+        color: #333;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      .hero-title {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        color: #0d47a1;
+        font-family: "Britannic Bold", cursive;
+      }
+
+      .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .hero-description {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 3rem;
+        color: #555;
+      }
+
+      /* IMPROVED STATS CONTAINER */
+      .stats-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        max-width: 800px;
+        margin: 2rem auto 0;
+        padding: 0 1rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        background: white;
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-item:hover {
+        transform: translateY(-15px) scale(1.05);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        border-color: #3b82f6;
+      }
+
+      .stat-icon {
+        font-size: 2.5rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        color: #0d47a1;
+      }
+
+      .stat-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.3;
+      }
+
+      /* Team Section */
+      .team-section {
+        padding: 3rem 0;
+        background: white;
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0d47a1;
+        margin-bottom: 3rem;
+        font-family: "Britannic Bold", cursive;
+      }
+
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      .team-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        padding: 30px 20px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      }
+
+      .team-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+      }
+
+      .team-leader {
+        border: 2px solid #f59e0b;
+      }
+
+      .team-leader-tag {
+        position: absolute;
+        top: 20px;
+        left: -35px;
+        background: #f59e0b;
+        color: white;
+        padding: 4px 40px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transform: rotate(-45deg);
+      }
+
+      .team-photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 20px auto;
+        border: 4px solid #e2e8f0;
+      }
+
+      .team-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #3b82f6;
+        margin-bottom: 4px;
+      }
+
+      .team-role {
+        font-size: 0.9rem;
+        color: #10b981;
+        font-weight: 500;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+      }
+
+      .team-info {
+        font-size: 0.9rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: auto;
+      }
+
+      .social-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+      }
+
+      .social-link.linkedin {
+        background: #0077b5;
+        color: white;
+      }
+
+      .social-link.linkedin:hover {
+        background: #005885;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+      }
+
+      .social-link.github {
+        background: #333333;
+        color: white;
+      }
+
+      .social-link.github:hover {
+        background: #24292e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(51, 51, 51, 0.3);
+      }
+
+      .social-link.email {
+        background: #dc3545;
+        color: white;
+      }
+
+      .social-link.email:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+      }
+
+      /* Footer Styles */
+      .footer-section {
+        background: #e2e8f0;
+        border-top: 1px solid #e2e8f0;
+        margin-top: auto;
+        padding: 20px;
+      }
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        color: #64748b;
+        font-size: 0.9rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      .footer-developer a:hover {
+        text-decoration: underline;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+        .hero-subtitle {
+          font-size: 1.1rem;
+        }
+
+        .stats-container {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          max-width: 350px;
+        }
+
+        .stat-item {
+          padding: 1.5rem 1rem;
+        }
+
+        .stat-number {
+          font-size: 2rem;
+        }
+
+        .footer-content {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .stats-container {
+          max-width: 300px;
+        }
+
+        .stat-label {
+          font-size: 0.9rem;
+        }
+      }
+
+      /* Tablet Layout */
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .stats-container {
+          grid-template-columns: repeat(3, 1fr);
+          max-width: 700px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-wrapper">
+      <header class="header-section">
+        <div class="container">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="logo-container">
+              <img
+                src="{{ url_for('static', filename='images/Civicsense.png') }}"
+                alt="Civicsense AI Logo"
+                class="logo-img"
+              />
+              <span class="brand-text">About the Team UNIQUE</span>
+            </div>
+            <a href="javascript:history.back()" class="back-btn">
+              <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <section class="content-section">
+        <section class="hero-section">
+          <div class="container">
+            <div class="hero-content" data-aos="fade-in">
+              <h1 class="hero-title">Team UNIQUE</h1>
+              <p class="hero-subtitle">
+                The Future of Civic Engagement, Powered by AI.
+              </p>
+              <p class="hero-description">
+                We are a dynamic team of final-year Computer Science and
+                Engineering students with a passion for using AI to drive
+                positive social change. With a specialization in Artificial
+                Intelligence and Machine Learning, we are building Civicsense AI
+                – an intelligent civic issue reporting platform aimed at
+                transforming how communities identify, report, and resolve
+                public concerns.
+              </p>
+              <div class="stats-container">
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="0">
+                  <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <h3 class="stat-number">4</h3>
+                  <p class="stat-label">Team Members</p>
+                </div>
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="0">
+                  <div class="stat-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                  </div>
+                  <h3 class="stat-number">2026</h3>
+                  <p class="stat-label">Graduation Year</p>
+                </div>
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="0">
+                  <div class="stat-icon">
+                    <i class="fas fa-code"></i>
+                  </div>
+                  <h3 class="stat-number">B.Tech</h3>
+                  <p class="stat-label">
+                    Computer Science and Engineering (AIML)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="team-section">
+          <div class="container">
+            <h2 class="section-title" data-aos="fade-in">Meet Our Team</h2>
+
+            <div class="team-grid">
+              {% for dev in developers %}
+              <div
+                class="team-card {% if dev.is_leader %}team-leader{% endif %}"
+                data-aos="fade-in"
+                data-aos-delay="{{ loop.index * 100 }}"
+              >
+                {% if dev.is_leader %}
+                <div class="team-leader-tag">Team Leader</div>
+                {% endif %}
+
+                <img
+                  src="{{ url_for('static', filename='uploads/' + dev.photo_filename if dev.photo_filename else 'images/female_avatar.png') }}"
+                  alt="Photo of {{ dev.name }}"
+                  class="team-photo"
+                />
+                <h3 class="team-name">{{ dev.name }}</h3>
+                <p class="team-role">{{ dev.role }}</p>
+                <div class="team-info">
+                  {{ dev.year }}, {{ dev.department }}<br />
+                  Reg. No: {{ dev.reg_no }}<br />
+                  {{ dev.institute_name }}
+                </div>
+                <div class="social-links">
+                  {% if dev.linkedin_url %}
+                  <a
+                    href="{{ dev.linkedin_url }}"
+                    class="social-link linkedin"
+                    title="LinkedIn"
+                    target="_blank"
+                  >
+                    <i class="fab fa-linkedin-in"></i>
+                  </a>
+                  {% endif %} {% if dev.github_url %}
+                  <a
+                    href="{{ dev.github_url }}"
+                    class="social-link github"
+                    title="GitHub"
+                    target="_blank"
+                  >
+                    <i class="fab fa-github"></i>
+                  </a>
+                  {% endif %} {% if dev.email %}
+                  <a
+                    href="mailto:{{ dev.email }}"
+                    class="social-link email"
+                    title="Email"
+                  >
+                    <i class="fas fa-envelope"></i>
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+              {% else %}
+              <p class="text-center">
+                Team information is currently being updated. Please check back
+                later.
+              </p>
+              {% endfor %}
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by <a href="#!">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+      // Initialize AOS
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100,
+      });
+    </script>
+  </body>
+</html>

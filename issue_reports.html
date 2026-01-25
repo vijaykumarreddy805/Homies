@@ -1,0 +1,3089 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issue Reports - Civicsense AI</title>
+    <!-- Importing Google Fonts - Poppins -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <!-- Google Material Icons -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      :root {
+        /* Light theme colors */
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-text-placeholder: #798eae;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --color-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --color-primary: #3b82f6;
+        --color-success: #10b981;
+        --color-info: #06b6d4;
+        --color-purple: #8b5cf6;
+        --color-border: #e2e8f0;
+        --color-hover: #f1f5f9;
+      }
+
+      body.dark-theme {
+        /* Dark theme colors */
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-text-placeholder: #a6b7d2;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border-hr: #334155;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #334155;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.3);
+        --color-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --color-border: #334155;
+        --color-hover: #334155;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-bg-primary);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        color: var(--color-text-primary);
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+
+      .header-logo {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: opacity 0.4s ease;
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+
+      .sidebar-toggle {
+        height: 36px;
+        width: 36px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        color: white;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .sidebar-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      .sidebar-toggle span {
+        font-size: 1.4rem;
+        transition: transform 0.4s ease;
+      }
+
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-text-placeholder) transparent;
+      }
+
+      .sidebar-content::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .sidebar-content::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .sidebar-content::-webkit-scrollbar-thumb {
+        background: var(--color-text-placeholder);
+        border-radius: 3px;
+      }
+
+      .menu-section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        padding: 0 12px;
+        transition: opacity 0.3s ease;
+      }
+
+      .menu-list {
+        display: flex;
+        gap: 4px;
+        list-style: none;
+        flex-direction: column;
+      }
+
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        white-space: nowrap;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* === ADD THIS NEW CSS BLOCK FOR THE CORRECT HOVER EFFECT === */
+
+      /* This prepares the blue background element, which is only used by the .active class */
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-error);
+      }
+
+      /* === ADD THIS CSS FOR DARK MODE SIDEBAR HEADER & LOGO === */
+
+      /* By default, hide the dark mode logo */
+      .dark-mode-logo {
+        display: none;
+      }
+
+      /* When dark mode is active, change the header background */
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar);
+      }
+
+      /* When dark mode is active, hide the light logo... */
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+
+      /* ...and show the dark logo */
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(
+          16px
+        ); /* Adjust this value if the logo is not perfectly centered */
+      }
+
+      /* Also ensure the light logo is visible by default */
+      .light-mode-logo {
+        display: block;
+        margin: 0 auto;
+      }
+
+      /* These ensure the text and icon are visible on top of the background */
+      .menu-icon,
+      .menu-label {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* Style for the ACTIVE link (solid blue background and white text) */
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+
+      /* Style for HOVERING over INACTIVE links (subtle light background) */
+      .menu-link:not(.logout-menu-link):not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: opacity 0.3s ease;
+      }
+
+      .status-badge {
+        background: var(--color-accent);
+        color: white;
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: auto;
+        font-weight: 500;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--color-border-hr);
+        margin: 16px 0;
+      }
+
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+        transition: all 0.3s ease;
+      }
+
+      .theme-toggle:hover {
+        background: var(--color-hover-secondary);
+      }
+
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: opacity 0.3s ease;
+      }
+
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-bg-secondary);
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+
+      .logout-menu-link::before {
+        display: none !important;
+      }
+
+      .logout-menu-link:hover,
+      .logout-menu-link.active,
+      .profile-dropdown-menu .dropdown-item.logout:hover {
+        background: rgba(
+          239,
+          68,
+          68,
+          0.1
+        ) !important; /* NEW: Very light red background */
+        color: var(--color-error) !important; /* Solid red text */
+        font-weight: 600;
+      }
+
+      .main-content {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .main-content-inner {
+        flex: 1;
+        padding: 30px;
+        background: var(--color-bg-primary);
+        min-height: 100vh;
+        transition: all 0.3s ease;
+      }
+
+      .page-header {
+        background: linear-gradient(135deg, #f77062 0%, #fe5196 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .page-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>')
+          repeat;
+        pointer-events: none;
+      }
+
+      .page-header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .page-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+
+      .live-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .live-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      .live-text {
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.1);
+        }
+      }
+
+      .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--card-color, var(--color-primary));
+        transition: width 0.3s ease;
+      }
+
+      .stat-card:hover::before {
+        width: 8px;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px var(--color-shadow);
+      }
+
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .stat-title {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        background: var(--card-color, var(--color-primary));
+      }
+
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--color-text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-change {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      .stat-change.positive {
+        color: var(--color-success);
+      }
+
+      .stat-change.negative {
+        color: var(--color-error);
+      }
+
+      .filters-section {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 12px var(--color-shadow);
+        border: 1px solid var(--color-border);
+      }
+
+      .filters-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .filters-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        align-items: end;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .filter-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--color-text-secondary);
+      }
+
+      .filter-input {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--color-border);
+        border-radius: 12px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .filter-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .search-input {
+        position: relative;
+      }
+
+      .search-input input {
+        padding-left: 3rem;
+      }
+
+      .search-input::before {
+        content: "search";
+        font-family: "Material Symbols Rounded";
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-secondary);
+        font-size: 1.2rem;
+        z-index: 2;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: var(--color-primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+
+      .btn-success {
+        background: var(--color-success);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        border: 2px solid var(--color-border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--color-hover);
+        border-color: var(--color-primary);
+      }
+
+      .issues-table-container {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+      }
+
+      .table-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .table-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .table-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        max-height: 70vh;
+      }
+
+      .issues-table {
+        /* Let the content define the width, but ensure a minimum size */
+        min-width: 1475px;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+      /* --- Table Column Widths (Fixed) --- */
+      .issues-table th,
+      .issues-table td {
+        /* Prevent long text from breaking layout */
+        word-wrap: break-word;
+      }
+
+      .issues-table th:nth-child(1),
+      .issues-table td:nth-child(1) {
+        width: 150px;
+      } /* Issue ID */
+      .issues-table th:nth-child(2),
+      .issues-table td:nth-child(2) {
+        width: 220px;
+      } /* Submitter */
+      .issues-table th:nth-child(3),
+      .issues-table td:nth-child(3) {
+        width: 180px;
+      } /* Category */
+      .issues-table th:nth-child(4),
+      .issues-table td:nth-child(4) {
+        width: 250px;
+      } /* Location */
+      .issues-table th:nth-child(5),
+      .issues-table td:nth-child(5) {
+        width: 110px;
+      } /* Priority */
+      .issues-table th:nth-child(6),
+      .issues-table td:nth-child(6) {
+        width: 110px;
+      } /* Status */
+      .issues-table th:nth-child(7),
+      .issues-table td:nth-child(7) {
+        width: 220px;
+      } /* Date */
+      .issues-table th:nth-child(8),
+      .issues-table td:nth-child(8) {
+        width: 120px;
+      } /* Actions */
+
+      .issues-table th {
+        background: var(--color-bg-primary);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--color-border);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .issues-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+        font-size: 0.9rem;
+        vertical-align: middle;
+      }
+
+      .issues-table tr:hover {
+        background: var(--color-hover);
+      }
+
+      .status-submitted {
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+      }
+
+      .status-in-progress {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .status-resolved {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+
+      .status-rejected {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      .priority-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .priority-high {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      .priority-medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .priority-low {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+
+      .priority-critical {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+      }
+
+      .priority-normal {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+
+      .action-btn {
+        padding: 0.5rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+        border-radius: 8px;
+        color: var(--color-text-secondary);
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .action-btn:hover {
+        background: var(--color-hover);
+        color: var(--color-primary);
+      }
+
+      .action-btn.danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--color-error);
+      }
+
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        padding: 3rem;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--color-border);
+        border-top: 4px solid var(--color-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--color-text-secondary);
+      }
+
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(8px);
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background: var(--color-bg-sidebar);
+        border-radius: 24px;
+        width: 95%;
+        max-width: 1200px;
+        max-height: 95vh;
+        overflow: hidden;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--color-border);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-overlay.active .modal {
+        transform: scale(1);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem;
+        border-bottom: 1px solid var(--color-border);
+        background: linear-gradient(
+          135deg,
+          var(--color-primary) 0%,
+          #667eea 100%
+        );
+        color: white;
+        position: relative;
+      }
+
+      .modal-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>')
+          repeat;
+        pointer-events: none;
+      }
+
+      .modal-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .modal-close-buttons {
+        display: flex;
+        gap: 1rem;
+        position: relative;
+        z-index: 2;
+      }
+
+      .modal-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        cursor: pointer;
+        color: white;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+      }
+
+      .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-text-secondary) transparent;
+      }
+
+      .modal-body::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .modal-body::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .modal-body::-webkit-scrollbar-thumb {
+        background: var(--color-text-secondary);
+        border-radius: 4px;
+      }
+
+      .modal-content-wrapper {
+        padding: 2rem;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+        margin-bottom: 2rem;
+        align-items: start;
+      }
+
+      .detail-section {
+        background: var(--color-bg-primary);
+        border-radius: 20px;
+        padding: 2.5rem;
+        border: 1px solid var(--color-border);
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 12px var(--color-shadow);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .detail-section:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px var(--color-shadow);
+        border-color: var(--color-primary);
+      }
+
+      .detail-section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--color-text-primary);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--color-border);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .detail-section-title .material-symbols-rounded {
+        color: var(--color-primary);
+        font-size: 1.8rem;
+        background: rgba(59, 130, 246, 0.1);
+        padding: 0.5rem;
+        border-radius: 12px;
+      }
+
+      /* The NEW, more compact CSS */
+      .detail-item {
+        /* REDUCED vertical padding */
+        padding: 0.75rem 0;
+        /* REMOVED the large bottom margin */
+        margin-bottom: 0;
+        /* Made the border slightly more solid for a cleaner look */
+        border-bottom: 1px solid var(--color-border);
+      }
+
+      .detail-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        /* REDUCED margin below the label */
+        margin-bottom: 0.25rem;
+        display: block;
+      }
+
+      .detail-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .detail-value {
+        font-size: 1.05rem;
+        color: var(--color-text-primary);
+        line-height: 1.6;
+        font-weight: 500;
+        word-wrap: break-word;
+      }
+
+      .detail-secondary {
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+        margin-top: 0.75rem;
+        font-style: italic;
+        padding: 0.5rem 1rem;
+        background: var(--color-bg-secondary);
+        border-radius: 8px;
+        border-left: 3px solid var(--color-primary);
+      }
+      .full-width-section {
+        grid-column: 1 / -1;
+      }
+
+      .image-section {
+        text-align: center;
+      }
+
+      .modal-image {
+        max-width: 100%;
+        height: auto;
+        max-height: 400px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+
+      .modal-image:hover {
+        transform: scale(1.02);
+      }
+
+      .map-container {
+        height: 350px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 4px 20px var(--color-shadow);
+      }
+
+      .status-update-section {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid var(--color-border);
+        margin-top: 2rem;
+      }
+
+      body.dark-theme .status-update-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      }
+
+      .status-update-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .status-update-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+      }
+
+      .status-notes-section {
+        grid-column: 1 / -1;
+        margin-top: 1rem;
+      }
+
+      .notes-textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 1rem;
+        border: 2px solid var(--color-border);
+        border-radius: 12px;
+        background: var(--color-bg-sidebar);
+        color: var(--color-text-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        resize: vertical;
+        transition: all 0.3s ease;
+      }
+
+      .notes-textarea:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 300px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .notification.show {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      .notification.success {
+        background: linear-gradient(
+          135deg,
+          var(--color-success) 0%,
+          #059669 100%
+        );
+      }
+
+      .notification.error {
+        background: linear-gradient(
+          135deg,
+          var(--color-error) 0%,
+          #dc2626 100%
+        );
+      }
+
+      .timeline {
+        position: relative;
+        padding: 1rem 0;
+      }
+
+      /* The NEW CSS that matches my-submissions.html */
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: var(--color-border-hr);
+      }
+
+      .timeline-item {
+        position: relative;
+        padding-left: 60px;
+        margin-bottom: 2rem;
+      }
+
+      .timeline-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .timeline-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--color-bg-sidebar);
+        border: 3px solid var(--color-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-primary);
+        font-size: 1.2rem;
+        z-index: 1;
+      }
+
+      .timeline-content {
+        background: var(--color-bg-primary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 2px 8px var(--color-shadow);
+      }
+
+      .timeline-title {
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .timeline-date {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+      }
+
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        margin-top: auto;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+      }
+
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        gap: 12px;
+      }
+
+      .footer-copyright {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .footer-developer a:hover {
+        color: var(--color-hover-primary);
+      }
+
+      .real-time-indicator:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+      }
+
+      .real-time-dot {
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        .mobile-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 999;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+
+        .mobile-overlay.active {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .mobile-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 20px;
+          background: var(--color-bg-sidebar);
+          border-bottom: 1px solid var(--color-border-hr);
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+
+        .mobile-toggle {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          color: var(--color-text-primary);
+          cursor: pointer;
+        }
+
+        .stats-cards {
+          grid-template-columns: 1fr;
+        }
+
+        .main-content-inner {
+          padding: 20px;
+        }
+
+        .page-header-content {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .page-title {
+          font-size: 2rem;
+        }
+
+        .filters-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .table-wrapper {
+          max-height: 50vh;
+        }
+
+        .modal {
+          width: 98%;
+          max-height: 98vh;
+        }
+
+        .detail-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .status-update-form {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-content-wrapper {
+          padding: 1rem;
+        }
+
+        .footer-content {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .footer-content {
+          flex-direction: row;
+          text-align: left;
+        }
+      }
+
+      /* Add these styles for the timeline icon colors */
+      .timeline-item.submitted .timeline-icon {
+        border-color: #3b82f6; /* Blue */
+        color: #3b82f6;
+      }
+
+      .timeline-item.in-progress .timeline-icon {
+        border-color: var(--color-warning); /* Yellow/Orange */
+        color: var(--color-warning);
+      }
+
+      .timeline-item.resolved .timeline-icon {
+        border-color: var(--color-success); /* Green */
+        color: var(--color-success);
+      }
+
+      .timeline-item.rejected .timeline-icon {
+        border-color: var(--color-error); /* Red */
+        color: var(--color-error);
+      }
+
+      /* Add this new class for a red button */
+      .btn-danger {
+        background: var(
+          --color-error
+        ); /* Uses the existing red color variable */
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626; /* A slightly darker red for the hover effect */
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Add these styles for the professional confirmation modal */
+      .confirm-modal {
+        max-width: 500px;
+      }
+
+      .confirm-modal-content {
+        text-align: center;
+        padding: 2.5rem;
+      }
+
+      .confirm-modal-icon {
+        font-size: 4rem;
+        color: var(--color-error);
+        margin-bottom: 1rem;
+        line-height: 1;
+      }
+
+      .confirm-modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .confirm-modal-text {
+        color: var(--color-text-secondary);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+
+      .confirm-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      /* Styles for the loading spinner inside the delete button */
+      .btn .spinner-sm {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      .btn .btn-text {
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      /* Add these new styles for all action buttons */
+      .action-btn.view {
+        background: #e9effd; /* Light Blue Background */
+        color: #3b82f6; /* Blue Icon */
+      }
+      .action-btn.pdf {
+        background: #ede9fe; /* Light Purple Background */
+        color: #8b5cf6; /* Purple Icon */
+      }
+      .action-btn.edit {
+        background: #fef3c7; /* Light Yellow/Orange Background */
+        color: #f59e0b; /* Yellow/Orange Icon */
+      }
+      .action-btn.danger {
+        background: #fee2e2; /* Light Red Background */
+        color: #ef4444; /* Red Icon */
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="{{ url_for('admin_dashboard') }}" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >dashboard</span
+                >
+                <span class="menu-label">Dashboard</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a
+                href="{{ url_for('admin_issue_reports') }}"
+                class="menu-link active"
+              >
+                <span class="material-symbols-rounded menu-icon"
+                  >assignment</span
+                >
+                <span class="menu-label">Manage Issues</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a
+                href="{{ url_for('admin_user_management') }}"
+                class="menu-link"
+              >
+                <span class="material-symbols-rounded menu-icon">group</span>
+                <span class="menu-label">User Management</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="{{ url_for('admin_chat_analytics') }}" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >trending_up</span
+                >
+                <span class="menu-label">Analytics & Trends</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="{{ url_for('admin_user_feedbacks') }}" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">feedback</span>
+                <span class="menu-label">User Feedbacks</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a
+                href="{{ url_for('admin_manage_about_us') }}"
+                class="menu-link"
+              >
+                <span class="material-symbols-rounded menu-icon">info</span>
+                <span class="menu-label">Manage About Us</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="{{ url_for('admin_profile') }}" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >account_circle</span
+                >
+                <span class="menu-label">Admin Profile</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a
+                href="{{ url_for('admin_logout') }}"
+                class="menu-link logout-menu-link"
+              >
+                <span class="material-symbols-rounded menu-icon">logout</span>
+                <span class="menu-label">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span>
+            <span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="main-content-inner">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-content">
+            <div>
+              <h1 class="page-title">Issue Reports</h1>
+              <p class="page-subtitle">
+                Real-time monitoring and management of citizen reports
+              </p>
+            </div>
+            <div class="live-indicator">
+              <div class="live-dot"></div>
+              <span class="live-text">Live Updates</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-cards">
+          <div class="stat-card" style="--card-color: #3b82f6">
+            <div class="stat-header">
+              <span class="stat-title">Total Issues</span>
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">assignment</span>
+              </div>
+            </div>
+            <div class="stat-value" id="totalIssues">0</div>
+            <div class="stat-change positive">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span>12% from last month</span>
+            </div>
+          </div>
+
+          <div class="stat-card" style="--card-color: #f59e0b">
+            <div class="stat-header">
+              <span class="stat-title">Pending</span>
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">schedule</span>
+              </div>
+            </div>
+            <div class="stat-value" id="pendingIssues">0</div>
+            <div class="stat-change negative">
+              <span class="material-symbols-rounded">trending_down</span>
+              <span>8% from last week</span>
+            </div>
+          </div>
+
+          <div class="stat-card" style="--card-color: #10b981">
+            <div class="stat-header">
+              <span class="stat-title">Resolved</span>
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">check_circle</span>
+              </div>
+            </div>
+            <div class="stat-value" id="resolvedIssues">0</div>
+            <div class="stat-change positive">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span>15% from last week</span>
+            </div>
+          </div>
+
+          <div class="stat-card" style="--card-color: #8b5cf6">
+            <div class="stat-header">
+              <span class="stat-title">High Priority</span>
+              <div class="stat-icon">
+                <span class="material-symbols-rounded">priority_high</span>
+              </div>
+            </div>
+            <div class="stat-value" id="highPriorityIssues">0</div>
+            <div class="stat-change positive">
+              <span class="material-symbols-rounded">trending_up</span>
+              <span>5% from yesterday</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+          <div class="filters-header">
+            <h3 class="filters-title">
+              <span class="material-symbols-rounded">filter_alt</span>
+              Filters & Search
+            </h3>
+          </div>
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label class="filter-label">Search Issues</label>
+              <div class="search-input">
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="filter-input"
+                  placeholder="Search by ID, name, or description..."
+                />
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Status</label>
+              <select id="statusFilter" class="filter-input">
+                <option value="">All Statuses</option>
+                <option value="Submitted">Submitted</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Priority</label>
+              <select id="priorityFilter" class="filter-input">
+                <option value="">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+                <option value="Critical">Critical</option>
+                <option value="Normal">Normal</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Category</label>
+              <select id="categoryFilter" class="filter-input">
+                <option value="">All Categories</option>
+                <option value="Roads & Transportation">
+                  Roads & Transportation
+                </option>
+                <option value="Water Supply">Water Supply</option>
+                <option value="Waste Management">Waste Management</option>
+                <option value="Public Safety">Public Safety</option>
+                <option value="Street Lighting">Street Lighting</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="action-buttons">
+              <button class="btn btn-primary" onclick="applyFilters()">
+                <span class="material-symbols-rounded">search</span>
+                Apply Filters
+              </button>
+              <button class="btn btn-secondary" onclick="clearFilters()">
+                <span class="material-symbols-rounded">clear</span>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issues Table -->
+        <div class="issues-table-container">
+          <div class="table-header">
+            <h3 class="table-title">
+              <span class="material-symbols-rounded">table_view</span>
+              All Issues <span id="issueCount">(0)</span>
+            </h3>
+            <div class="table-actions">
+              <button class="btn btn-success" onclick="exportData()">
+                <span class="material-symbols-rounded">download</span>
+                Export CSV
+              </button>
+              <button class="btn btn-primary" onclick="refreshData()">
+                <span class="material-symbols-rounded">refresh</span>
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="issues-table">
+              <thead>
+                <tr>
+                  <th>Issue ID</th>
+                  <th>Submitter</th>
+                  <th>Category</th>
+                  <th>Location</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="issuesTableBody">
+                <tr>
+                  <td colspan="8">
+                    <div class="loading-spinner">
+                      <div class="spinner"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by
+            <a href="{{ url_for('team_details') }}">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="modal-overlay" id="confirmDeleteModal">
+      <div class="modal confirm-modal">
+        <div class="modal-header" style="background: var(--color-error)">
+          <h3 class="modal-title">
+            <span class="material-symbols-rounded">warning</span>
+            Confirm Deletion
+          </h3>
+          <div class="modal-close-buttons">
+            <button
+              class="modal-close"
+              onclick="closeConfirmDeleteModal()"
+              title="Close"
+            >
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-modal-content">
+            <h4 class="confirm-modal-title">Are you sure?</h4>
+            <p class="confirm-modal-text">
+              You are about to permanently delete Issue ID:
+              <strong
+                id="issueIdToDeleteSpan"
+                style="color: var(--color-error)"
+              ></strong
+              >.
+              <br />
+              This action cannot be undone.
+            </p>
+            <div class="confirm-modal-actions">
+              <button
+                class="btn btn-secondary"
+                id="cancelDeleteBtn"
+                onclick="closeConfirmDeleteModal()"
+              >
+                Cancel
+              </button>
+              <button class="btn btn-danger" id="confirmDeleteBtn">
+                <span class="btn-text">Yes, Delete It</span>
+                <div class="spinner-sm" style="display: none"></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Issue Details Modal -->
+    <div class="modal-overlay" id="issueModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">
+            <span class="material-symbols-rounded">assignment</span>
+            Issue Details
+          </h3>
+          <div class="modal-close-buttons">
+            <button class="modal-close" onclick="closeModal()" title="Close">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="modal-content-wrapper" id="modalContent">
+            <!-- Content will be loaded dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+      let allIssues = [];
+      let filteredIssues = [];
+      let lastUpdateTime = Date.now();
+      let issueIdToDelete = null; // ADD THIS LINE
+
+      // Initialize the page
+      document.addEventListener("DOMContentLoaded", function () {
+        loadIssues();
+        setupRealTimeUpdates();
+        setupEventListeners();
+        initializeTheme();
+        initializeSidebar();
+      });
+
+      // Initialize theme
+      function initializeTheme() {
+        const savedTheme = localStorage.getItem("civicsense-theme");
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const shouldUseDarkTheme =
+          savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+
+        document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+        updateThemeIcon();
+      }
+
+      // Initialize sidebar functionality
+      function initializeSidebar() {
+        const sidebar = document.querySelector(".sidebar");
+        const themeToggle = document.querySelector(".theme-toggle");
+        const mobileOverlay = document.querySelector(".mobile-overlay");
+        const menuLinks = document.querySelectorAll(".menu-link");
+
+        // Theme toggle functionality
+        themeToggle.addEventListener("click", () => {
+          const isDark = document.body.classList.toggle("dark-theme");
+          localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+          updateThemeIcon();
+          showNotification(
+            `Switched to ${isDark ? "dark" : "light"} theme`,
+            "success"
+          );
+        });
+
+        // Mobile menu functionality
+        mobileOverlay.addEventListener("click", () => {
+          sidebar.classList.remove("open");
+          mobileOverlay.classList.remove("active");
+        });
+
+        // Menu link active state
+        menuLinks.forEach((link) => {
+          link.addEventListener("click", (e) => {
+            //e.preventDefault();
+            menuLinks.forEach((l) => l.classList.remove("active"));
+            link.classList.add("active");
+
+            const menuLabel = link.querySelector(".menu-label").textContent;
+            if (window.innerWidth <= 768) {
+              sidebar.classList.remove("open");
+              mobileOverlay.classList.remove("active");
+            }
+          });
+        });
+
+        // Logout functionality
+        document.querySelectorAll(".logout-menu-link").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (confirm("Are you sure you want to logout?")) {
+              showNotification("Logging out...", "success");
+              // Handle logout logic here
+            }
+          });
+        });
+
+        // Auto-expand sidebar on large screens
+        const handleResize = () => {
+          if (window.innerWidth > 768) {
+            sidebar.classList.remove("open");
+            mobileOverlay.classList.remove("active");
+          }
+        };
+
+        window.addEventListener("resize", handleResize);
+        handleResize();
+      }
+
+      // Update theme icon
+      function updateThemeIcon() {
+        const themeIcon = document.querySelector(
+          ".theme-toggle .material-symbols-rounded"
+        );
+        const isDark = document.body.classList.contains("dark-theme");
+        themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+      }
+
+      // Setup event listeners
+      function setupEventListeners() {
+        document
+          .getElementById("searchInput")
+          .addEventListener("input", debounce(applyFilters, 300));
+        document
+          .getElementById("statusFilter")
+          .addEventListener("change", applyFilters);
+        document
+          .getElementById("priorityFilter")
+          .addEventListener("change", applyFilters);
+        document
+          .getElementById("categoryFilter")
+          .addEventListener("change", applyFilters);
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") {
+            closeModal();
+          }
+          if (e.ctrlKey && e.key === "r") {
+            e.preventDefault();
+            refreshData();
+          }
+        });
+
+        // ADD THIS LISTENER for the new modal's confirm button
+        document
+          .getElementById("confirmDeleteBtn")
+          .addEventListener("click", confirmDeleteIssue);
+
+        // Also add logic to close on overlay click
+        document
+          .getElementById("confirmDeleteModal")
+          .addEventListener("click", function (e) {
+            if (e.target === this) {
+              closeConfirmDeleteModal();
+            }
+          });
+
+        // Close modal when clicking outside
+        document
+          .getElementById("issueModal")
+          .addEventListener("click", function (e) {
+            if (e.target === this) {
+              closeModal();
+            }
+          });
+      }
+
+      // Debounce function to limit API calls
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      // Load issues from API
+      async function loadIssues() {
+        try {
+          const response = await fetch("/admin/api/issues");
+          const data = await response.json();
+
+          if (data.status === "success") {
+            allIssues = data.issues;
+            filteredIssues = [...allIssues];
+            updateStatistics();
+            renderIssuesTable();
+            lastUpdateTime = Date.now();
+          } else {
+            showNotification("Failed to load issues", "error");
+          }
+        } catch (error) {
+          console.error("Error loading issues:", error);
+          showNotification("Error loading issues", "error");
+          renderEmptyState();
+        }
+      }
+
+      // Update statistics cards
+      function updateStatistics() {
+        const stats = {
+          total: allIssues.length,
+          pending: allIssues.filter(
+            (issue) =>
+              issue.status === "Submitted" || issue.status === "In Progress"
+          ).length,
+          resolved: allIssues.filter((issue) => issue.status === "Resolved")
+            .length,
+          highPriority: allIssues.filter(
+            (issue) =>
+              issue.priority === "High" || issue.priority === "Critical"
+          ).length,
+        };
+
+        document.getElementById("totalIssues").textContent = stats.total;
+        document.getElementById("pendingIssues").textContent = stats.pending;
+        document.getElementById("resolvedIssues").textContent = stats.resolved;
+        document.getElementById("highPriorityIssues").textContent =
+          stats.highPriority;
+      }
+
+      // Render issues table
+      // Replace the entire renderIssuesTable function with this one
+      function renderIssuesTable() {
+        const tbody = document.getElementById("issuesTableBody");
+        const issueCount = document.getElementById("issueCount");
+
+        if (filteredIssues.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><h3>No issues found</h3></div></td></tr>`;
+          issueCount.textContent = "(0)";
+          return;
+        }
+
+        issueCount.textContent = `(${filteredIssues.length})`;
+
+        tbody.innerHTML = filteredIssues
+          .map(
+            (issue) => `
+            <tr onclick="viewIssueDetails('${
+              issue.issue_id
+            }')" style="cursor: pointer;">
+                <td>
+                    <strong style="color: var(--color-primary);">${
+                      issue.issue_id
+                    }</strong>
+                </td>
+                <td>
+                    <div>
+                        <div style="font-weight: 600;">${
+                          issue.fullName || "N/A"
+                        }</div>
+                        <div style="font-size: 0.8rem; color: var(--color-text-secondary);">${
+                          issue.email || "N/A"
+                        }</div>
+                    </div>
+                </td>
+                <td>
+                    <span style="font-weight: 500;">${
+                      issue.issueCategory || issue.customIssueType || "N/A"
+                    }</span>
+                </td>
+                <td>
+                    <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${
+                      issue.locationAddress || "N/A"
+                    }">
+                        ${issue.locationAddress || "N/A"}
+                    </div>
+                </td>
+                <td>
+                    <span class="priority-badge priority-${(
+                      issue.priority || "normal"
+                    ).toLowerCase()}">
+                        ${issue.priority || "Normal"}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge status-${(
+                      issue.status || "submitted"
+                    )
+                      .toLowerCase()
+                      .replace(" ", "-")}">
+                        ${issue.status || "Submitted"}
+                    </span>
+                </td>
+                <td>
+                    <div style="font-size: 0.85rem;">
+                        ${formatDate(issue.submitted_at)}
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="action-btn view" onclick="event.stopPropagation(); viewIssueDetails('${
+                          issue.issue_id
+                        }')" title="View Details">
+                            <span class="material-symbols-rounded">visibility</span>
+                        </button>
+                        <a href="/report/view/${
+                          issue.id
+                        }" target="_blank" class="action-btn pdf" title="View PDF Report" onclick="event.stopPropagation()">
+                            <span class="material-symbols-rounded">picture_as_pdf</span>
+                        </a>
+                        <button class="action-btn edit" onclick="event.stopPropagation(); editIssueStatus('${
+                          issue.issue_id
+                        }')" title="Edit Status">
+                            <span class="material-symbols-rounded">edit</span>
+                        </button>
+                        <button class="action-btn danger" onclick="event.stopPropagation(); deleteIssue('${
+                          issue.issue_id
+                        }')" title="Delete">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `
+          )
+          .join("");
+      }
+      // Format date for display
+      function formatDate(dateString) {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        // This format will always be used, e.g., "Jul 27, 2025, 10:15 AM"
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      // Apply filters
+      function applyFilters() {
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const statusFilter = document.getElementById("statusFilter").value;
+        const priorityFilter = document.getElementById("priorityFilter").value;
+        const categoryFilter = document.getElementById("categoryFilter").value;
+
+        filteredIssues = allIssues.filter((issue) => {
+          const matchesSearch =
+            !searchTerm ||
+            (issue.issue_id &&
+              issue.issue_id.toLowerCase().includes(searchTerm)) ||
+            (issue.fullName &&
+              issue.fullName.toLowerCase().includes(searchTerm)) ||
+            (issue.issueCategory &&
+              issue.issueCategory.toLowerCase().includes(searchTerm)) ||
+            (issue.customIssueType &&
+              issue.customIssueType.toLowerCase().includes(searchTerm)) ||
+            (issue.locationAddress &&
+              issue.locationAddress.toLowerCase().includes(searchTerm)) ||
+            (issue.issueDescription &&
+              issue.issueDescription.toLowerCase().includes(searchTerm));
+
+          const matchesStatus = !statusFilter || issue.status === statusFilter;
+          const matchesPriority =
+            !priorityFilter || issue.priority === priorityFilter;
+          const matchesCategory =
+            !categoryFilter ||
+            issue.issueCategory === categoryFilter ||
+            issue.customIssueType === categoryFilter;
+
+          return (
+            matchesSearch && matchesStatus && matchesPriority && matchesCategory
+          );
+        });
+
+        renderIssuesTable();
+      }
+
+      // Clear all filters
+      function clearFilters() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("statusFilter").value = "";
+        document.getElementById("priorityFilter").value = "";
+        document.getElementById("categoryFilter").value = "";
+
+        filteredIssues = [...allIssues];
+        renderIssuesTable();
+      }
+
+      // In issue_reports.html, update this function
+      async function viewIssueDetails(issueId) {
+        try {
+          const response = await fetch(`/admin/api/issues/${issueId}`);
+          const data = await response.json(); // Changed to 'data' to hold the whole object
+
+          if (response.ok) {
+            // Pass BOTH the issue and its history to the modal function
+            showIssueModal(data.issue, data.history);
+          } else {
+            showNotification("Failed to load issue details", "error");
+          }
+        } catch (error) {
+          console.error("Error loading issue details:", error);
+          showNotification("Error loading issue details", "error");
+        }
+      }
+
+      // Show enhanced issue details modal
+      // In issue_reports.html, replace your existing showIssueModal function with this complete version.
+      function showIssueModal(issue, history) {
+        const modalContent = document.getElementById("modalContent");
+
+        // This calls the helper function to build the dynamic timeline HTML
+        const timelineHtml = generateTimelineHTML(history);
+
+        modalContent.innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <span class="material-symbols-rounded">confirmation_number</span>
+                    Issue Information
+                </div>
+                
+<div class="detail-value" style="font-weight: 700; font-size: 1.2rem;">
+  <span style="color: var(--color-text-secondary);">Issue ID:</span>
+  <span style="color: var(--color-primary);">${
+    issue.issue_id || "Not Available"
+  }</span>
+</div>
+                <div class="detail-item"><div class="detail-label">Category</div><div class="detail-value">${
+                  issue.issueCategory || issue.customIssueType || "N/A"
+                }</div></div>
+                <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span class="status-badge status-${(
+                  issue.status || "submitted"
+                )
+                  .toLowerCase()
+                  .replace(" ", "-")}">${
+          issue.status || "Submitted"
+        }</span></div></div>
+                <div class="detail-item"><div class="detail-label">Priority</div><div class="detail-value"><span class="priority-badge priority-${(
+                  issue.priority || "normal"
+                ).toLowerCase()}">${
+          issue.priority || "Normal"
+        }</span></div></div>
+                <div class="detail-secondary">Submitted: ${formatDate(
+                  issue.submitted_at
+                )}</div>
+                ${
+                  issue.updated_at
+                    ? `<div class="detail-secondary">Last Updated: ${formatDate(
+                        issue.updated_at
+                      )}</div>`
+                    : ""
+                }
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <span class="material-symbols-rounded">person</span>
+                    Submitter Details
+                </div>
+                <div class="detail-item"><div class="detail-label">Name</div><div class="detail-value">${
+                  issue.fullName || "N/A"
+                }</div></div>
+                <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${
+                  issue.email || "N/A"
+                }</div></div>
+                <div class="detail-item"><div class="detail-label">Mobile</div><div class="detail-value">${
+                  issue.mobile || "N/A"
+                }</div></div>
+                <div class="detail-item"><div class="detail-label">Age</div><div class="detail-value">${
+                  issue.age || "N/A"
+                }</div></div>
+                <div class="detail-item"><div class="detail-label">Gender</div><div class="detail-value">${
+                  issue.gender || "N/A"
+                }</div></div>
+                <div class="detail-item"><div class="detail-label">Residential Address</div><div class="detail-value">${
+                  issue.residentialAddress || "N/A"
+                }</div></div>
+                <div class="detail-item"><div class="detail-label">Work Address</div><div class="detail-value">${
+                  issue.workAddress || "N/A"
+                }</div></div>
+            </div>
+
+            <div class="detail-section full-width-section">
+                 <div class="detail-section-title">
+                     <span class="material-symbols-rounded">location_on</span>
+                     Location Details
+                 </div>
+                 <div class="detail-item"><div class="detail-label">Full Address</div><div class="detail-value">${
+                   issue.locationAddress || "N/A"
+                 }</div></div>
+                 <div class="detail-item"><div class="detail-label">City</div><div class="detail-value">${
+                   issue.city || "N/A"
+                 }</div></div>
+                 <div class="detail-item"><div class="detail-label">District</div><div class="detail-value">${
+                   issue.district || "N/A"
+                 }</div></div>
+                 <div class="detail-item"><div class="detail-label">State</div><div class="detail-value">${
+                   issue.state || "N/A"
+                 }</div></div>
+                 <div class="detail-item"><div class="detail-label">Pincode</div><div class="detail-value">${
+                   issue.pincode || "N/A"
+                 }</div></div>
+                 <div class="detail-item"><div class="detail-label">Country</div><div class="detail-value">${
+                   issue.country || "N/A"
+                 }</div></div>
+                 ${
+                   issue.latitude && issue.longitude
+                     ? `
+                    <div class="detail-item"><div class="detail-label">Coordinates</div><div class="detail-value">${issue.latitude}, ${issue.longitude}</div></div>
+                 `
+                     : ""
+                 }
+            </div>
+
+            <div class="detail-section full-width-section">
+                 <div class="detail-section-title">
+                     <span class="material-symbols-rounded">description</span>
+                     Issue Description
+                 </div>
+                 <div class="detail-value" style="white-space: pre-wrap; line-height: 1.6;">
+                     ${issue.issueDescription || "No description provided."}
+                 </div>
+            </div>
+
+            ${
+              issue.image_filename
+                ? `
+                 <div class="detail-section full-width-section image-section">
+                     <div class="detail-section-title">
+                         <span class="material-symbols-rounded">image</span>
+                         Submitted Image
+                     </div>
+                     <img src="/static/uploads/${issue.image_filename}" alt="Issue Image" class="modal-image" onclick="openImageFullscreen(this.src)">
+                     <div class="detail-secondary" style="margin-top: 0.5rem;">Click image to view full size</div>
+                 </div>
+             `
+                : ""
+            }
+
+            ${
+              issue.latitude && issue.longitude
+                ? `
+                 <div class="detail-section full-width-section">
+                     <div class="detail-section-title">
+                         <span class="material-symbols-rounded">map</span>
+                         Location Map
+                     </div>
+                     <div id="modal-map-container" class="map-container"></div>
+                 </div>
+             `
+                : ""
+            }
+
+            <div class="detail-section full-width-section">
+                <div class="detail-section-title">
+                    <span class="material-symbols-rounded">timeline</span>
+                    Status Timeline
+                </div>
+                ${timelineHtml}
+            </div>
+        </div>
+
+        <div class="status-update-section">
+            <div class="status-update-title">
+                <span class="material-symbols-rounded">edit</span>
+                Update Issue Status
+            </div>
+            <div class="status-update-form">
+                <div class="filter-group">
+                    <label class="filter-label">New Status</label>
+                    <select id="newStatus" class="filter-input">
+                        <option value="Submitted" ${
+                          issue.status === "Submitted" ? "selected" : ""
+                        }>Submitted</option>
+                        <option value="In Progress" ${
+                          issue.status === "In Progress" ? "selected" : ""
+                        }>In Progress</option>
+                        <option value="Resolved" ${
+                          issue.status === "Resolved" ? "selected" : ""
+                        }>Resolved</option>
+                        <option value="Rejected" ${
+                          issue.status === "Rejected" ? "selected" : ""
+                        }>Rejected</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Priority</label>
+                    <select id="newPriority" class="filter-input">
+                        <option value="Low" ${
+                          issue.priority === "Low" ? "selected" : ""
+                        }>Low</option>
+                        <option value="Normal" ${
+                          issue.priority === "Normal" ? "selected" : ""
+                        }>Normal</option>
+                        <option value="Medium" ${
+                          issue.priority === "Medium" ? "selected" : ""
+                        }>Medium</option>
+                        <option value="High" ${
+                          issue.priority === "High" ? "selected" : ""
+                        }>High</option>
+                        <option value="Critical" ${
+                          issue.priority === "Critical" ? "selected" : ""
+                        }>Critical</option>
+                    </select>
+                </div>
+                <button class="btn btn-danger" onclick="updateIssueStatus('${
+                  issue.issue_id
+                }')" style="height: fit-content;">
+                    <span class="material-symbols-rounded">update</span>
+                    Update
+                </button>
+                <div class="status-notes-section">
+                    <label class="filter-label">Admin Notes (Optional)</label>
+                    <textarea id="statusNotes" class="notes-textarea" placeholder="Add notes about this status update..."></textarea>
+                </div>
+            </div>
+        </div>
+    `;
+
+        if (issue.latitude && issue.longitude) {
+          setTimeout(() => initModalMap(issue.latitude, issue.longitude), 100);
+        }
+
+        document.getElementById("issueModal").classList.add("active");
+      }
+
+      // NEW function to be added to issue_reports.html
+      // In issue_reports.html, replace the old helper function with this one
+      function generateTimelineHTML(history) {
+        if (!history || history.length === 0) {
+          return "<p>No status history available.</p>";
+        }
+
+        // This map defines the class and icon for each status
+        const statusMap = {
+          Submitted: { class: "submitted", icon: "flag" },
+          "In Progress": { class: "in-progress", icon: "construction" },
+          Resolved: { class: "resolved", icon: "task_alt" },
+          Rejected: { class: "rejected", icon: "cancel" },
+        };
+
+        return `
+        <div class="timeline">
+            ${history
+              .map((item) => {
+                const statusInfo = statusMap[item.status] || {
+                  class: "",
+                  icon: "help",
+                };
+                // The statusInfo.class is now added to the timeline-item div
+                return `
+                    <div class="timeline-item ${statusInfo.class}">
+                        <div class="timeline-icon">
+                            <span class="material-symbols-rounded">${
+                              statusInfo.icon
+                            }</span>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">${item.status}</div>
+                            <div class="timeline-date">${formatDate(
+                              item.created_at
+                            )}</div>
+                            ${
+                              item.notes
+                                ? `<p style="font-size: 0.9rem; margin-top: 8px; color: var(--color-text-secondary);">${item.notes}</p>`
+                                : ""
+                            }
+                        </div>
+                    </div>
+                `;
+              })
+              .join("")}
+        </div>
+    `;
+      }
+      // Initialize modal map
+      function initModalMap(lat, lng) {
+        if (
+          typeof google === "undefined" ||
+          !document.getElementById("modal-map-container")
+        ) {
+          const mapContainer = document.getElementById("modal-map-container");
+          if (mapContainer) {
+            mapContainer.innerHTML =
+              '<div style="text-align:center; padding: 40px; color: var(--color-text-secondary);"><span class="material-symbols-rounded" style="font-size: 3rem; opacity: 0.5;">map_off</span><div>Map could not be loaded. Please check your internet connection.</div></div>';
+          }
+          return;
+        }
+
+        try {
+          const location = { lat: parseFloat(lat), lng: parseFloat(lng) };
+          const map = new google.maps.Map(
+            document.getElementById("modal-map-container"),
+            {
+              zoom: 16,
+              center: location,
+              mapTypeId: google.maps.MapTypeId.ROADMAP,
+            }
+          );
+
+          const marker = new google.maps.Marker({
+            position: location,
+            map: map,
+            title: "Issue Location",
+          });
+
+          const infoWindow = new google.maps.InfoWindow({
+            content: `
+                        <div style="padding: 8px; font-family: 'Poppins', sans-serif;">
+                            <h4 style="margin: 0 0 8px 0; color: #1f2937;">Issue Location</h4>
+                            <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">Coordinates: ${lat}, ${lng}</p>
+                        </div>
+                    `,
+          });
+
+          marker.addListener("click", function () {
+            infoWindow.open(map, marker);
+          });
+        } catch (error) {
+          console.error("Error initializing map:", error);
+          const mapContainer = document.getElementById("modal-map-container");
+          if (mapContainer) {
+            mapContainer.innerHTML =
+              '<div style="text-align:center; padding: 40px; color: var(--color-text-secondary);"><span class="material-symbols-rounded" style="font-size: 3rem; opacity: 0.5;">error</span><div>Error loading map</div></div>';
+          }
+        }
+      }
+
+      // Open image in fullscreen
+      function openImageFullscreen(src) {
+        const fullscreenOverlay = document.createElement("div");
+        fullscreenOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            `;
+
+        const fullscreenImage = document.createElement("img");
+        fullscreenImage.src = src;
+        fullscreenImage.style.cssText = `
+                max-width: 95%;
+                max-height: 95%;
+                object-fit: contain;
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            `;
+
+        const closeButton = document.createElement("button");
+        closeButton.innerHTML =
+          '<span class="material-symbols-rounded">close</span>';
+        closeButton.style.cssText = `
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                color: white;
+                padding: 12px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 1.5rem;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            `;
+
+        fullscreenOverlay.appendChild(fullscreenImage);
+        fullscreenOverlay.appendChild(closeButton);
+        document.body.appendChild(fullscreenOverlay);
+
+        // Close on click
+        fullscreenOverlay.addEventListener("click", function () {
+          document.body.removeChild(fullscreenOverlay);
+        });
+
+        closeButton.addEventListener("click", function (e) {
+          e.stopPropagation();
+          document.body.removeChild(fullscreenOverlay);
+        });
+
+        // Close on escape key
+        const escapeHandler = function (e) {
+          if (e.key === "Escape") {
+            document.body.removeChild(fullscreenOverlay);
+            document.removeEventListener("keydown", escapeHandler);
+          }
+        };
+        document.addEventListener("keydown", escapeHandler);
+      }
+
+      // Update issue status
+      async function updateIssueStatus(issueId) {
+        const newStatus = document.getElementById("newStatus").value;
+        const newPriority = document.getElementById("newPriority").value;
+        const notes = document.getElementById("statusNotes").value;
+
+        if (!newStatus || !newPriority) {
+          showNotification("Please select both status and priority", "error");
+          return;
+        }
+
+        try {
+          const response = await fetch(`/admin/api/issues/${issueId}/status`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: newStatus,
+              priority: newPriority,
+              notes: notes,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showNotification("Issue updated successfully!", "success");
+            closeModal();
+            loadIssues(); // Refresh the data
+          } else {
+            showNotification(result.error || "Failed to update issue", "error");
+          }
+        } catch (error) {
+          console.error("Error updating status:", error);
+          showNotification("Error updating issue", "error");
+        }
+      }
+
+      // Delete issue
+      // The NEW deleteIssue function
+      // Replace your existing deleteIssue function
+      function deleteIssue(issueId) {
+        issueIdToDelete = issueId;
+        // NEW: Set the issue ID in the modal text for clarity
+        document.getElementById("issueIdToDeleteSpan").textContent = issueId;
+        document.getElementById("confirmDeleteModal").classList.add("active");
+      }
+
+      // ADD THESE NEW FUNCTIONS
+      // Replace your existing closeConfirmDeleteModal function
+      function closeConfirmDeleteModal() {
+        document
+          .getElementById("confirmDeleteModal")
+          .classList.remove("active");
+        issueIdToDelete = null;
+
+        // NEW: Reset button state whenever the modal is closed
+        const confirmBtn = document.getElementById("confirmDeleteBtn");
+        const cancelBtn = document.getElementById("cancelDeleteBtn");
+        const btnText = confirmBtn.querySelector(".btn-text");
+        const spinner = confirmBtn.querySelector(".spinner-sm");
+
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+          btnText.style.display = "inline-block";
+          spinner.style.display = "none";
+        }
+        if (cancelBtn) {
+          cancelBtn.disabled = false;
+        }
+      }
+
+      // Replace your existing confirmDeleteIssue function
+      async function confirmDeleteIssue() {
+        if (!issueIdToDelete) return;
+
+        // NEW: Show loading state and disable buttons
+        const confirmBtn = document.getElementById("confirmDeleteBtn");
+        const cancelBtn = document.getElementById("cancelDeleteBtn");
+        const btnText = confirmBtn.querySelector(".btn-text");
+        const spinner = confirmBtn.querySelector(".spinner-sm");
+
+        confirmBtn.disabled = true;
+        cancelBtn.disabled = true;
+        btnText.style.display = "none";
+        spinner.style.display = "block";
+
+        try {
+          const response = await fetch(`/admin/api/issues/${issueIdToDelete}`, {
+            method: "DELETE",
+          });
+          const result = await response.json();
+
+          if (response.ok) {
+            showNotification("Issue deleted successfully!", "success");
+            loadIssues();
+          } else {
+            showNotification(result.error || "Failed to delete issue", "error");
+          }
+        } catch (error) {
+          console.error("Error deleting issue:", error);
+          showNotification("Error deleting issue", "error");
+        } finally {
+          // Hide the modal (which will also reset the button state)
+          closeConfirmDeleteModal();
+        }
+      }
+      // Edit issue status (quick edit)
+      function editIssueStatus(issueId) {
+        viewIssueDetails(issueId);
+      }
+
+      // Export data to CSV
+      async function exportData() {
+        try {
+          showNotification("Preparing export...", "success");
+
+          const response = await fetch("/admin/api/issues/export");
+
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `CivicsenseAI_issues_export_${
+              new Date().toISOString().split("T")[0]
+            }.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showNotification("Export completed successfully!", "success");
+          } else {
+            showNotification("Export failed", "error");
+          }
+        } catch (error) {
+          console.error("Export error:", error);
+          showNotification("Export error", "error");
+        }
+      }
+
+      // Refresh data
+      function refreshData() {
+        showNotification("Refreshing data...", "success");
+        loadIssues();
+      }
+
+      // Close modal
+      function closeModal() {
+        document.getElementById("issueModal").classList.remove("active");
+      }
+
+      // Show notification with enhanced styling
+      function showNotification(message, type = "success") {
+        const notification = document.getElementById("notification");
+        const icon = type === "success" ? "check_circle" : "error";
+
+        notification.innerHTML = `
+                <span class="material-symbols-rounded">${icon}</span>
+                <span>${message}</span>
+            `;
+        notification.className = `notification ${type} show`;
+
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 4000);
+      }
+
+      // Render empty state
+      function renderEmptyState() {
+        const tbody = document.getElementById("issuesTableBody");
+        tbody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <span class="material-symbols-rounded">error_outline</span>
+                            </div>
+                            <h3>Unable to load issues</h3>
+                            <p>Please check your connection and try again.</p>
+                            <button class="btn btn-primary" onclick="loadIssues()" style="margin-top: 1.5rem;">
+                                <span class="material-symbols-rounded">refresh</span>
+                                Retry
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+      }
+
+      // Setup real-time updates
+      function setupRealTimeUpdates() {
+        // Refresh data every 15 seconds for real-time updates
+        setInterval(() => {
+          loadIssues();
+        }, 15000);
+
+        // Show connection status
+        window.addEventListener("online", () => {
+          showNotification(
+            "Connection restored - Real-time updates active",
+            "success"
+          );
+        });
+
+        window.addEventListener("offline", () => {
+          showNotification("Connection lost - Updates paused", "error");
+        });
+      }
+
+      // Enhanced error handling
+      window.addEventListener("error", function (e) {
+        console.error("Global error:", e.error);
+        showNotification("An unexpected error occurred", "error");
+      });
+
+      // Mock data for demonstration (remove in production)
+      function loadMockData() {
+        allIssues = [
+          {
+            issue_id: "CIV-2025-001",
+            fullName: "John Doe",
+            email: "john.doe@example.com",
+            mobile: "9876543210",
+            age: "35",
+            gender: "Male",
+            residentialAddress: "123 Main St, City",
+            workAddress: "456 Business Ave, City",
+            issueCategory: "Roads & Transportation",
+            customIssueType: "",
+            locationAddress: "Main Street Bridge, Downtown",
+            city: "Chennai",
+            district: "Chennai",
+            state: "Tamil Nadu",
+            pincode: "600001",
+            country: "India",
+            latitude: "13.0827",
+            longitude: "80.2707",
+            issueDescription:
+              "Large pothole causing traffic issues and vehicle damage.",
+            image_filename: null,
+            status: "Submitted",
+            priority: "High",
+            submitted_at: new Date().toISOString(),
+            updated_at: null,
+          },
+          {
+            issue_id: "CIV-2025-002",
+            fullName: "Jane Smith",
+            email: "jane.smith@example.com",
+            mobile: "9876543211",
+            age: "28",
+            gender: "Female",
+            residentialAddress: "789 Oak St, City",
+            workAddress: "321 Tech Park, City",
+            issueCategory: "Water Supply",
+            customIssueType: "",
+            locationAddress: "Residential Area Block B",
+            city: "Chennai",
+            district: "Chennai",
+            state: "Tamil Nadu",
+            pincode: "600002",
+            country: "India",
+            latitude: "13.0478",
+            longitude: "80.2209",
+            issueDescription:
+              "No water supply for the past 3 days in our area.",
+            image_filename: null,
+            status: "In Progress",
+            priority: "Critical",
+            submitted_at: new Date(Date.now() - 86400000).toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ];
+        filteredIssues = [...allIssues];
+        updateStatistics();
+        renderIssuesTable();
+      }
+
+      // Use mock data if API is not available
+      setTimeout(() => {
+        if (allIssues.length === 0) {
+          console.log("Loading mock data for demonstration");
+          loadMockData();
+        }
+      }, 2000);
+
+      console.log(
+        "Civicsense AI Issue Reports Dashboard initialized successfully!"
+      );
+    </script>
+
+    <!-- Google Maps API -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDgvBDfYBO3SyzvGMkuN3R8vLvur78Oi4&libraries=places"
+      async
+      defer
+    ></script>
+  </body>
+</html>

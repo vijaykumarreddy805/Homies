@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+       <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"
+      defer
+    ></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      :root {
+        /* Light theme colors */
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+
+      body.dark-theme {
+        /* Dark theme colors */
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border-hr: #334155;
+        --color-hover-secondary: #334155;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-bg-primary);
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* --- Sidebar Styles --- */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center; /* centers horizontally */
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .menu-section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        padding: 0 12px;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-hover-primary);
+
+        z-index: -1;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      /* Replace it with this code */
+      .menu-link:not(.logout-menu-link):not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      /* Logout button hover + active styles */
+      .logout-menu-link::before {
+        display: none !important; /* remove sliding hover animation background */
+      }
+
+      .logout-menu-link:hover,
+      .logout-menu-link.active {
+        background: rgba(
+          239,
+          68,
+          68,
+          0.1
+        ) !important; /* Very light red background */
+        color: var(--color-error) !important; /* Solid red text */
+        font-weight: 600;
+      }
+      .divider {
+        height: 1px;
+        background: var(--color-border-hr);
+        margin: 16px 0;
+      }
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-bg-secondary);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      .main-content {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1;
+        padding: 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .page-header {
+        margin-bottom: 30px;
+        padding: 30px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #cc2b5e 0%, #753a88 100%);
+
+        color: white;
+        box-shadow: 0 4px 20px var(--color-shadow);
+      }
+      .page-header .page-title,
+      .page-header .page-title .material-symbols-rounded,
+      .page-header .page-subtitle {
+        color: white;
+      }
+      .page-header .page-subtitle {
+        opacity: 0.9;
+      }
+      .page-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .page-subtitle {
+        font-size: 1.1rem;
+        margin-top: 4px;
+      }
+
+      .profile-summary-card {
+        background: var(--sidebar-bg);
+
+        border-radius: 16px;
+        border: 1px solid var(--color-border-hr);
+        padding: 30px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .profile-avatar-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        flex-shrink: 0;
+      }
+      .profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--color-bg-sidebar);
+      }
+      .avatar-upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .profile-avatar-container:hover .avatar-upload-overlay {
+        opacity: 1;
+      }
+      .profile-details {
+        flex-grow: 1;
+      }
+      .profile-name {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+      .profile-email {
+        font-size: 1.1rem;
+        color: var(--color-text-secondary);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .verified-icon {
+        color: var(--color-accent);
+        font-size: 1.4rem;
+      }
+      .profile-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin: 20px 0;
+        padding: 20px 0;
+        border-top: 1px solid var(--color-border-hr);
+        border-bottom: 1px solid var(--color-border-hr);
+      }
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .info-icon {
+        font-size: 1.8rem;
+        color: var(--color-text-secondary);
+      }
+      .info-label {
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+      }
+      .info-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--color-text-primary);
+      }
+      .profile-stats {
+        display: flex;
+        gap: 30px;
+        margin-top: 20px;
+      }
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .stat-icon {
+        font-size: 2rem;
+        color: var(--color-hover-primary);
+      }
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+      .stat-label {
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+      }
+
+      .forms-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+      }
+      .profile-form-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        border: 1px solid var(--color-border-hr);
+        padding: 30px;
+      }
+      .form-card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--color-border-hr);
+        color: var(--color-text-primary);
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+      .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        color: var(--color-text-primary);
+      }
+      .verified-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .verified-icon-small {
+        color: var(--color-accent);
+        font-size: 1.1rem;
+      }
+      .form-input,
+      .form-select,
+      .form-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--color-border-hr);
+        border-radius: 8px;
+        font-size: 1rem;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .form-footer {
+        text-align: right;
+        margin-top: 10px;
+        padding-top: 20px;
+        border-top: 1px solid var(--color-border-hr);
+      }
+      .form-button {
+        /* --- Add these properties for alignment --- */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px; /* Adds space between the icon and text */
+        background: #f59e0b; /* Yellow color */
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .form-button:hover {
+        background: #d97706; /* Darker yellow on hover */
+      }
+      /* --- CORRECTED TOAST STYLES --- */
+      #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+      }
+
+      .toast {
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        margin-bottom: 10px;
+        transform: translateX(120%);
+        transition: transform 0.3s ease;
+      }
+      .toast.show {
+        transform: translateX(0);
+      }
+      .toast.success {
+        background-color: var(--color-accent);
+      }
+      .toast.error {
+        background-color: var(--color-error);
+      }
+
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        margin-top: auto;
+        padding: 20px;
+      }
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      /* --- NEW: Sidebar Profile Picture Styles --- */
+      .sidebar-profile-pic {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--color-border-hr);
+        /* Placeholder background color */
+        background-color: var(--color-bg-secondary);
+      }
+      /* By default, hide the dark mode logo */
+      .dark-mode-logo {
+        display: none;
+      }
+
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar); /* Match the dark sidebar color */
+      }
+
+      /* When dark mode is on, hide the light logo... */
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+
+      /* ...and show the dark logo */
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(10px); /* ⬅ adjust this value as per your need */
+      }
+
+      /* ADD THIS NEW RULE */
+      .right-column-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      /* --- NEW: Delete Confirmation Modal Styles --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.show {
+        opacity: 1;
+      }
+      .modal-content {
+        background: var(--color-bg-sidebar);
+        padding: 30px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+      }
+      .modal-overlay.show .modal-content {
+        transform: scale(1);
+      }
+      .modal-title {
+        color: var(--color-text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .modal-text {
+        color: var(--color-text-secondary);
+        margin-bottom: 24px;
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+      .modal-button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .modal-button.cancel {
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+      }
+      .modal-button.cancel:hover {
+        background: var(--color-border-hr);
+      }
+      .modal-button.confirm {
+        background: var(--color-error);
+        color: white;
+      }
+      .modal-button.confirm:hover {
+        background: #dc2626; /* Darker red */
+      }
+
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .modal.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal .modal-footer {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid var(--color-border-hr);
+      }
+      .modal .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .modal .btn-primary {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .modal .btn-secondary {
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+      }
+      /* ADD THIS CSS to your main <style> tag */
+
+      #cropperModal .modal-content {
+        width: 100%;
+        max-width: 800px;
+        height: 85vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #cropperModal .modal-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding-bottom: 20px;
+      }
+
+      .cropper-image-container {
+        flex: 1;
+        min-height: 0;
+        margin-bottom: 1rem;
+      }
+
+      .cropper-image-container .cropper-container {
+        height: 100% !important;
+        width: 100% !important;
+      }
+
+      .cropper-controls {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: var(--color-text-secondary);
+      }
+
+      #zoomSlider {
+        width: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <!-- Main Menu -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="dashboard" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >dashboard</span
+                >
+                <span class="menu-label">Dashboard</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="report-issue" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >report_problem</span
+                >
+                <span class="menu-label">Report an Issue</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="my-submissions" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >description</span
+                >
+                <span class="menu-label">My Submissions</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="check-status" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">task_alt</span>
+                <span class="menu-label">Check Status</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- AI & Analytics -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="chatbot" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >smart_toy</span
+                >
+                <span class="menu-label">AI Chatbot</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="analytics" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >trending_up</span
+                >
+                <span class="menu-label">Analytics & Trends</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="feedback" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >star_rate</span
+                >
+                <span class="menu-label">Feedback & Rating</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="help-support" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">help</span>
+                <span class="menu-label">Help/Support</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="about-us" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">info</span>
+                <span class="menu-label">About Us</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Account -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="my-profile" class="menu-link active">
+                <img
+                  src=""
+                  alt="My Profile"
+                  id="sidebarProfilePic"
+                  class="sidebar-profile-pic"
+                />
+                <span class="menu-label">My Profile</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="logout" class="menu-link logout-menu-link">
+                <span class="material-symbols-rounded menu-icon">logout</span>
+                <span class="menu-label">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span>
+            <span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <header class="page-header">
+          <div>
+            <h1 class="page-title">
+              <span class="material-symbols-rounded">person</span>My Profile
+            </h1>
+            <p class="page-subtitle">
+              Manage your personal information and account settings.
+            </p>
+          </div>
+        </header>
+
+        <div class="profile-summary-card">
+          <div
+            id="avatarContainerTrigger"
+            class="profile-avatar-container"
+            style="cursor: pointer"
+          >
+            <img
+              src=""
+              alt="Profile Avatar"
+              id="profileAvatar"
+              class="profile-avatar"
+            />
+            <div class="avatar-upload-overlay">
+              <span class="material-symbols-rounded">photo_camera</span>
+            </div>
+            <input
+              type="file"
+              id="photoUploadInput"
+              accept="image/*"
+              style="display: none"
+            />
+          </div>
+          <div class="profile-details">
+            <h2 id="profile-name" class="profile-name">Loading...</h2>
+            <div id="profile-email" class="profile-email">
+              <span id="profile-email-text">...</span>
+              <span
+                class="material-symbols-rounded verified-icon"
+                title="Verified Email"
+                >verified</span
+              >
+            </div>
+            <div class="profile-info-grid">
+              <div class="info-item">
+                <span class="material-symbols-rounded info-icon">call</span>
+                <div>
+                  <div class="info-label">Mobile</div>
+                  <div class="info-value" id="profile-mobile">...</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="material-symbols-rounded info-icon">cake</span>
+                <div>
+                  <div class="info-label">Age</div>
+                  <div class="info-value" id="profile-age">...</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="material-symbols-rounded info-icon">person</span>
+                <div>
+                  <div class="info-label">Gender</div>
+                  <div class="info-value" id="profile-gender">...</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="material-symbols-rounded info-icon">home</span>
+                <div>
+                  <div class="info-label">City</div>
+                  <div class="info-value" id="profile-city">...</div>
+                </div>
+              </div>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="material-symbols-rounded stat-icon"
+                  >assignment</span
+                >
+                <div>
+                  <div class="stat-value" id="total-submissions-stat">--</div>
+                  <div class="stat-label">Total Submissions</div>
+                </div>
+              </div>
+              <div class="stat-item">
+                <span class="material-symbols-rounded stat-icon">task_alt</span>
+                <div>
+                  <div class="stat-value" id="resolved-issues-stat">--</div>
+                  <div class="stat-label">Issues Resolved</div>
+                </div>
+              </div>
+              <div class="stat-item">
+                <span class="material-symbols-rounded stat-icon"
+                  >hourglass_top</span
+                >
+                <div>
+                  <div class="stat-value" id="inprogress-issues-stat">--</div>
+                  <div class="stat-label">In Progress</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="forms-grid">
+          <div class="profile-form-card">
+            <h3 class="form-card-title">Edit Profile Information</h3>
+            <form id="profileUpdateForm">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="first_name" class="form-label">First Name</label
+                  ><input
+                    type="text"
+                    id="first_name"
+                    name="first_name"
+                    class="form-input"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="last_name" class="form-label">Last Name</label
+                  ><input
+                    type="text"
+                    id="last_name"
+                    name="last_name"
+                    class="form-input"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="age" class="form-label">Age</label
+                  ><input
+                    type="number"
+                    id="age"
+                    name="age"
+                    class="form-input"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="gender" class="form-label">Gender</label>
+                  <select id="gender" name="gender" class="form-select">
+                    <option value="">Select...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="mobile" class="form-label">Mobile Number</label
+                ><input
+                  type="tel"
+                  id="mobile"
+                  name="mobile"
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group full-width">
+                <label for="address" class="form-label">Address</label
+                ><textarea
+                  id="address"
+                  name="address"
+                  class="form-textarea"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="city" class="form-label">City</label
+                  ><input
+                    type="text"
+                    id="city"
+                    name="city"
+                    class="form-input"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="state" class="form-label">State</label
+                  ><input
+                    type="text"
+                    id="state"
+                    name="state"
+                    class="form-input"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="pincode" class="form-label">Pincode</label
+                  ><input
+                    type="text"
+                    id="pincode"
+                    name="pincode"
+                    class="form-input"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="country" class="form-label">Country</label
+                  ><input
+                    type="text"
+                    id="country"
+                    name="country"
+                    class="form-input"
+                  />
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label for="email" class="form-label verified-label"
+                  ><span>Email Address</span
+                  ><span
+                    class="material-symbols-rounded verified-icon-small"
+                    title="Verified Email"
+                    >verified</span
+                  ></label
+                ><input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-input"
+                  readonly
+                  disabled
+                  style="cursor: not-allowed"
+                />
+              </div>
+              <div class="form-footer">
+                <button type="submit" class="form-button">Save Changes</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="right-column-stack">
+            <div class="profile-form-card">
+              <h3 class="form-card-title">Change Password</h3>
+              <form id="passwordUpdateForm">
+                <div class="form-group">
+                  <label for="currentPassword" class="form-label"
+                    >Current Password</label
+                  ><input
+                    type="password"
+                    id="currentPassword"
+                    name="current_password"
+                    class="form-input"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="newPassword" class="form-label"
+                    >New Password</label
+                  ><input
+                    type="password"
+                    id="newPassword"
+                    name="new_password"
+                    class="form-input"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="confirmPassword" class="form-label"
+                    >Confirm New Password</label
+                  ><input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirm_password"
+                    class="form-input"
+                    required
+                  />
+                </div>
+                <div class="form-footer">
+                  <button type="submit" class="form-button">
+                    Update Password
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="profile-form-card">
+              <h3
+                class="form-card-title"
+                style="
+                  color: var(--color-error);
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                "
+              >
+                <span class="material-symbols-rounded">delete_forever</span>
+                Delete Account
+              </h3>
+              <div class="form-group">
+                <p
+                  style="
+                    color: var(--color-text-secondary);
+                    margin-bottom: 20px;
+                  "
+                >
+                  Once you delete your account, this action is irreversible. All
+                  your data, including submissions and personal information,
+                  will be permanently removed. Please be certain before
+                  proceeding.
+                </p>
+              </div>
+              <div class="form-footer" style="border-top: none; padding-top: 0">
+                <button
+                  type="button"
+                  id="deleteAccountBtn"
+                  class="form-button"
+                  style="background: var(--color-error); width: 100%"
+                >
+                  Delete My Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="deleteConfirmModal" class="modal-overlay" style="display: none">
+        <div class="modal-content">
+          <h2 class="modal-title">Are you absolutely sure?</h2>
+          <p class="modal-text">
+            This action cannot be undone. This will permanently delete your
+            account and all associated data.
+          </p>
+          <div class="modal-actions">
+            <button id="cancelDeleteBtn" class="modal-button cancel">
+              Cancel
+            </button>
+            <button id="confirmDeleteBtn" class="modal-button confirm">
+              Yes, delete my account
+            </button>
+          </div>
+        </div>
+      </div>
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by <a href="team-details">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="modal" id="cropperModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Crop Your Photo</h3>
+        </div>
+        <div class="modal-body">
+          <div class="cropper-image-container">
+            <img id="imageToCrop" style="max-width: 100%; display: block" />
+          </div>
+          <div class="cropper-controls">
+            <span class="material-symbols-rounded">zoom_out</span>
+            <input
+              type="range"
+              id="zoomSlider"
+              min="0"
+              max="2"
+              step="0.05"
+              value="0"
+            />
+            <span class="material-symbols-rounded">zoom_in</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="cropAndSaveBtn">
+            Crop
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="photoOptionsModal">
+      <div class="modal-content" style="max-width: 400px; text-align: center">
+        <div class="modal-header" style="justify-content: center">
+          <h3 class="modal-title">Profile Photo Options</h3>
+        </div>
+        <div
+          class="modal-body"
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-top: 1rem;
+          "
+        >
+          <button
+            id="changePhotoBtn"
+            class="form-button"
+            style="width: 100%; background: var(--color-hover-primary)"
+          >
+            <span class="material-symbols-rounded" style="font-size: 1.2em"
+              >photo_camera</span
+            >
+            Change Photo
+          </button>
+          <button
+            id="removePhotoBtn"
+            class="form-button"
+            style="width: 100%; background: var(--color-error)"
+          >
+            <span class="material-symbols-rounded" style="font-size: 1.2em"
+              >delete</span
+            >
+            Remove Photo
+          </button>
+          <button
+            id="cancelPhotoOptionsBtn"
+            class="modal-button cancel modal-close"
+            style="width: 100%"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ADD THESE LINES AT THE TOP OF YOUR SCRIPT
+      let cropper;
+      let croppedBlob = null;
+      document.addEventListener("DOMContentLoaded", function () {
+        const profileAvatar = document.getElementById("profileAvatar");
+        const profileName = document.getElementById("profile-name");
+        const profileEmailText = document.getElementById("profile-email-text");
+        const photoUploadInput = document.getElementById("photoUploadInput");
+        const profileUpdateForm = document.getElementById("profileUpdateForm");
+        const passwordUpdateForm =
+          document.getElementById("passwordUpdateForm");
+        const profileMobile = document.getElementById("profile-mobile");
+        const profileAge = document.getElementById("profile-age");
+        const profileGender = document.getElementById("profile-gender");
+        const profileCity = document.getElementById("profile-city");
+        const totalSubmissionsStat = document.getElementById(
+          "total-submissions-stat"
+        );
+        const resolvedIssuesStat = document.getElementById(
+          "resolved-issues-stat"
+        );
+        const inProgressIssuesStat = document.getElementById(
+          "inprogress-issues-stat"
+        );
+
+        const themeToggle = document.querySelector(".theme-toggle");
+        const themeIcon = themeToggle.querySelector(
+          ".material-symbols-rounded"
+        );
+        // ADD THIS BLOCK OF JAVASCRIPT inside your DOMContentLoaded listener
+
+        // --- START: New Photo Options Modal Logic ---
+        const avatarContainerTrigger = document.getElementById(
+          "avatarContainerTrigger"
+        );
+        const photoOptionsModal = document.getElementById("photoOptionsModal");
+        const changePhotoBtn = document.getElementById("changePhotoBtn");
+        const removePhotoBtn = document.getElementById("removePhotoBtn");
+
+        // Open the options modal when the avatar is clicked
+        // In your my-profile.html <script> tag...
+
+        // REPLACE your existing 'avatarContainerTrigger' event listener with this one.
+        avatarContainerTrigger.addEventListener("click", () => {
+          const isDefaultPhoto =
+            profileAvatar.src.includes("female_avatar.png");
+
+          if (isDefaultPhoto) {
+            // If no custom photo is set, skip the modal and directly open the file chooser.
+            photoUploadInput.click();
+          } else {
+            // If a custom photo exists, open the options modal as before.
+            // Ensure the 'Remove Photo' button is enabled.
+            removePhotoBtn.disabled = false;
+            removePhotoBtn.style.opacity = "1";
+            removePhotoBtn.style.cursor = "pointer";
+            openModal("photoOptionsModal");
+          }
+        });
+
+        // "Change Photo" button triggers the hidden file input
+        changePhotoBtn.addEventListener("click", () => {
+          closeModal("photoOptionsModal");
+          photoUploadInput.click(); // Trigger the file selection dialog
+        });
+
+        // "Remove Photo" button calls the new backend endpoint
+        removePhotoBtn.addEventListener("click", async () => {
+          closeModal("photoOptionsModal");
+          try {
+            const response = await fetch("/api/user/profile/photo", {
+              method: "DELETE",
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+
+            // Update UI with the new default photo URL from the server
+            const newPhotoUrl =
+              result.default_photo_url + "?t=" + new Date().getTime();
+            profileAvatar.src = newPhotoUrl;
+            document.getElementById("sidebarProfilePic").src = newPhotoUrl;
+            showToast(result.message, "success");
+          } catch (error) {
+            showToast(error.message || "Failed to remove photo.", "error");
+          }
+        });
+        // --- END: New Photo Options Modal Logic ---
+
+        function showToast(message, type = "success") {
+          const container =
+            document.getElementById("toast-container") || document.body;
+          const toast = document.createElement("div");
+          toast.className = `toast ${type}`;
+          toast.textContent = message;
+          container.appendChild(toast);
+          setTimeout(() => {
+            toast.classList.add("show");
+            setTimeout(() => {
+              toast.classList.remove("show");
+              setTimeout(() => toast.remove(), 300);
+            }, 3000);
+          }, 100);
+        }
+
+        async function loadProfileData() {
+          try {
+            const response = await fetch("/api/user/profile");
+            if (!response.ok) throw new Error("Failed to load profile.");
+            const data = await response.json();
+
+            profileName.textContent = `${data.first_name} ${data.last_name}`;
+            profileEmailText.textContent = data.email;
+            profileAvatar.src = data.photo_url;
+            profileMobile.textContent = data.mobile || "Not Set";
+            profileAge.textContent = data.age || "Not Set";
+            profileGender.textContent = data.gender || "Not Set";
+            profileCity.textContent = data.city || "Not Set";
+            totalSubmissionsStat.textContent = data.total_submissions;
+            resolvedIssuesStat.textContent = data.resolved_issues;
+            inProgressIssuesStat.textContent = data.in_progress_issues;
+
+            for (const key in data) {
+              if (profileUpdateForm.elements[key]) {
+                profileUpdateForm.elements[key].value = data[key] || "";
+              }
+            }
+          } catch (error) {
+            showToast(error.message, "error");
+          }
+        }
+
+        profileUpdateForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const button = e.target.querySelector("button");
+          button.textContent = "Saving...";
+          button.disabled = true;
+          const formData = {};
+          new FormData(e.target).forEach(
+            (value, key) => (formData[key] = value)
+          );
+          try {
+            const response = await fetch("/api/user/profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            showToast(result.message, "success");
+            loadProfileData();
+          } catch (error) {
+            showToast(error.message, "error");
+          } finally {
+            button.textContent = "Save Changes";
+            button.disabled = false;
+          }
+        });
+
+        passwordUpdateForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const button = e.target.querySelector("button");
+          button.textContent = "Updating...";
+          button.disabled = true;
+          const formData = {
+            current_password: e.target.current_password.value,
+            new_password: e.target.new_password.value,
+            confirm_password: e.target.confirm_password.value,
+          };
+          try {
+            const response = await fetch("/api/user/password", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            showToast(result.message, "success");
+            e.target.reset();
+          } catch (error) {
+            showToast(error.message, "error");
+          } finally {
+            button.textContent = "Update Password";
+            button.disabled = false;
+          }
+        });
+
+        // --- START: Delete Account Logic ---
+        const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+        const deleteConfirmModal =
+          document.getElementById("deleteConfirmModal");
+        const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+        if (deleteAccountBtn) {
+          deleteAccountBtn.addEventListener("click", () => {
+            deleteConfirmModal.style.display = "flex";
+            setTimeout(() => deleteConfirmModal.classList.add("show"), 10);
+          });
+        }
+
+        // --- START: Delete Account Logic ---
+        // ...
+        const closeDeleteModal = () => {
+          // Renamed the function
+          deleteConfirmModal.classList.remove("show");
+          setTimeout(() => (deleteConfirmModal.style.display = "none"), 300);
+        };
+        //...
+
+        if (cancelDeleteBtn) {
+          cancelDeleteBtn.addEventListener("click", closeDeleteModal); // Use the new function name
+        }
+
+        if (confirmDeleteBtn) {
+          confirmDeleteBtn.addEventListener("click", async () => {
+            const button = confirmDeleteBtn;
+            button.textContent = "Deleting...";
+            button.disabled = true;
+
+            try {
+              const response = await fetch("/api/user/profile", {
+                method: "DELETE",
+              });
+
+              const result = await response.json();
+
+              if (!response.ok) {
+                throw new Error(result.message || "Failed to delete account.");
+              }
+
+              showToast(
+                "Account deleted successfully. Logging you out...",
+                "success"
+              );
+
+              setTimeout(() => {
+                window.location.href = "/login";
+              }, 2500);
+            } catch (error) {
+              showToast(error.message, "error");
+              button.textContent = "Yes, delete my account";
+              button.disabled = false;
+              closeModal(); // Close modal on error
+            }
+          });
+        }
+        // --- END: Delete Account Logic ---
+
+        // FIXED: Photo upload event listener
+        // REMOVE the old 'photoUploadInput.addEventListener' and REPLACE it with these three blocks:
+
+        // 1. NEW: This function handles the actual upload of the cropped image
+        async function uploadCroppedPhoto(blob) {
+          const formData = new FormData();
+          formData.append("photo", blob, "cropped_photo.png");
+
+          try {
+            const response = await fetch("/api/user/profile/photo", {
+              method: "POST",
+              body: formData,
+            });
+            const result = await response.json();
+
+            if (response.ok && result.status === "success") {
+              const newPhotoUrl =
+                result.photo_url + "?t=" + new Date().getTime();
+              profileAvatar.src = newPhotoUrl;
+              document.getElementById("sidebarProfilePic").src = newPhotoUrl; // Update sidebar pic too
+              showToast(result.message, "success");
+            } else {
+              throw new Error(result.message || "Upload failed");
+            }
+          } catch (error) {
+            showToast(error.message || "Error uploading photo.", "error");
+          }
+        }
+
+        // 2. MODIFIED: This listener now opens the cropper instead of uploading directly
+        photoUploadInput.addEventListener("change", function () {
+          const file = this.files[0];
+          if (!file) return;
+          if (!file.type.startsWith("image/")) {
+            showToast("Please select a valid image file.", "error");
+            return;
+          }
+          if (file.size > 5 * 1024 * 1024) {
+            showToast("File size must be less than 5MB.", "error");
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const imageToCrop = document.getElementById("imageToCrop");
+            const zoomSlider = document.getElementById("zoomSlider");
+            imageToCrop.src = e.target.result;
+            openModal("cropperModal");
+
+            imageToCrop.onload = () => {
+              if (cropper) cropper.destroy();
+              cropper = new Cropper(imageToCrop, {
+                aspectRatio: 1 / 1,
+                viewMode: 1,
+                dragMode: "move",
+                background: false,
+                zoomOnWheel: true,
+                zoomOnTouch: true,
+                zoom: (event) => {
+                  if (event.detail.oldRatio === event.detail.ratio) return;
+                  zoomSlider.value = event.detail.ratio;
+                },
+              });
+              zoomSlider.addEventListener("input", (e) => {
+                if (cropper) cropper.zoomTo(e.target.value);
+              });
+            };
+          };
+          reader.readAsDataURL(file);
+          this.value = ""; // Clear input to allow re-selecting the same file
+        });
+
+        // 3. NEW: This listener handles the "Crop" button click in the modal
+        document
+          .getElementById("cropAndSaveBtn")
+          .addEventListener("click", () => {
+            if (!cropper) return;
+            cropper
+              .getCroppedCanvas({
+                width: 400,
+                height: 400,
+                imageSmoothingQuality: "high",
+              })
+              .toBlob((blob) => {
+                closeModal("cropperModal");
+                uploadCroppedPhoto(blob); // Call the upload function with the new blob
+                cropper.destroy();
+              }, "image/png");
+          });
+
+        // Also, make sure your generic open/close modal functions are in place
+        const openModal = (modalId) =>
+          document.getElementById(modalId).classList.add("active");
+        const closeModal = (modalId) =>
+          document.getElementById(modalId).classList.remove("active");
+
+        loadProfileData();
+
+        // ADD THIS EVENT LISTENER to handle all modal close buttons
+
+        document.addEventListener("click", function (event) {
+          // Check if the clicked element or its parent has the class 'modal-close'
+          const closeButton = event.target.closest(".modal-close");
+          if (closeButton) {
+            // Find the closest parent modal to the button that was clicked
+            const modalToClose = closeButton.closest(".modal");
+            if (modalToClose) {
+              // Use your existing closeModal function to hide it
+              closeModal(modalToClose.id);
+            }
+          }
+        });
+
+        // --- START: Auto-scroll sidebar to active link ---
+        const activeMenuLink = document.querySelector(
+          ".sidebar .menu-link.active"
+        );
+
+        if (activeMenuLink) {
+          // This function scrolls the sidebar so the active link is in the middle
+          activeMenuLink.scrollIntoView({
+            behavior: "smooth", // Optional: for a smooth scrolling animation
+            block: "center", // This aligns the link to the center of the view
+          });
+        }
+        // --- END: Auto-scroll sidebar to active link ---
+
+        // --- START: Load Profile Picture into Sidebar ---
+        async function loadSidebarProfilePic() {
+          const sidebarPicElement =
+            document.getElementById("sidebarProfilePic");
+          if (!sidebarPicElement) return;
+
+          try {
+            const response = await fetch("/api/user/profile");
+            if (!response.ok) return; // Fail silently if not logged in or error
+
+            const data = await response.json();
+            if (data.photo_url) {
+              sidebarPicElement.src = data.photo_url;
+            }
+          } catch (error) {
+            console.error("Could not load sidebar profile picture:", error);
+          }
+        }
+
+        // Call the function to load the picture
+        loadSidebarProfilePic();
+        // --- END: Load Profile Picture into Sidebar ---
+
+        // Theme Management
+        const updateThemeIcon = () => {
+          const isDark = document.body.classList.contains("dark-theme");
+          themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+        };
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem("civicsense-theme");
+        const systemPrefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const shouldUseDarkTheme =
+          savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+
+        document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+        updateThemeIcon();
+
+        // Theme toggle functionality
+        themeToggle.addEventListener("click", () => {
+          const isDark = document.body.classList.toggle("dark-theme");
+          localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+          updateThemeIcon();
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage About Us - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"
+      defer
+    ></script>
+    <style>
+      :root {
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border: #e2e8f0;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+      body.dark-theme {
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border: #334155;
+        --color-border-hr: #334155;
+        --color-hover-secondary: #334155;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+      }
+
+      /* --- Sidebar Header (Exact match to user_management.html) --- */
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-error);
+        transition: width 0.3s ease;
+        z-index: 1;
+      }
+      .menu-icon,
+      .menu-label {
+        position: relative;
+        z-index: 2;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      .menu-link:not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      .logout-menu-link:hover {
+        background: rgba(239, 68, 68, 0.1) !important;
+        font-weight: 600;
+      }
+
+      /* --- Theme Toggle (Exact match to user_management.html) --- */
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-toggle:hover {
+        background: var(--color-hover-secondary);
+      }
+      body.dark-theme .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-border-hr);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1 0 auto;
+        padding: 30px;
+      }
+      .page-header {
+        background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        color: white;
+      }
+      .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+      .content-section {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        margin-bottom: 2rem;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-border-hr);
+      }
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .developers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+      }
+      .dev-card {
+        text-align: left;
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid var(--color-border);
+        position: relative;
+        background: var(--color-bg-primary);
+        display: flex;
+        flex-direction: column;
+      }
+      .dev-card-header {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .dev-photo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--color-border-hr);
+      }
+      .dev-name {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: var(--color-hover-primary);
+      }
+      .dev-role {
+        color: var(--color-accent);
+        font-size: 0.9rem;
+      }
+      .dev-details {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        border-top: 1px solid var(--color-border-hr);
+        padding-top: 1rem;
+        margin-top: 1rem;
+      }
+      .leader-tag {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--color-warning);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+      /* MODIFIED card-actions RULE */
+      .card-actions {
+        margin-top: auto;
+        padding-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* ADD THESE NEW STYLES FOR THE ICONS */
+      .social-links {
+        display: flex;
+        gap: 8px;
+        padding-left: 16px; /* This adds space to the left */
+      }
+      .social-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: white;
+        transition: all 0.2s ease;
+      }
+      .social-link:hover {
+        transform: translateY(-2px);
+        opacity: 0.85;
+      }
+      .social-link.linkedin {
+        background: #0077b5;
+      }
+      .social-link.github {
+        background: #171515;
+      }
+      .social-link.email {
+        background: var(--color-error);
+      }
+      .guide-card-admin {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .btn-primary {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .btn-secondary {
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+      }
+      .btn-danger {
+        background: var(--color-error);
+        color: white;
+      }
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .modal.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-content {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        padding: 30px;
+        max-width: 800px;
+        width: 95%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .modal-body {
+        overflow-y: auto;
+        padding-right: 15px;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+      }
+      .modal-footer {
+        margin-top: 24px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        border-top: 1px solid var(--color-border-hr);
+        padding-top: 20px;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 30px;
+      }
+      .form-grid-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 30px;
+      }
+      .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .full-width {
+        grid-column: 1 / -1;
+      }
+      .photo-preview-container {
+        text-align: center;
+      }
+      #photoPreview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--color-border-hr);
+        margin-bottom: 16px;
+        background-color: var(--color-bg-secondary);
+        color: var(--color-text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.7);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .loading-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .loading-spinner {
+        border: 4px solid var(--color-border);
+        border-top-color: var(--color-hover-primary);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+      }
+      .toast {
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        min-width: 300px;
+        margin-bottom: 10px;
+      }
+      .toast.bg-success {
+        background-color: var(--color-accent);
+      }
+      .toast.bg-danger {
+        background-color: var(--color-error);
+      }
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        padding: 1.5rem 2rem;
+        flex-shrink: 0;
+      }
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .footer-copyright,
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      .dark-mode-logo {
+        display: none;
+      }
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar);
+      }
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+      body.dark-theme .dark-mode-logo {
+        display: block;
+      }
+
+      /* CORRECTED RULE */
+      .modal-footer .btn,
+      .modal-actions .btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+      }
+
+      /* ADD THESE NEW STYLES */
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 20px;
+        border-top: 1px solid var(--color-border-hr);
+        padding-top: 20px;
+      }
+      .btn-delete-confirm {
+        background: var(--color-error);
+        color: white;
+      }
+      .btn-delete-confirm:hover {
+        background: #dc2626; /* Darker red */
+      }
+
+      /* ADD THIS CSS FOR ICON LABELS */
+      .icon-label {
+        display: flex;
+        align-items: center;
+        gap: 8px; /* Space between icon and text */
+      }
+      /* General icon sizing and alignment */
+      .icon-label .fab,
+      .icon-label .material-symbols-rounded {
+        font-size: 1.1rem;
+        width: 20px; /* Ensures icons are aligned neatly */
+        text-align: center;
+      }
+
+      /* Specific icon colors */
+      .icon-label .fa-linkedin-in {
+        color: #0077b5;
+      } /* LinkedIn Blue */
+      .icon-label .fa-github {
+        color: #171515;
+      } /* GitHub Black */
+      .icon-label .material-symbols-rounded {
+        color: var(--color-error);
+      } /* Theme Red */
+
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(
+          16px
+        ); /* Adjust this value if the logo is not perfectly centered */
+      }
+
+      /* ADD THIS CSS to your <style> tag */
+      .cropper-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 20px;
+        color: var(--color-text-secondary);
+      }
+      #zoomSlider {
+        width: 200px;
+      }
+
+      /* ADD THIS CSS to your main <style> tag to fix the modal size */
+
+      /* Make the cropper modal larger and flexible */
+      #cropperModal .modal-content {
+        width: 90%;
+        max-width: 800px;
+        height: 90vh; /* Make the modal much taller */
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Use flexbox for the modal body to control the layout */
+      #cropperModal .modal-body {
+        flex: 1; /* Allows the body to grow and fill the available space */
+        display: flex;
+        flex-direction: column;
+        min-height: 0; /* A necessary flexbox fix to prevent overflow */
+        padding-bottom: 20px;
+      }
+
+      /* The new container for the image will take up all available space */
+      .cropper-image-container {
+        flex: 1;
+        min-height: 0; /* Another necessary flexbox fix */
+        margin-bottom: 1rem;
+      }
+
+      /* Ensure the cropper's generated view fits perfectly inside our container */
+      .cropper-image-container .cropper-container {
+        height: 100% !important;
+        width: 100% !important;
+      }
+
+      /* Ensure the controls do not shrink */
+      .cropper-controls {
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <ul class="menu-list">
+          <li class="menu-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">dashboard</span
+              ><span class="menu-label">Dashboard</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_issue_reports') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">assignment</span
+              ><span class="menu-label">Manage Issues</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_management') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">group</span
+              ><span class="menu-label">User Management</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_chat_analytics') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon"
+                >trending_up</span
+              ><span class="menu-label">Analytics & Trends</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_feedbacks') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">feedback</span
+              ><span class="menu-label">User Feedbacks</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_manage_about_us') }}"
+              class="menu-link active"
+              ><span class="material-symbols-rounded menu-icon">info</span
+              ><span class="menu-label">Manage About Us</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_profile') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon"
+                >account_circle</span
+              ><span class="menu-label">Admin Profile</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_logout') }}"
+              class="menu-link logout-menu-link"
+              ><span class="material-symbols-rounded menu-icon">logout</span
+              ><span class="menu-label">Logout</span></a
+            >
+          </li>
+        </ul>
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span
+            ><span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <div class="page-header">
+          <h1 class="page-title">Manage Developers</h1>
+          <p class="page-subtitle">
+            Update the content for the project guide and development team.
+          </p>
+        </div>
+
+        <div class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Development Team</h2>
+            <button class="btn btn-primary" id="addDeveloperBtn">
+              <span class="material-symbols-rounded">add</span> Add Developer
+            </button>
+          </div>
+          <div class="developers-grid" id="developers-grid-area">
+            <p>Loading developer profiles...</p>
+          </div>
+        </div>
+        <div class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Project Guide</h2>
+
+            <div class="section-actions" style="display: flex; gap: 0.75rem">
+              <button class="btn btn-danger" id="deleteGuideBtn">
+                <span class="material-symbols-rounded">delete</span> Delete
+                Guide
+              </button>
+
+              <button class="btn btn-primary" id="editGuideBtn">
+                <span class="material-symbols-rounded">edit</span> Edit Details
+              </button>
+            </div>
+          </div>
+          <div id="guide-display-area"><p>Loading guide details...</p></div>
+        </div>
+      </div>
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by
+            <a href="{{ url_for('team_details') }}">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="modal" id="formModal">
+      <div class="modal-content" id="modal-content-area"></div>
+    </div>
+    <div id="toast-container"></div>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div class="modal" id="deleteConfirmModal">
+      <div class="modal-content" style="max-width: 450px">
+        <div class="modal-header">
+          <h3 class="modal-title">Confirm Deletion</h3>
+        </div>
+        <div style="padding: 20px 0; color: var(--color-text-secondary)">
+          <p>
+            Are you sure you want to permanently delete this developer profile?
+            This action cannot be undone.
+          </p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary modal-close">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-delete-confirm"
+            id="confirmDeleteBtn"
+          >
+            <span class="material-symbols-rounded">delete</span>Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="cropperModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Crop Your Photo</h3>
+        </div>
+        <div class="modal-body">
+          <div class="cropper-image-container">
+            <img id="imageToCrop" style="max-width: 100%; display: block" />
+          </div>
+
+          <div class="cropper-controls">
+            <span class="material-symbols-rounded">zoom_out</span>
+            <input
+              type="range"
+              id="zoomSlider"
+              min="0"
+              max="2"
+              step="0.05"
+              value="0"
+            />
+            <span class="material-symbols-rounded">zoom_in</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="cropAndSaveBtn">
+            Crop
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- THEME INITIALIZATION (No changes) ---
+        const initializeTheme = () => {
+          const themeToggle = document.querySelector(".theme-toggle");
+          if (!themeToggle) return;
+          const updateThemeIcon = () => {
+            const themeIcon = themeToggle.querySelector(
+              ".material-symbols-rounded"
+            );
+            const isDark = document.body.classList.contains("dark-theme");
+            themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+          };
+          const savedTheme = localStorage.getItem("civicsense-theme");
+          const systemPrefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const shouldUseDarkTheme =
+            savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+          document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+          updateThemeIcon();
+          themeToggle.addEventListener("click", () => {
+            const isDark = document.body.classList.toggle("dark-theme");
+            localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+            updateThemeIcon();
+          });
+        };
+        initializeTheme();
+
+        // --- NEW: VARIABLES FOR CROPPER.JS ---
+        let cropper;
+        let croppedBlob = null; // This will store the final cropped image data
+
+        // --- DATA GENERATION FUNCTIONS (No changes) ---
+        const generateYearOptions = (selectedValue) => {
+          const options = [
+            "First Year",
+            "Second Year",
+            "Third Year",
+            "Final Year",
+          ];
+          let html = '<option value="">Select Year</option>';
+          html += options
+            .map(
+              (opt) =>
+                `<option value="${opt}" ${
+                  selectedValue === opt ? "selected" : ""
+                }>${opt}</option>`
+            )
+            .join("");
+          return html;
+        };
+        const generateDepartmentOptions = (selectedValue) => {
+          const options = [
+            "Computer Science and Engineering (AIML)",
+            "Computer Science and Engineering (Data science)",
+            "Computer Science and Engineering (Cyber security)",
+            "Information Technology (IT)",
+            "Electronics and Communication Engineering (VLSI)",
+            "Electronics and Communication Engineering (Embedded IoT)",
+            "Electronics and Communication Engineering (MATLAB)",
+            "Electrical and Electronics Engineering",
+            "Biotechnology",
+            "Biomedical",
+            "Mechanical Enginnering",
+            "Civil Engineering",
+            "Automobile engineering",
+            "Chemical Engineering",
+            "Aeronautical Engineering",
+            "Others",
+          ];
+          let html = '<option value="">Select Department</option>';
+          html += options
+            .map(
+              (opt) =>
+                `<option value="${opt}" ${
+                  selectedValue === opt ? "selected" : ""
+                }>${opt}</option>`
+            )
+            .join("");
+          return html;
+        };
+        const generateInstituteOptions = (selectedValue) => {
+          const options = ["Kalasalingam University", "Other College"];
+          let html = '<option value="">Select Institute</option>';
+          html += options
+            .map(
+              (opt) =>
+                `<option value="${opt}" ${
+                  selectedValue === opt ? "selected" : ""
+                }>${opt}</option>`
+            )
+            .join("");
+          return html;
+        };
+
+        // --- API & UI HELPERS (Modal functions MODIFIED) ---
+        const api = async (endpoint, options = {}) => {
+          document.getElementById("loading-overlay").classList.add("active");
+          try {
+            const response = await fetch(endpoint, options);
+            if (!response.ok)
+              throw new Error(
+                `Server responded with status: ${response.status}`
+              );
+            return await response.json();
+          } catch (error) {
+            showToast(`API Error: ${error.message}`, "danger");
+            return null;
+          } finally {
+            document
+              .getElementById("loading-overlay")
+              .classList.remove("active");
+          }
+        };
+        const showToast = (message, type = "success") => {
+          const container = document.getElementById("toast-container");
+          const toast = document.createElement("div");
+          toast.className = `toast bg-${type}`;
+          toast.textContent = message;
+          container.appendChild(toast);
+          setTimeout(() => toast.remove(), 4000);
+        };
+
+        // MODIFIED: Modal functions now accept an ID to work with any modal
+        const openModal = (modalId) =>
+          document.getElementById(modalId).classList.add("active");
+        const closeModal = (modalId) =>
+          document.getElementById(modalId).classList.remove("active");
+
+        // --- RENDERING FUNCTIONS (No changes) ---
+        const renderGuide = (guide) => {
+          const container = document.getElementById("guide-display-area");
+          if (!guide) {
+            container.innerHTML = `<p>No guide details found. Click 'Edit Details' to add them.</p>`;
+            return;
+          }
+          const photoUrl = guide.photo_filename
+            ? `/static/uploads/${guide.photo_filename}`
+            : "/static/images/faculty.png";
+          container.innerHTML = `<div class="guide-card-admin"><img src="${photoUrl}" alt="Guide Photo" class="dev-photo"><div><h3 class="dev-name">${
+            guide.name || "N/A"
+          }</h3><p class="dev-role">${(guide.role || "").replace(
+            /\n/g,
+            "<br>"
+          )}</p><p><em>"${
+            guide.bio_quote || ""
+          }"</em></p><div class="social-links" style="margin-top: 1rem; justify-content: flex-start;">${
+            guide.linkedin_url
+              ? `<a href="${guide.linkedin_url}" target="_blank" class="social-link linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>`
+              : ""
+          }${
+            guide.email
+              ? `<a href="mailto:${guide.email}" class="social-link email" title="Email"><i class="fas fa-envelope"></i></a>`
+              : ""
+          }</div></div></div>`;
+        };
+        const renderDevelopers = (developers) => {
+          const grid = document.getElementById("developers-grid-area");
+          grid.innerHTML = "";
+          if (!developers || developers.length === 0) {
+            grid.innerHTML =
+              '<p>No developers added yet. Click "Add Developer" to start.</p>';
+            return;
+          }
+          developers.forEach((dev) => {
+            const photoUrl = dev.photo_filename
+              ? `/static/uploads/${dev.photo_filename}`
+              : "/static/images/female_avatar.png";
+            const card = document.createElement("div");
+            card.className = "dev-card";
+            card.innerHTML = `${
+              dev.is_leader ? '<span class="leader-tag">Leader</span>' : ""
+            }<div class="dev-card-header"><img src="${photoUrl}" alt="Photo" class="dev-photo"><div><h3 class="dev-name">${
+              dev.name
+            }</h3><p class="dev-role">${
+              dev.role
+            }</p></div></div><div class="dev-details">Year: <strong>${
+              dev.year || "N/A"
+            }</strong><br>Dept: <strong>${
+              dev.department || "N/A"
+            }</strong><br>Reg. No: <strong>${
+              dev.reg_no || "N/A"
+            }</strong><br>Institute: <strong>${
+              dev.institute_name || "N/A"
+            }</strong></div><div class="card-actions"><div class="social-links">${
+              dev.linkedin_url
+                ? `<a href="${dev.linkedin_url}" target="_blank" class="social-link linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>`
+                : ""
+            }${
+              dev.github_url
+                ? `<a href="${dev.github_url}" target="_blank" class="social-link github" title="GitHub"><i class="fab fa-github"></i></a>`
+                : ""
+            }${
+              dev.email
+                ? `<a href="mailto:${dev.email}" class="social-link email" title="Email"><i class="fas fa-envelope"></i></a>`
+                : ""
+            }</div><div class="action-buttons" style="display: flex; gap: 0.5rem;"><button class="btn btn-secondary edit-dev-btn" data-id="${
+              dev.id
+            }">Edit</button><button class="btn btn-danger delete-dev-btn" data-id="${
+              dev.id
+            }">Delete</button></div></div>`;
+            grid.appendChild(card);
+          });
+        };
+
+        // --- MODIFIED: Photo preview now triggers the cropper ---
+        // MODIFIED: Replace your entire setupPhotoPreview function with this one
+
+        const setupPhotoPreview = (inputId) => {
+          document
+            .getElementById(inputId)
+            .addEventListener("change", function (event) {
+              const file = event.target.files[0];
+              if (!file) return;
+
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const imageToCrop = document.getElementById("imageToCrop");
+                const zoomSlider = document.getElementById("zoomSlider");
+                imageToCrop.src = e.target.result;
+                openModal("cropperModal");
+
+                imageToCrop.onload = () => {
+                  if (cropper) {
+                    cropper.destroy();
+                  }
+
+                  // NEW: Updated Cropper.js configuration
+                  cropper = new Cropper(imageToCrop, {
+                    // --- Core settings ---
+                    aspectRatio: 1 / 1, // Keep it square
+                    viewMode: 1, // Restrict crop box to image area
+
+                    // --- New Interactive Features ---
+                    dragMode: "move", // Allows panning the image
+                    responsive: true,
+                    restore: false,
+                    background: false,
+                    autoCropArea: 0.8,
+                    zoomOnWheel: true, // Enable mouse wheel zoom
+                    zoomOnTouch: true, // Enable pinch-to-zoom on touch devices
+
+                    // This event syncs the slider if you zoom with the mouse wheel
+                    zoom: function (event) {
+                      // Prevent an infinite loop
+                      if (event.detail.oldRatio === event.detail.ratio) return;
+                      zoomSlider.value = event.detail.ratio;
+                    },
+                  });
+
+                  // NEW: Event listener to connect the slider to the cropper's zoom function
+                  zoomSlider.addEventListener("input", (e) => {
+                    if (cropper) {
+                      cropper.zoomTo(e.target.value);
+                    }
+                  });
+                };
+              };
+              reader.readAsDataURL(file);
+            });
+        };
+
+        // --- NEW: Handles the "Crop" button click ---
+        document
+          .getElementById("cropAndSaveBtn")
+          .addEventListener("click", () => {
+            if (!cropper) return;
+            cropper
+              .getCroppedCanvas({
+                width: 400,
+                height: 400,
+                imageSmoothingQuality: "high",
+              })
+              .toBlob((blob) => {
+                croppedBlob = blob;
+                const previewUrl = URL.createObjectURL(blob);
+                document.getElementById("photoPreview").src = previewUrl;
+                closeModal("cropperModal");
+                cropper.destroy();
+              }, "image/png");
+          });
+
+        // --- FORM DISPLAY FUNCTIONS (MODIFIED) ---
+        // In manage_about_us.html
+
+        // In manage_about_us.html
+
+        const showGuideForm = async () => {
+          croppedBlob = null;
+          const res = await api("/admin/api/guide");
+          const guide = res ? res.guide : {};
+          const photoUrl = guide?.photo_filename
+            ? `/static/uploads/${guide.photo_filename}`
+            : "/static/images/faculty.png";
+          document.getElementById(
+            "modal-content-area"
+          ).innerHTML = `<div class="modal-header"><h3 class="modal-title">Edit Guide Details</h3><button type="button" class="modal-close">&times;</button></div><form id="guideForm" class="modal-body"><div class="form-grid"><div class="photo-preview-container"><img id="photoPreview" src="${photoUrl}" alt="Photo Preview"><label class="form-label">Update Photo</label><input type="file" id="photoInput" name="photo" class="form-control" accept="image/*">
+
+    ${
+      guide?.photo_filename
+        ? `<button type="button" class="btn btn-secondary btn-sm" id="removePhotoBtn" style="width: 100%; margin-top: 8px;">
+             <span class="material-symbols-rounded">delete</span> Remove Photo
+           </button>`
+        : ""
+    }
+    </div><div class="form-grid-fields">
+
+    <input type="hidden" id="removePhotoFlag" name="remove_photo" value="false">
+    
+    <div><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="${
+      guide?.name || ""
+    }" required></div><div class="full-width"><label class="form-label">Role & University</label><textarea name="role" class="form-control">${
+            guide?.role || ""
+          }</textarea></div><div class="full-width"><label class="form-label">Bio Quote</label><textarea name="bio_quote" class="form-control">${
+            guide?.bio_quote || ""
+          }</textarea></div>
+    
+    <div>
+        <label class="form-label icon-label"><i class="fab fa-linkedin-in"></i><span>LinkedIn URL</span></label>
+        <input type="url" name="linkedin_url" class="form-control" value="${
+          guide?.linkedin_url || ""
+        }">
+    </div>
+    <div>
+        <label class="form-label icon-label"><span class="material-symbols-rounded">email</span><span>Email</span></label>
+        <input type="email" name="email" class="form-control" value="${
+          guide?.email || ""
+        }">
+    </div>
+    </div></div></form><div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="submit" form="guideForm" class="btn btn-primary">Save Changes</button></div>`;
+          openModal("formModal");
+          setupPhotoPreview("photoInput", "photoPreview");
+        };
+        const showDeveloperForm = (dev = null) => {
+          croppedBlob = null;
+          const isEditing = dev !== null;
+          const photoUrl = dev?.photo_filename
+            ? `/static/uploads/${dev.photo_filename}`
+            : "/static/images/female_avatar.png";
+          document.getElementById("modal-content-area").innerHTML = `
+    <div class="modal-header"><h3 class="modal-title">${
+      isEditing ? "Edit" : "Add"
+    } Developer</h3><button type="button" class="modal-close">&times;</button></div>
+    <form id="developerForm" data-id="${
+      isEditing ? dev.id : ""
+    }" class="modal-body">
+        <div class="form-grid">
+            <div class="photo-preview-container">
+                <img id="photoPreview" src="${photoUrl}" alt="Photo Preview">
+                <label class="form-label">Photo</label>
+                <input type="file" id="photoInput" name="photo" class="form-control" accept="image/*">
+
+                ${
+                  dev?.photo_filename
+                    ? `<button type="button" class="btn btn-secondary btn-sm" id="removePhotoBtn" style="width: 100%; margin-top: 8px;">
+                         <span class="material-symbols-rounded">delete</span> Remove Photo
+                       </button>`
+                    : ""
+                }
+                </div>
+            <div class="form-grid-fields">
+
+                <input type="hidden" id="removePhotoFlag" name="remove_photo" value="false">
+                <div><label class="form-label">Full Name</label><input type="text" name="name" class="form-control" value="${
+                  dev?.name || ""
+                }" required></div>
+                <div><label class="form-label">Role</label><input type="text" name="role" class="form-control" value="${
+                  dev?.role || ""
+                }" required></div>
+                <div>
+                    <label class="form-label">Year</label>
+                    <select name="year" class="form-control">${generateYearOptions(
+                      dev?.year
+                    )}</select>
+                </div>
+                <div>
+                    <label class="form-label">Department</label>
+                    <select name="department" class="form-control">${generateDepartmentOptions(
+                      dev?.department
+                    )}</select>
+                </div>
+                <div><label class="form-label">Reg. No</label><input type="text" name="reg_no" class="form-control" value="${
+                  dev?.reg_no || ""
+                }"></div>
+                <div>
+                    <label class="form-label">Institute Name</label>
+                    <select name="institute_name" class="form-control">${generateInstituteOptions(
+                      dev?.institute_name
+                    )}</select>
+                </div>
+                <div>
+                    <label class="form-label icon-label"><i class="fab fa-linkedin-in"></i><span>LinkedIn URL</span></label>
+                    <input type="url" name="linkedin_url" class="form-control" value="${
+                      dev?.linkedin_url || ""
+                    }">
+                </div>
+                <div>
+                    <label class="form-label icon-label"><i class="fab fa-github"></i><span>GitHub URL</span></label>
+                    <input type="url" name="github_url" class="form-control" value="${
+                      dev?.github_url || ""
+                    }">
+                </div>
+                <div class="full-width">
+                    <label class="form-label icon-label"><span class="material-symbols-rounded">email</span><span>Email</span></label>
+                    <input type="email" name="email" class="form-control" value="${
+                      dev?.email || ""
+                    }">
+                </div>
+                <div class="full-width"><input type="checkbox" name="is_leader" id="is_leader" ${
+                  dev?.is_leader ? "checked" : ""
+                }><label for="is_leader" style="margin-left:8px;">Team Leader</label></div>
+            </div>
+        </div>
+    </form>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close">Cancel</button>
+        <button type="submit" form="developerForm" class="btn btn-primary">Save</button>
+    </div>`;
+          openModal("formModal");
+          setupPhotoPreview("photoInput");
+        };
+        // --- DATA LOADING & EVENT LISTENERS ---
+        const loadAllData = async () => {
+          const [guideRes, devRes] = await Promise.all([
+            api("/admin/api/guide"),
+            api("/admin/api/developers"),
+          ]);
+          if (guideRes) renderGuide(guideRes.guide);
+          if (devRes) renderDevelopers(devRes.developers);
+        };
+
+        document
+          .getElementById("editGuideBtn")
+          .addEventListener("click", showGuideForm);
+
+        document
+          .getElementById("addDeveloperBtn")
+          .addEventListener("click", () => showDeveloperForm());
+
+        // MODIFIED: Form submission now handles the croppedBlob
+        document.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const form = e.target;
+          if (form.id !== "guideForm" && form.id !== "developerForm") return;
+
+          const formData = new FormData(form);
+
+          if (croppedBlob) {
+            formData.set("photo", croppedBlob, "cropped_image.png");
+            formData.set("remove_photo", "false");
+          } else {
+            formData.delete("photo");
+          }
+
+          let res;
+          if (form.id === "guideForm") {
+            res = await api("/admin/api/guide", {
+              method: "POST",
+              body: formData, // Use modified formData
+            });
+          } else if (form.id === "developerForm") {
+            const devId = form.dataset.id;
+            const endpoint = devId
+              ? `/admin/api/developers/${devId}`
+              : "/admin/api/developers";
+            formData.set(
+              "is_leader",
+              document.getElementById("is_leader").checked
+            );
+            res = await api(endpoint, { method: "POST", body: formData }); // Use modified formData
+          }
+
+          if (res && res.status === "success") {
+            showToast(res.message);
+            closeModal("formModal"); // MODIFIED: Pass modal ID
+            loadAllData();
+          }
+        });
+
+        // MODIFIED: Click listener now uses generalized closeModal
+        let itemToDelete = { type: null, id: null };
+        document.addEventListener("click", async (e) => {
+          if (
+            e.target.closest(".modal-close") ||
+            e.target.classList.contains("modal")
+          ) {
+            // This will now correctly close any open modal
+            document
+              .querySelectorAll(".modal.active")
+              .forEach((m) => m.classList.remove("active"));
+          }
+
+          const editBtn = e.target.closest(".edit-dev-btn");
+          if (editBtn) {
+            const res = await api(
+              `/admin/api/developers/${editBtn.dataset.id}`
+            );
+            if (res) showDeveloperForm(res.developer);
+          }
+
+          const deleteDevBtn = e.target.closest(".delete-dev-btn");
+          if (deleteDevBtn) {
+            itemToDelete = { type: "developer", id: deleteDevBtn.dataset.id };
+            document.querySelector(
+              "#deleteConfirmModal .modal-content p"
+            ).textContent =
+              "Are you sure you want to permanently delete this developer profile? This action cannot be undone.";
+            openModal("deleteConfirmModal"); // MODIFIED: Pass modal ID
+          }
+
+          const deleteGuideBtn = e.target.closest("#deleteGuideBtn");
+          if (deleteGuideBtn) {
+            itemToDelete = { type: "guide" };
+            document.querySelector(
+              "#deleteConfirmModal .modal-content p"
+            ).textContent =
+              "Are you sure you want to permanently delete the project guide details? This action cannot be undone.";
+            openModal("deleteConfirmModal"); // MODIFIED: Pass modal ID
+          }
+
+          if (e.target.closest("#confirmDeleteBtn")) {
+            if (!itemToDelete.type) return;
+
+            let endpoint = "";
+            if (itemToDelete.type === "developer") {
+              endpoint = `/admin/api/developers/${itemToDelete.id}`;
+            } else if (itemToDelete.type === "guide") {
+              endpoint = `/admin/api/guide`;
+            }
+
+            const res = await api(endpoint, { method: "DELETE" });
+            if (res) {
+              showToast(res.message);
+              closeModal("deleteConfirmModal"); // MODIFIED: Pass modal ID
+              loadAllData();
+            }
+            itemToDelete = { type: null, id: null };
+          }
+          if (e.target.closest("#removePhotoBtn")) {
+            // Revert preview to the default avatar
+            document.getElementById("photoPreview").src =
+              "/static/images/female_avatar.png";
+
+            // Set the flag to tell the backend to remove the photo
+            document.getElementById("removePhotoFlag").value = "true";
+
+            // Clear the file input and any cropped image data
+            document.getElementById("photoInput").value = "";
+            croppedBlob = null;
+
+            // Hide the button after it's been clicked
+            e.target.closest("#removePhotoBtn").style.display = "none";
+          }
+        });
+
+        loadAllData();
+      });
+    </script>
+  </body>
+</html>

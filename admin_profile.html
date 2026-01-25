@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Profile - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <style>
+      :root {
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border: #e2e8f0;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+      body.dark-theme {
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border: #334155;
+        --color-border-hr: #334155;
+        --color-hover-secondary: #334155;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-error);
+        z-index: 1;
+      }
+      .menu-icon,
+      .menu-label {
+        position: relative;
+        z-index: 2;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      .menu-link:not(.active):not(.logout-menu-link):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      .logout-menu-link:hover {
+        background: rgba(239, 68, 68, 0.1);
+        font-weight: 600;
+      }
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-toggle:hover {
+        background: var(--color-hover-secondary);
+      }
+      body.dark-theme .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-border-hr);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+      .dark-mode-logo {
+        display: none;
+      }
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar);
+      }
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+      body.dark-theme .dark-mode-logo {
+        display: block;
+      }
+      .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1 0 auto;
+        padding: 30px;
+      }
+      .page-header {
+        background: linear-gradient(135deg, #decba4 0%, #bf9a70 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        color: white;
+      }
+      .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+      .content-section {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        margin-bottom: 2rem;
+      }
+      .section-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--color-border-hr);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+      .section-body {
+        padding: 1.5rem;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        font-size: 1rem;
+      }
+      .form-control:disabled {
+        background-color: var(--color-bg-secondary);
+        cursor: not-allowed;
+      }
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+      }
+      .btn-primary {
+        background-color: var(--color-hover-primary);
+        color: white;
+      }
+      /* CORRECTED RULE */
+      .btn-secondary {
+        background-color: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+        border: 1px solid var(--color-border-hr); /* This adds the visible border */
+      }
+      .btn-secondary:hover {
+        background-color: var(
+          --color-hover-secondary
+        ); /* This adds a hover effect */
+      }
+
+      /* ADD THIS NEW RULE */
+      .btn-accent {
+        background-color: var(--color-accent);
+        color: white;
+      }
+      .btn-accent:hover {
+        background-color: #0d926a; /* A slightly darker green */
+      }
+      #profile-actions {
+        display: flex;
+        gap: 0.75rem;
+      }
+      #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+      }
+      .toast {
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        min-width: 300px;
+        margin-bottom: 10px;
+      }
+      .toast.bg-success {
+        background-color: var(--color-accent);
+      }
+      .toast.bg-danger {
+        background-color: var(--color-error);
+      }
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        padding: 1.5rem 2rem;
+        flex-shrink: 0;
+      }
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .footer-copyright,
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+      }
+      @media (max-width: 992px) {
+        .profile-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(
+          16px
+        ); /* Adjust this value if the logo is not perfectly centered */
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Logo"
+              class="logo-img light-mode-logo"
+            /><img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <ul class="menu-list">
+          <li class="menu-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">dashboard</span
+              ><span class="menu-label">Dashboard</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_issue_reports') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">assignment</span
+              ><span class="menu-label">Manage Issues</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_management') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">group</span
+              ><span class="menu-label">User Management</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_chat_analytics') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon"
+                >trending_up</span
+              ><span class="menu-label">Analytics & Trends</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_feedbacks') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">feedback</span
+              ><span class="menu-label">User Feedbacks</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_manage_about_us') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">info</span
+              ><span class="menu-label">Manage About Us</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_profile') }}" class="menu-link active"
+              ><span class="material-symbols-rounded menu-icon"
+                >account_circle</span
+              ><span class="menu-label">Admin Profile</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_logout') }}"
+              class="menu-link logout-menu-link"
+              ><span class="material-symbols-rounded menu-icon">logout</span
+              ><span class="menu-label">Logout</span></a
+            >
+          </li>
+        </ul>
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span
+            ><span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <div class="page-header">
+          <h1 class="page-title">Admin Profile</h1>
+          <p class="page-subtitle">
+            Manage your administrator account details and password.
+          </p>
+        </div>
+
+        <div class="profile-grid">
+          <div>
+            <div class="content-section">
+              <div class="section-header">
+                <h2 class="section-title">Profile Information</h2>
+                <div id="profile-actions">
+                  <button class="btn btn-secondary" id="editProfileBtn">
+                    Edit
+                  </button>
+                </div>
+              </div>
+              <div class="section-body">
+                <form id="profileForm">
+                  <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input
+                      type="text"
+                      id="username"
+                      class="form-control"
+                      disabled
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Admin Since</label>
+                    <p
+                      id="adminSince"
+                      style="padding: 12px; color: var(--color-text-secondary)"
+                    >
+                      -
+                    </p>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="content-section">
+              <div class="section-header">
+                <h2 class="section-title">Application Logs</h2>
+              </div>
+              <div class="section-body">
+                <p
+                  style="
+                    margin-bottom: 1rem;
+                    color: var(--color-text-secondary);
+                  "
+                >
+                  Download the application log file (app.log) to review system
+                  events and errors.
+                </p>
+                <a href="download-logs" class="btn btn-accent">
+                  <span class="material-symbols-rounded">description</span>
+                  Download Log File
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="content-section">
+              <div class="section-header">
+                <h2 class="section-title">Change Password</h2>
+              </div>
+              <div class="section-body">
+                <form id="passwordForm">
+                  <div class="form-group">
+                    <label for="current_password" class="form-label"
+                      >Current Password</label
+                    >
+                    <input
+                      type="password"
+                      id="current_password"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="new_password" class="form-label"
+                      >New Password</label
+                    >
+                    <input
+                      type="password"
+                      id="new_password"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="confirm_password" class="form-label"
+                      >Confirm New Password</label
+                    >
+                    <input
+                      type="password"
+                      id="confirm_password"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    Change Password
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by
+            <a href="{{ url_for('team_details') }}">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const initializeTheme = () => {
+          const themeToggle = document.querySelector(".theme-toggle");
+          if (!themeToggle) return;
+          const updateThemeIcon = () => {
+            const themeIcon = themeToggle.querySelector(
+              ".material-symbols-rounded"
+            );
+            const isDark = document.body.classList.contains("dark-theme");
+            themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+          };
+          const savedTheme = localStorage.getItem("civicsense-theme");
+          const systemPrefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const shouldUseDarkTheme =
+            savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+          document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+          updateThemeIcon();
+          themeToggle.addEventListener("click", () => {
+            const isDark = document.body.classList.toggle("dark-theme");
+            localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+            updateThemeIcon();
+          });
+        };
+        initializeTheme();
+
+        const showToast = (message, type = "success") => {
+          const container = document.getElementById("toast-container");
+          const toast = document.createElement("div");
+          toast.className = `toast bg-${type}`;
+          toast.textContent = message;
+          container.appendChild(toast);
+          setTimeout(() => toast.remove(), 4000);
+        };
+
+        const loadProfile = async () => {
+          try {
+            const response = await fetch("/admin/api/profile");
+            const data = await response.json();
+            if (data.status === "success") {
+              document.getElementById("username").value = data.admin.username;
+              const date = new Date(data.admin.created_at);
+              document.getElementById("adminSince").textContent =
+                date.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                });
+            } else {
+              showToast(data.message, "danger");
+            }
+          } catch (error) {
+            showToast("Failed to load profile data.", "danger");
+          }
+        };
+        loadProfile();
+
+        const editProfileBtn = document.getElementById("editProfileBtn");
+        const usernameInput = document.getElementById("username");
+        const profileActions = document.getElementById("profile-actions");
+
+        profileActions.addEventListener("click", async (e) => {
+          if (e.target.id === "editProfileBtn") {
+            usernameInput.disabled = false;
+            usernameInput.focus();
+            profileActions.innerHTML = `
+                    <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                    <button class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
+                `;
+          }
+          if (e.target.id === "cancelEditBtn") {
+            usernameInput.disabled = true;
+            profileActions.innerHTML = `<button class="btn btn-secondary" id="editProfileBtn">Edit</button>`;
+            loadProfile();
+          }
+          if (e.target.id === "saveProfileBtn") {
+            const newUsername = usernameInput.value.trim();
+            const response = await fetch("/admin/api/profile", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: newUsername }),
+            });
+            const data = await response.json();
+            showToast(
+              data.message,
+              data.status === "success" ? "success" : "danger"
+            );
+            if (data.status === "success") {
+              usernameInput.disabled = true;
+              profileActions.innerHTML = `<button class="btn btn-secondary" id="editProfileBtn">Edit</button>`;
+              document.querySelector(
+                ".page-subtitle"
+              ).textContent = `Manage your administrator account details and password.`;
+            }
+          }
+        });
+
+        document
+          .getElementById("passwordForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const current_password =
+              document.getElementById("current_password").value;
+            const new_password = document.getElementById("new_password").value;
+            const confirm_password =
+              document.getElementById("confirm_password").value;
+
+            if (new_password !== confirm_password) {
+              showToast("New passwords do not match.", "danger");
+              return;
+            }
+
+            const response = await fetch("/admin/api/password", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                current_password,
+                new_password,
+                confirm_password,
+              }),
+            });
+            const data = await response.json();
+            showToast(
+              data.message,
+              data.status === "success" ? "success" : "danger"
+            );
+
+            if (data.status === "success") {
+              document.getElementById("passwordForm").reset();
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Management - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+       <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+      :root {
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border: #e2e8f0;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+      }
+      body.dark-theme {
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border: #334155;
+        --color-border-hr: #334155;
+        --color-hover-secondary: #334155;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      html {
+        height: 100%;
+      }
+      body {
+        min-height: 100%;
+        display: flex;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+        flex-shrink: 0;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .header-logo {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-error);
+      }
+      .menu-icon,
+      .menu-label {
+        position: relative;
+        z-index: 2;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      .menu-link:not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      .logout-menu-link:hover {
+        background: rgba(239, 68, 68, 0.1) !important;
+        color: var(--color-error) !important;
+        font-weight: 600;
+      }
+      .dark-mode-logo {
+        display: none;
+      }
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar);
+      }
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(16px);
+      }
+      .light-mode-logo {
+        display: block;
+        margin: 0 auto;
+      }
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-toggle:hover {
+        background: var(--color-hover-secondary);
+      }
+      body.dark-theme .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-border-hr);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+      .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1 0 auto;
+        padding: 30px;
+      }
+      .page-header {
+        background: linear-gradient(135deg, #da22ff 0%, #9733ee 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        color: white;
+      }
+      .page-header .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .page-header .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+      .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .stat-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 2rem 2rem 2rem 2.5rem; /* Adjusted padding */
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        position: relative; /* Added */
+        overflow: hidden; /* Added */
+        transition: transform 0.3s ease; /* Added */
+      }
+      .stat-card:hover {
+        transform: translateY(-5px); /* Added hover effect */
+      }
+      /* --- START: Styles for Stat Card Vertical Line --- */
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 7px;
+        height: 100%;
+        background-color: var(--color-border);
+        transition: width 0.3s ease;
+      }
+
+      /* Assigns colors to match the icon of each card */
+      .stats-cards .stat-card:nth-child(1)::before {
+        background-color: #3b82f6; /* Total Users - Blue */
+      }
+      .stats-cards .stat-card:nth-child(2)::before {
+        background-color: #10b981; /* Active Users - Green */
+      }
+      .stats-cards .stat-card:nth-child(3)::before {
+        background-color: #f59e0b; /* New Users - Orange */
+      }
+
+      /* A modern hover effect to make the line wider */
+      .stat-card:hover::before {
+        width: 12px;
+      }
+
+      /* --- END: Styles for Stat Card Vertical Line --- */
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .stat-title {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+      }
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .users-table-container {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+      }
+      .table-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .table-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+      .table-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+      .search-box {
+        position: relative;
+      }
+      .search-input {
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid var(--color-border);
+        border-radius: 12px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        font-size: 0.9rem;
+        width: 250px;
+      }
+      .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-secondary);
+      }
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+      }
+      .btn-primary {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+      }
+      .btn-secondary {
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        border: 2px solid var(--color-border);
+      }
+      .btn-secondary:hover {
+        background: var(--color-hover-secondary);
+      }
+      .btn.active-filter {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .table-wrapper {
+        overflow-x: auto;
+      }
+      .users-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .users-table th,
+      .users-table td {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .users-table th:nth-child(1) {
+        width: 250px;
+      }
+      .users-table th:nth-child(2) {
+        width: 250px;
+      }
+      .users-table th:nth-child(3) {
+        width: 120px;
+      }
+      .users-table th:nth-child(4) {
+        width: 120px;
+      }
+      .users-table th:nth-child(5) {
+        width: 150px;
+      }
+      .users-table th:nth-child(6) {
+        width: 150px;
+      }
+      .users-table th {
+        background: var(--color-bg-primary);
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+      }
+      .users-table tr:hover {
+        background: var(--color-hover-secondary);
+      }
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .user-name {
+        font-weight: 600;
+      }
+      .user-id {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+      }
+      .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+      .status-active {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--color-accent);
+      }
+      .status-suspended {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--color-error);
+      }
+      .action-buttons-cell {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .btn-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      .btn-view {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--color-hover-primary);
+      }
+      .btn-delete {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--color-error);
+      }
+      .btn-suspend {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--color-warning);
+      }
+      .btn-reactivate {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--color-accent);
+      }
+      .pagination {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--color-border);
+      }
+      .pagination-controls {
+        display: flex;
+        gap: 8px;
+      }
+      .pagination-btn {
+        width: 38px;
+        height: 38px;
+        border: 1px solid var(--color-border);
+        background: var(--color-bg-sidebar);
+        color: var(--color-text-primary);
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      .pagination-btn:hover:not(:disabled) {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .pagination-btn.active {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        padding: 1.5rem 2rem;
+        flex-shrink: 0;
+      }
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .footer-copyright,
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      /* Modals and Overlays */
+      .modal,
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .loading-overlay {
+        z-index: 10000;
+      }
+      .modal {
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .modal.active,
+      .loading-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-content {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        padding: 30px;
+        max-width: 950px;
+        width: 95%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+      }
+      .modal.active .modal-content {
+        transform: scale(1);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .modal-body {
+        overflow-y: auto;
+        padding-right: 15px;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+      }
+      .modal-footer {
+        margin-top: 24px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        border-top: 1px solid var(--color-border-hr);
+        padding-top: 20px;
+      }
+      .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      .profile-modal-grid {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 30px;
+      }
+      .profile-sidebar {
+        text-align: center;
+      }
+      .profile-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--color-border-hr);
+        margin-bottom: 16px;
+      }
+      .profile-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+      .profile-email {
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+        margin-bottom: 16px;
+        word-break: break-all;
+      }
+      .profile-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 30px;
+      }
+      #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .toast {
+        padding: 16px;
+        border-radius: 8px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: 300px;
+        animation: slideInRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+          slideOutRight 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) 3.5s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .toast.bg-success {
+        background-color: var(--color-accent);
+      }
+      .toast.bg-danger {
+        background-color: var(--color-error);
+      }
+      .toast.bg-info {
+        background-color: var(--color-hover-primary);
+      }
+      @keyframes slideInRight {
+        from {
+          transform: translateX(120%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+      @keyframes slideOutRight {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(120%);
+        }
+      }
+      .loading-spinner {
+        border: 4px solid var(--color-border);
+        border-top-color: var(--color-hover-primary);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .modal-footer .btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+      }
+
+      .btn-success {
+        background: var(--color-accent);
+        color: white;
+      }
+      .btn-success:hover {
+        background: #059669; /* Darker Green */
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-content">
+        <ul class="menu-list">
+          <li class="menu-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">dashboard</span
+              ><span class="menu-label">Dashboard</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_issue_reports') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">assignment</span
+              ><span class="menu-label">Manage Issues</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_user_management') }}"
+              class="menu-link active"
+              ><span class="material-symbols-rounded menu-icon">group</span
+              ><span class="menu-label">User Management</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_chat_analytics') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon"
+                >trending_up</span
+              ><span class="menu-label">Analytics & Trends</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_feedbacks') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">feedback</span
+              ><span class="menu-label">User Feedbacks</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_manage_about_us') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">info</span
+              ><span class="menu-label">Manage About Us</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_profile') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon"
+                >account_circle</span
+              ><span class="menu-label">Admin Profile</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_logout') }}"
+              class="menu-link logout-menu-link"
+              ><span class="material-symbols-rounded menu-icon">logout</span
+              ><span class="menu-label">Logout</span></a
+            >
+          </li>
+        </ul>
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span
+            ><span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <div class="page-header">
+          <h1 class="page-title">User Management</h1>
+          <p class="page-subtitle">
+            Real-time monitoring and management of platform users
+          </p>
+        </div>
+
+        <div class="stats-cards" id="stats-container"></div>
+
+        <div class="users-table-container">
+          <div class="table-header">
+            <h2 class="table-title">All Users</h2>
+            <div class="table-actions">
+              <div class="search-box">
+                <span class="material-symbols-rounded search-icon">search</span>
+                <input
+                  type="search"
+                  id="searchInput"
+                  class="search-input"
+                  placeholder="Search users..."
+                />
+              </div>
+              <button id="filterBtn" class="btn btn-secondary">
+                <span class="material-symbols-rounded">filter_list</span>Filter
+              </button>
+              <button id="exportBtn" class="btn btn-success">
+                <span class="material-symbols-rounded">download</span>Export
+              </button>
+              <button id="addUserBtn" class="btn btn-primary">
+                <span class="material-symbols-rounded">add</span>Add User
+              </button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Submissions</th>
+                  <th>Member Since</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body"></tbody>
+            </table>
+          </div>
+          <div
+            id="table-message"
+            style="text-align: center; padding: 40px; display: none"
+          ></div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by
+            <a href="{{ url_for('team_details') }}">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="modal" id="profileModal">
+      <div class="modal-content" id="profileModalContent"></div>
+    </div>
+    <div class="modal" id="addUserModal">
+      <div
+        class="modal-content"
+        id="addUserModalContent"
+        style="max-width: 500px"
+      ></div>
+    </div>
+    <div class="modal" id="deleteModal">
+      <div
+        class="modal-content"
+        id="deleteModalContent"
+        style="max-width: 450px"
+      ></div>
+    </div>
+    <div class="modal" id="exportModal">
+      <div
+        class="modal-content"
+        id="exportModalContent"
+        style="max-width: 450px"
+      ></div>
+    </div>
+    <div class="modal" id="resetPasswordModal">
+      <div
+        class="modal-content"
+        id="resetPasswordModalContent"
+        style="max-width: 450px"
+      ></div>
+    </div>
+    <div class="modal" id="suspendModal">
+      <div
+        class="modal-content"
+        id="suspendModalContent"
+        style="max-width: 450px"
+      ></div>
+    </div>
+    <div class="modal" id="filterModal">
+      <div
+        class="modal-content"
+        id="filterModalContent"
+        style="max-width: 450px"
+      ></div>
+    </div>
+    <div id="toast-container"></div>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const initializeTheme = () => {
+          const themeToggle = document.querySelector(".theme-toggle");
+          const updateThemeIcon = () => {
+            const themeIcon = themeToggle.querySelector(
+              ".material-symbols-rounded"
+            );
+            const isDark = document.body.classList.contains("dark-theme");
+            themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+          };
+          const savedTheme = localStorage.getItem("civicsense-theme");
+          const systemPrefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const shouldUseDarkTheme =
+            savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+          document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+          updateThemeIcon();
+          themeToggle.addEventListener("click", () => {
+            const isDark = document.body.classList.toggle("dark-theme");
+            localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+            updateThemeIcon();
+          });
+        };
+        initializeTheme();
+
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentPage = 1;
+        const usersPerPage = 10;
+        let currentUserId = null;
+        let currentUserStatus = null;
+        let currentStatusFilter = "all";
+
+        const showToast = (message, type = "info") => {
+          const container = document.getElementById("toast-container");
+          const toast = document.createElement("div");
+          const iconMap = {
+            success: "check_circle",
+            danger: "error",
+            info: "info",
+          };
+          toast.className = `toast bg-${type}`;
+          toast.innerHTML = `<span class="material-symbols-rounded">${iconMap[type]}</span><span>${message}</span>`;
+          container.appendChild(toast);
+          setTimeout(() => {
+            toast.remove();
+          }, 4000);
+        };
+
+        const setLoading = (isLoading) =>
+          document
+            .getElementById("loading-overlay")
+            .classList.toggle("active", isLoading);
+        const openModal = (modalId) =>
+          document.getElementById(modalId).classList.add("active");
+        const closeModal = () =>
+          document
+            .querySelectorAll(".modal.active")
+            .forEach((m) => m.classList.remove("active"));
+
+        const api = async (endpoint, options = {}) => {
+          try {
+            const response = await fetch(endpoint, options);
+            if (!response.ok)
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            return await response.json();
+          } catch (error) {
+            console.error("API Error:", error);
+            showToast("Could not connect to the server.", "danger");
+            return null;
+          }
+        };
+
+        const renderStats = (stats) => {
+          document.getElementById("stats-container").innerHTML = `
+            <div class="stat-card">
+              <div class="stat-header"><span class="stat-title">Total Users</span><div class="stat-icon" style="background:#3b82f6;"><span class="material-symbols-rounded">group</span></div></div>
+              <div class="stat-value">${stats.total_users}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header"><span class="stat-title">Active Users</span><div class="stat-icon" style="background:#10b981;"><span class="material-symbols-rounded">how_to_reg</span></div></div>
+              <div class="stat-value">${stats.active_users}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header"><span class="stat-title">New Users (7d)</span><div class="stat-icon" style="background:#f59e0b;"><span class="material-symbols-rounded">person_add</span></div></div>
+              <div class="stat-value">${stats.new_users_last_7_days}</div>
+            </div>`;
+        };
+
+        const loadStats = async () => {
+          const data = await api("/admin/api/user-stats");
+          if (data && data.status === "success") renderStats(data.stats);
+        };
+
+        const renderTable = () => {
+          const tableBody = document.getElementById("users-table-body");
+          const tableMessage = document.getElementById("table-message");
+          tableBody.innerHTML = "";
+          tableMessage.style.display = "none";
+
+          if (filteredUsers.length === 0) {
+            tableMessage.innerHTML = `<p style="color: var(--color-text-secondary);">No users found.</p>`;
+            tableMessage.style.display = "block";
+            renderPagination();
+            return;
+          }
+
+          const startIndex = (currentPage - 1) * usersPerPage;
+          const pageUsers = filteredUsers.slice(
+            startIndex,
+            startIndex + usersPerPage
+          );
+
+          pageUsers.forEach((user) => {
+            const tr = document.createElement("tr");
+            const statusClass =
+              user.status === "active" ? "status-active" : "status-suspended";
+            const suspendBtn =
+              user.status === "active"
+                ? `<button class="btn-icon btn-suspend" data-id="${user.id}" data-status="suspended" title="Suspend"><span class="material-symbols-rounded">block</span></button>`
+                : `<button class="btn-icon btn-reactivate" data-id="${user.id}" data-status="active" title="Reactivate"><span class="material-symbols-rounded">check_circle</span></button>`;
+
+            tr.innerHTML = `
+                    <td>
+                        <div class="user-info">
+                            <img src="${user.photo_url}" class="avatar">
+                            <div>
+                                <div class="user-name">${user.first_name} ${
+              user.last_name
+            }</div>
+                                
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td><span class="status-badge ${statusClass}">${
+              user.status
+            }</span></td>
+                    <td>${user.issue_count}</td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td><div class="action-buttons-cell">
+                        <button class="btn-icon btn-view" data-id="${
+                          user.id
+                        }" title="View Details"><span class="material-symbols-rounded">visibility</span></button>
+                        ${suspendBtn}
+                        <button class="btn-icon btn-delete" data-id="${
+                          user.id
+                        }" title="Delete User"><span class="material-symbols-rounded">delete</span></button>
+                    </div></td>`;
+            tableBody.appendChild(tr);
+          });
+          renderPagination();
+        };
+
+        const renderPagination = () => {
+          const container = document.getElementById("pagination");
+          const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+          if (totalPages <= 1) {
+            container.innerHTML = "";
+            return;
+          }
+          let pageButtonsHTML = "";
+          for (let i = 1; i <= totalPages; i++) {
+            pageButtonsHTML += `<button class="pagination-btn ${
+              i === currentPage ? "active" : ""
+            }" data-page="${i}">${i}</button>`;
+          }
+          container.innerHTML = `
+                <div style="color: var(--color-text-secondary); font-size: 0.9rem;">Page ${currentPage} of ${totalPages}</div>
+                <div class="pagination-controls">
+                    <button id="prevPageBtn" class="pagination-btn" ${
+                      currentPage === 1 ? "disabled" : ""
+                    }><span class="material-symbols-rounded">chevron_left</span></button>
+                    ${pageButtonsHTML}
+                    <button id="nextPageBtn" class="pagination-btn" ${
+                      currentPage >= totalPages ? "disabled" : ""
+                    }><span class="material-symbols-rounded">chevron_right</span></button>
+                </div>`;
+        };
+
+        const populateProfileModal = (user, isEditing = false) => {
+          const content = document.getElementById("profileModalContent");
+          const fields = [
+            { label: "First Name", key: "first_name" },
+            { label: "Last Name", key: "last_name" },
+            { label: "Email", key: "email", type: "email" },
+            { label: "Mobile", key: "mobile", type: "tel" },
+            { label: "Age", key: "age", type: "number" },
+            {
+              label: "Gender",
+              key: "gender",
+              type: "select",
+              options: ["Male", "Female", "Other"],
+            },
+            { label: "Address", key: "address", full: true },
+            { label: "City", key: "city" },
+            { label: "Pincode", key: "pincode" },
+            { label: "State", key: "state" },
+            { label: "Country", key: "country" },
+          ];
+          let detailsHtml = fields
+            .map((f) => {
+              let fieldHtml = "";
+              if (f.type === "select") {
+                // Creates the <select> dropdown
+                const isGenderSet = f.options.includes(user[f.key]);
+
+                let optionsHtml = `<option value="" disabled ${
+                  !isGenderSet ? "selected" : ""
+                }>Select Gender</option>`;
+
+                optionsHtml += f.options
+                  .map(
+                    (opt) =>
+                      `<option value="${opt}" ${
+                        user[f.key] === opt ? "selected" : ""
+                      }>${opt}</option>`
+                  )
+                  .join("");
+
+                fieldHtml = `<select class="form-control" id="edit-${f.key}" ${
+                  !isEditing ? "disabled" : ""
+                }>${optionsHtml}</select>`;
+              } else {
+                // Creates the regular <input> for all other fields
+                fieldHtml = `<input type="${
+                  f.type || "text"
+                }" class="form-control" id="edit-${f.key}" value="${
+                  user[f.key] || ""
+                }" ${!isEditing ? "disabled" : ""}>`;
+              }
+
+              return `
+                    <div ${f.full ? 'style="grid-column: 1 / -1;"' : ""}>
+                        <label class="form-label">${f.label}</label>
+                        ${fieldHtml}
+                    </div>`;
+            })
+            .join("");
+
+          content.innerHTML = `
+                <div class="modal-header"><h3 class="modal-title">User Profile</h3><button class="modal-close"><span class="material-symbols-rounded">close</span></button></div>
+                <div class="modal-body"><div class="profile-modal-grid">
+                    <div class="profile-sidebar">
+                        <img src="${
+                          user.photo_url
+                        }" alt="Profile" class="profile-photo">
+                        <div class="profile-name">${user.first_name} ${
+            user.last_name
+          }</div>
+                        <div class="profile-email">${user.email}</div>
+                        <div class="status-badge ${
+                          user.status === "active"
+                            ? "status-active"
+                            : "status-suspended"
+                        }">${user.status}</div>
+                        <p style="margin-top:16px;font-size:0.9rem;color:var(--color-text-secondary);">Member since:<br>${new Date(
+                          user.created_at
+                        ).toLocaleDateString()}</p>
+                          <button class="btn btn-secondary" id="changePasswordBtn" style="width: 100%; margin-top: 1rem;"><span class="material-symbols-rounded">lock_reset</span>Change Password</button>
+                    </div>
+                    <form id="editUserForm" class="profile-details-grid">${detailsHtml}</form>
+                </div></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close">Close</button>
+                    <button type="button" class="btn btn-primary" id="profileEditSaveBtn" data-mode="${
+                      isEditing ? "save" : "edit"
+                    }">${isEditing ? "Save Changes" : "Edit Profile"}</button>
+                </div>`;
+        };
+
+        const refreshData = () => {
+          const query = document
+            .getElementById("searchInput")
+            .value.toLowerCase();
+          let data = allUsers;
+          if (currentStatusFilter !== "all") {
+            data = data.filter((user) => user.status === currentStatusFilter);
+          }
+          filteredUsers = data.filter((u) =>
+            `${u.first_name} ${u.last_name} ${u.email}`
+              .toLowerCase()
+              .includes(query)
+          );
+          currentPage = 1;
+          renderTable();
+        };
+
+        const loadInitialData = async () => {
+          document.getElementById(
+            "users-table-body"
+          ).innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 40px;"><div class="loading-spinner"></div></td></tr>`;
+          const data = await api("/admin/api/users");
+          if (data && data.status === "success") {
+            allUsers = data.users;
+            refreshData();
+          } else {
+            document.getElementById(
+              "table-message"
+            ).innerHTML = `<p style="color: var(--color-error);">Could not load user data.</p>`;
+            document.getElementById("table-message").style.display = "block";
+          }
+        };
+
+        const handleViewUser = async (userId) => {
+          currentUserId = userId;
+          openModal("profileModal");
+          document.getElementById(
+            "profileModalContent"
+          ).innerHTML = `<div class="loading-spinner" style="margin: 50px auto;"></div>`;
+          const data = await api(`/admin/api/users/${userId}`);
+          if (data && data.status === "success")
+            populateProfileModal(data.user);
+        };
+
+        const handleAddUser = async () => {
+          setLoading(true);
+          const data = {
+            first_name: document.getElementById("newFirstName").value,
+            last_name: document.getElementById("newLastName").value,
+            email: document.getElementById("newEmail").value,
+            password: document.getElementById("newPassword").value,
+          };
+          const result = await api("/admin/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          setLoading(false);
+          if (result) {
+            showToast(
+              result.message,
+              result.status === "success" ? "success" : "danger"
+            );
+            if (result.status === "success") {
+              closeModal();
+              loadInitialData();
+              loadStats();
+            }
+          }
+        };
+
+        const handleDeleteUser = async () => {
+          setLoading(true);
+          const result = await api(`/admin/api/users/${currentUserId}`, {
+            method: "DELETE",
+          });
+          setLoading(false);
+          if (result) {
+            showToast(
+              result.message,
+              result.status === "success" ? "success" : "danger"
+            );
+            if (result.status === "success") {
+              closeModal();
+              loadInitialData();
+              loadStats();
+            }
+          }
+        };
+
+        const handleUpdateStatus = async () => {
+          setLoading(true);
+          const result = await api(`/admin/api/users/${currentUserId}/status`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: currentUserStatus }),
+          });
+          setLoading(false);
+          if (result) {
+            showToast(
+              result.message,
+              result.status === "success" ? "success" : "danger"
+            );
+            if (result.status === "success") {
+              closeModal();
+              loadInitialData();
+            }
+          }
+        };
+
+        const handleProfileEditSave = async (e) => {
+          const mode = e.target.dataset.mode;
+          if (mode === "edit") {
+            const data = await api(`/admin/api/users/${currentUserId}`);
+            if (data && data.status === "success")
+              populateProfileModal(data.user, true);
+          } else {
+            setLoading(true);
+            const updatedData = {};
+            document
+              .querySelectorAll("#editUserForm .form-control")
+              .forEach((input) => {
+                updatedData[input.id.replace("edit-", "")] = input.value;
+              });
+            const result = await api(`/admin/api/users/${currentUserId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(updatedData),
+            });
+            setLoading(false);
+            if (result) {
+              showToast(
+                result.message,
+                result.status === "success" ? "success" : "danger"
+              );
+              if (result.status === "success") {
+                closeModal();
+                loadInitialData();
+              }
+            }
+          }
+        };
+
+        const handleResetPassword = async () => {
+          const newPassword =
+            document.getElementById("resetPasswordInput").value;
+          if (newPassword.length < 4) {
+            showToast("Password must be at least 4 characters.", "danger");
+            return;
+          }
+          setLoading(true);
+          const result = await api(
+            `/admin/api/users/${currentUserId}/password`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password: newPassword }),
+            }
+          );
+          setLoading(false);
+          if (result) {
+            showToast(
+              result.message,
+              result.status === "success" ? "success" : "danger"
+            );
+            if (result.status === "success") closeModal();
+          }
+        };
+
+        const handleExport = (format) => {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ orientation: "landscape" });
+          const headers = [
+            "ID",
+            "First Name",
+            "Last Name",
+            "Email",
+            "Status",
+            "Member Since",
+          ];
+          const tableData = filteredUsers.map((u) => [
+            u.id,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.status,
+            new Date(u.created_at).toLocaleDateString(),
+          ]);
+          const escapeCsvCell = (cell) =>
+            `"${String(cell || "").replace(/"/g, '""')}"`;
+          if (format === "pdf") {
+            doc.autoTable({ head: [headers], body: tableData });
+            doc.save("users_export.pdf");
+          } else {
+            const csvContent =
+              "data:text/csv;charset=utf-8," +
+              [
+                headers.join(","),
+                ...tableData.map((row) => row.map(escapeCsvCell).join(",")),
+              ].join("\n");
+            const link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "users_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          closeModal();
+        };
+
+        const updateFilterButtonState = () => {
+          const filterBtn = document.getElementById("filterBtn");
+          if (currentStatusFilter !== "all") {
+            filterBtn.classList.add("active-filter");
+            filterBtn.innerHTML = `<span class="material-symbols-rounded">close</span>Clear Filter`;
+          } else {
+            filterBtn.classList.remove("active-filter");
+            filterBtn.innerHTML = `<span class="material-symbols-rounded">filter_list</span>Filter`;
+          }
+        };
+
+        document
+          .getElementById("searchInput")
+          .addEventListener("input", refreshData);
+        document.getElementById("addUserBtn").onclick = () => {
+          document.getElementById("addUserModalContent").innerHTML = `
+                <div class="modal-header"><h3 class="modal-title">Add New User</h3><button class="modal-close"><span class="material-symbols-rounded">close</span></button></div>
+<form id="addUserForm" class="modal-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                        <div><label for="newFirstName" class="form-label">First Name</label><input type="text" class="form-control" id="newFirstName" required></div>
+                        <div><label for="newLastName" class="form-label">Last Name</label><input type="text" class="form-control" id="newLastName" required></div>
+                    </div>
+                    <div style="margin-top:1rem;"><label for="newEmail" class="form-label">Email</label><input type="email" class="form-control" id="newEmail" required></div>
+                    <div style="margin-top:1rem;"><label for="newPassword" class="form-label">Password</label><input type="password" class="form-control" id="newPassword" required></div>
+                </form>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="button" class="btn btn-primary" id="confirmAddUserBtn">Create User</button></div>`;
+          openModal("addUserModal");
+        };
+        document.getElementById("exportBtn").onclick = () => {
+          document.getElementById("exportModalContent").innerHTML = `
+                <div class="modal-header"><h3 class="modal-title">Export Users</h3><button class="modal-close"><span class="material-symbols-rounded">close</span></button></div>
+                <div class="modal-body"><p>Select the format to export the currently filtered user list.</p>
+                    <div style="display:flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button id="exportCsvBtn" class="btn btn-primary" style="flex:1;"><span class="material-symbols-rounded">description</span>Export as CSV</button>
+                        <button id="exportPdfBtn" class="btn btn-primary" style="flex:1; background: var(--color-error);"><span class="material-symbols-rounded">picture_as_pdf</span>Export as PDF</button>
+                    </div></div>`;
+          openModal("exportModal");
+        };
+        document.getElementById("filterBtn").onclick = () => {
+          if (currentStatusFilter !== "all") {
+            currentStatusFilter = "all";
+            updateFilterButtonState();
+            refreshData();
+            return;
+          }
+          document.getElementById("filterModalContent").innerHTML = `
+                <div class="modal-header"><h3 class="modal-title">Filter Users</h3><button class="modal-close"><span class="material-symbols-rounded">close</span></button></div>
+                <div class="modal-body"><div class="filter-group">
+                    <label for="statusFilterSelect">User Status</label>
+                    <select id="statusFilterSelect" class="form-control">
+                        <option value="all" ${
+                          currentStatusFilter === "all" ? "selected" : ""
+                        }>All</option>
+                        <option value="active" ${
+                          currentStatusFilter === "active" ? "selected" : ""
+                        }>Active</option>
+                        <option value="suspended" ${
+                          currentStatusFilter === "suspended" ? "selected" : ""
+                        }>Suspended</option>
+                    </select></div></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="button" class="btn btn-primary" id="applyFilterBtn">Apply</button></div>`;
+          openModal("filterModal");
+        };
+
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".modal-close")) closeModal();
+          if (e.target.closest("#confirmAddUserBtn")) handleAddUser();
+          if (e.target.closest("#confirmDeleteButton")) handleDeleteUser();
+          if (e.target.closest("#profileEditSaveBtn")) handleProfileEditSave(e);
+          if (e.target.closest("#exportCsvBtn")) handleExport("csv");
+          if (e.target.closest("#exportPdfBtn")) handleExport("pdf");
+
+          const prevBtn = e.target.closest("#prevPageBtn");
+          const nextBtn = e.target.closest("#nextPageBtn");
+          const pageBtn = e.target.closest(".pagination-btn[data-page]");
+
+          if (prevBtn) {
+            currentPage--;
+            renderTable();
+          }
+          if (nextBtn) {
+            currentPage++;
+            renderTable();
+          }
+          if (pageBtn) {
+            currentPage = parseInt(pageBtn.dataset.page);
+            renderTable();
+          }
+
+          if (e.target.closest("#changePasswordBtn")) {
+            document.getElementById("resetPasswordModalContent").innerHTML = `
+                    <div class="modal-header"><h3 class="modal-title">Reset Password</h3><button class="modal-close"><span class="material-symbols-rounded">close</span></button></div>
+                    <div class="modal-body"><label for="resetPasswordInput" class="form-label">New Password</label><input type="password" class="form-control" id="resetPasswordInput" required></div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="button" class="btn btn-primary" id="confirmResetPasswordBtn">Set New Password</button></div>`;
+            openModal("resetPasswordModal");
+          }
+          if (e.target.closest("#confirmResetPasswordBtn"))
+            handleResetPassword();
+          if (e.target.closest("#confirmSuspendBtn")) handleUpdateStatus();
+          if (e.target.closest("#applyFilterBtn")) {
+            currentStatusFilter =
+              document.getElementById("statusFilterSelect").value;
+            updateFilterButtonState();
+            refreshData();
+            closeModal();
+          }
+
+          const actionBtn = e.target.closest("button[data-id]");
+          if (actionBtn) {
+            currentUserId = actionBtn.dataset.id;
+            if (actionBtn.classList.contains("btn-view"))
+              handleViewUser(currentUserId);
+            if (actionBtn.classList.contains("btn-delete")) {
+              document.getElementById("deleteModalContent").innerHTML = `
+                        <div class="modal-header"><h3 class="modal-title">Confirm Deletion</h3></div>
+                        <p style="margin:20px 0;color:var(--color-text-secondary);">Are you sure? This will permanently delete the user.</p>
+                        <div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="button" class="btn" id="confirmDeleteButton" style="background:var(--color-error);color:white;">Delete</button></div>`;
+              openModal("deleteModal");
+            }
+            if (actionBtn.matches(".btn-suspend, .btn-reactivate")) {
+              currentUserStatus = actionBtn.dataset.status;
+              const actionText =
+                currentUserStatus === "suspended" ? "suspend" : "reactivate";
+              document.getElementById("suspendModalContent").innerHTML = `
+                        <div class="modal-header"><h3 class="modal-title">Confirm Action</h3></div>
+                        <p style="margin:20px 0;color:var(--color-text-secondary);">Are you sure you want to ${actionText} this user?</p>
+                        <div class="modal-footer"><button type="button" class="btn btn-secondary modal-close">Cancel</button><button type="button" class="btn" id="confirmSuspendBtn" style="background:var(--color-${
+                          actionText === "suspend" ? "warning" : "accent"
+                        });color:white;">${
+                actionText.charAt(0).toUpperCase() + actionText.slice(1)
+              }</button></div>`;
+              openModal("suspendModal");
+            }
+          }
+        });
+
+        loadInitialData();
+        loadStats();
+      });
+    </script>
+  </body>
+</html>

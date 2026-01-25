@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+       <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-text-placeholder: #798eae;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border: #e2e8f0;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --sidebar-width: 280px;
+        --header-height: 70px; /* ADDED */
+      }
+      body.dark-theme {
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-text-placeholder: #a6b7d2;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border: #334155;
+        --color-border-hr: #334155;
+        --color-hover-secondary: #334155;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      html {
+        height: 100%;
+      }
+      body {
+        min-height: 100%;
+        display: flex;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+      /* --- ADDED HEADER CSS --- */
+      .main-header {
+        position: fixed;
+        top: 0;
+        left: var(--sidebar-width);
+        right: 0;
+        height: var(--header-height);
+        background: white;
+        border-bottom: 1px solid var(--color-border-hr);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        z-index: 998; /* Lower than sidebar */
+        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      body.dark-theme .main-header {
+        background: var(--color-bg-sidebar);
+        border-bottom-color: var(--color-border-hr);
+      }
+
+      .header-search-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 400px;
+      }
+
+      .header-search-container .search-icon {
+        position: absolute;
+        left: 15px;
+        color: var(--color-text-placeholder);
+        font-size: 1.3rem;
+        pointer-events: none;
+      }
+
+      #headerSearchInput {
+        width: 100%;
+        height: 42px;
+        border-radius: 12px;
+        border: 1px solid var(--color-border-hr);
+        background-color: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        padding: 0 15px 0 45px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+
+      #headerSearchInput:focus {
+        border-color: var(--color-hover-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+
+      #headerSearchInput::placeholder {
+        color: var(--color-text-placeholder);
+      }
+
+      .profile-dropdown {
+        position: relative;
+      }
+
+      .profile-trigger {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        border: none;
+        background: none;
+      }
+
+      .profile-trigger:hover {
+        background: var(--color-hover-secondary);
+      }
+
+      .profile-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--color-border-hr);
+        background-color: var(--color-bg-secondary);
+      }
+
+      .profile-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+      }
+
+      .profile-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--color-text-primary);
+        line-height: 1.2;
+      }
+
+      .profile-role {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+        line-height: 1.2;
+      }
+
+      .profile-dropdown-icon {
+        color: var(--color-text-secondary);
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+      }
+
+      .profile-trigger.active .profile-dropdown-icon {
+        transform: rotate(180deg);
+      }
+
+      .profile-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: var(--color-bg-sidebar);
+        border: 1px solid var(--color-border-hr);
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        min-width: 200px;
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .profile-dropdown-menu.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .profile-dropdown-menu .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        color: var(--color-text-primary);
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+        border-radius: 8px;
+        margin: 4px;
+      }
+
+      .profile-dropdown-menu .dropdown-item:hover {
+        background: var(--color-hover-secondary);
+      }
+
+      .profile-dropdown-menu .dropdown-item.logout {
+        color: var(--color-error);
+        border-top: 1px solid var(--color-border-hr);
+        margin-top: 8px;
+      }
+
+      .profile-dropdown-menu .dropdown-item.logout:hover {
+        background: rgba(239, 68, 68, 0.1) !important;
+        color: var(--color-error) !important;
+        font-weight: 600;
+      }
+      /* --- END OF ADDED HEADER CSS --- */
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        z-index: 1000;
+        flex-shrink: 0;
+      }
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: var(--color-bg-sidebar);
+        color: var(--color-text-primary);
+        position: relative;
+      }
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .menu-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-error); /* Changed to red */
+        transition: width 0.3s ease;
+        z-index: 1;
+      }
+      .menu-icon,
+      .menu-label {
+        position: relative;
+        z-index: 2;
+      }
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+      .menu-link:not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+      }
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+      .logout-menu-link:hover {
+        background: rgba(239, 68, 68, 0.1) !important;
+        color: var(--color-error) !important;
+        font-weight: 600;
+      }
+      .dark-mode-logo {
+        display: none;
+      }
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar);
+      }
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(16px);
+      }
+      .light-mode-logo {
+        display: block;
+        margin: 0 auto;
+      }
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+      }
+      .theme-toggle:hover {
+        background: var(--color-hover-secondary);
+      }
+      body.dark-theme .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-border-hr);
+        position: relative;
+      }
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        transition: transform 0.3s ease;
+      }
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+      .main-content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-content-inner {
+        flex: 1 0 auto;
+        padding: 30px;
+        margin-top: var(--header-height); /* MODIFIED */
+      }
+      .page-header {
+        background: linear-gradient(135deg, #642b73 0%, #c6426e 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        color: white;
+      }
+      .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .stat-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px var(--color-shadow);
+      }
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      .stat-title {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+      }
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .chart-container {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+      }
+      .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--color-text-primary);
+      }
+      .content-section {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+      }
+      .table-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .table-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+      .table-wrapper {
+        overflow-x: auto;
+      }
+      .activity-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .activity-table th,
+      .activity-table td {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid var(--color-border);
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .activity-table th {
+        background: var(--color-bg-primary);
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+      }
+      .activity-table tr:hover {
+        background: var(--color-hover-secondary);
+      }
+      .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+      .status-submitted {
+        background-color: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+      }
+      .status-in-progress {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+      .status-resolved {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+      .status-rejected {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--color-error);
+      }
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        padding: 1.5rem 2rem;
+        flex-shrink: 0;
+      }
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .footer-copyright,
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+      }
+      body.dark-theme .footer-developer a {
+        color: var(--color-hover-primary);
+      }
+      .loading-placeholder {
+        background: var(--color-bg-secondary);
+        border-radius: 8px;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      @media (max-width: 992px) {
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* --- COMPLETE CSS FOR MODERN ANNOUNCEMENT MODAL --- */
+
+      /* Base Modal Styles (Overlay, Positioning, etc.) */
+      /* --- COMPLETE AND FINAL CSS FOR MODERN ANNOUNCEMENT MODAL --- */
+
+      /* Base Modal Styles (Overlay, Positioning, etc.) */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.6); /* Darker overlay for more focus */
+        backdrop-filter: blur(5px); /* Frosted glass effect */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Modal Content Box */
+      .modal-content {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--color-border);
+      }
+
+      .modal-content.large {
+        max-width: 850px; /* Slightly wider for a more spacious feel */
+      }
+
+      /* Modal Header */
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-border-hr);
+        margin-bottom: 1.5rem;
+      }
+
+      .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.4rem;
+        font-weight: 600;
+      }
+
+      .modal-title .material-symbols-rounded {
+        color: var(--color-hover-primary);
+      }
+
+      .modal-close-btn {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+        transition: color 0.2s ease;
+      }
+      .modal-close-btn:hover {
+        color: var(--color-text-primary);
+      }
+
+      /* --- KEY FIXES FOR LAYOUT AND SCROLLING --- */
+      #announcementModal .modal-body {
+        display: grid;
+        grid-template-columns: 3fr 4fr;
+        grid-template-rows: 1fr; /* This constrains the row height */
+        gap: 2rem;
+        height: 70vh; /* Use a fixed height for the container */
+        overflow: hidden; /* Hide any overflow from the grid itself */
+      }
+
+      /* --- IMPROVED FORM LAYOUT --- */
+      .announcement-form-container {
+        display: flex;
+        flex-direction: column; /* Allows us to push the button to the bottom */
+      }
+      #announcementForm {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; /* Makes the form take up the full column height */
+      }
+      #announcementForm .form-group {
+        margin-bottom: 1rem;
+      }
+      #announcementForm label {
+        display: block;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        color: var(--color-text-secondary);
+      }
+      #announcementForm input,
+      #announcementForm textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+      }
+      #announcementForm textarea {
+        flex-grow: 1; /* Allows the textarea to expand */
+        resize: none; /* Disables manual resizing */
+        min-height: 220px; /* Adjust this value as needed */
+      }
+      #announcementForm input:focus,
+      #announcementForm textarea:focus {
+        outline: none;
+        border-color: var(--color-hover-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+      .post-btn {
+        width: 100%;
+        margin-top: auto; /* Pushes the button to the very bottom of the form */
+        padding: 12px;
+        font-size: 1rem;
+      }
+
+      /* --- SCROLLABLE LIST & CARD STYLES --- */
+      .announcements-list-container {
+        border-left: 1px solid var(--color-border-hr);
+        padding-left: 2rem;
+        overflow-y: auto; /* This now works because the parent height is constrained */
+      }
+      /* Custom Scrollbar */
+      .announcements-list-container::-webkit-scrollbar {
+        width: 8px;
+      }
+      .announcements-list-container::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .announcements-list-container::-webkit-scrollbar-thumb {
+        background-color: var(--color-bg-secondary);
+        border-radius: 10px;
+      }
+
+      /* --- IMPROVED CARD DESIGN --- */
+      .announcement-item {
+        background: var(--color-bg-primary);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid var(--color-border);
+        position: relative;
+        transition: all 0.3s ease;
+      }
+      .announcement-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border-color: var(--color-border-hr);
+      }
+      .announcement-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.25rem; /* <-- ADD THIS LINE for spacing */
+        padding-right: 35px;
+      }
+      .announcement-item-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--color-text-primary);
+      }
+      .announcement-item-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+        margin-bottom: 0.75rem; /* Add margin here to create space below the date/time */
+      }
+      .announcement-item-meta .material-symbols-rounded {
+        font-size: 1rem;
+      }
+      .announcement-item-content {
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+        white-space: pre-wrap;
+        line-height: 1.6;
+      }
+
+      /* CORRECTED styles for Edit and Delete buttons */
+      .edit-btn,
+      .delete-btn {
+        background: var(--color-bg-secondary);
+        border: none;
+        color: var(--color-text-secondary);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .edit-btn:hover {
+        background: var(--color-hover-primary);
+        color: white;
+        transform: scale(1.1);
+      }
+
+      .delete-btn:hover {
+        background: var(--color-error);
+        color: white;
+        transform: scale(1.1) rotate(15deg);
+      }
+
+      .announcement-item:hover .delete-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .delete-btn:hover {
+        background: var(--color-error);
+        color: white;
+        transform: scale(1.1) rotate(15deg);
+      }
+
+      /* Responsive Design for Modal */
+      @media (max-width: 900px) {
+        #announcementModal .modal-body {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto;
+          overflow-y: auto;
+          height: auto;
+          max-height: 80vh;
+        }
+        .announcements-list-container {
+          border-left: none;
+          padding-left: 0;
+          margin-top: 2rem;
+          border-top: 1px solid var(--color-border-hr);
+          padding-top: 2rem;
+        }
+      }
+
+      /* ADD THIS CSS for proper button styling */
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s ease;
+      }
+
+      .btn-primary {
+        background: var(--color-hover-primary);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #2563eb; /* A slightly darker blue */
+      }
+      /* ADD THIS RULE to create space below the "Published Announcements" title */
+      #announcementsList {
+        margin-top: 1.5rem;
+      }
+
+      /* ADD THIS CSS to fix the header icon's position and style */
+
+      .header-actions-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem; /* Adjust spacing between icon and profile */
+      }
+
+      .announcement-trigger {
+        background: none;
+        border: none;
+        color: var(--color-text-secondary);
+        font-size: 1.6rem;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      .announcement-trigger:hover {
+        background-color: var(--color-hover-secondary);
+        transform: rotate(-15deg);
+      }
+
+      /* ADD THIS CSS for the notification badge */
+
+      /* Make the parent button a positioning container */
+      .announcement-trigger {
+        position: relative;
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background-color: var(--color-error); /* Red for attention */
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--color-bg-sidebar); /* Creates a nice cutout effect */
+
+        /* Hidden by default, will be shown by JS */
+        transform: scale(0);
+        transition: transform 0.2s ease-out;
+      }
+
+      .notification-badge.visible {
+        transform: scale(1); /* Add this class with JS to show the badge */
+      }
+
+      /* ADD THIS CSS for the Edit button and form layout */
+
+      .announcement-item-actions {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.2s ease;
+      }
+
+      .announcement-item:hover .announcement-item-actions {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .edit-btn:hover {
+        background: var(--color-warning); /* Use the theme's yellow color */
+        color: #1f2936; /* Use a dark text color for contrast */
+        transform: scale(1.1);
+      }
+
+      .form-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: auto;
+      }
+      .btn-secondary {
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+      }
+
+      /* ADD THIS CSS for the new danger button style */
+      .btn-danger {
+        background: var(--color-error);
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #c53030; /* Darker red */
+      }
+
+      /* ADD THIS RULE for a styled modal footer */
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end; /* This aligns buttons to the right */
+        gap: 12px;
+        margin-top: 1.5rem; /* Creates space above the new line */
+        padding-top: 1.5rem; /* Creates space below the new line */
+        border-top: 1px solid var(--color-border-hr); /* This is the divider line */
+      }
+
+      /* ADD THIS CSS for the empty state message */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 100%; /* Fills the container vertically */
+        color: var(--color-text-secondary);
+        opacity: 0.7;
+      }
+
+      .empty-state .material-symbols-rounded {
+        font-size: 4rem; /* Makes the icon large */
+        margin-bottom: 1rem;
+      }
+
+      .empty-state p {
+        font-size: 1rem;
+        font-weight: 500;
+      }
+      .stat-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 20px;
+        /* Modify the padding to add more space on the left */
+        padding: 2rem 2rem 2rem 2.5rem;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      /* --- START: Styles for Stat Card Vertical Line --- */
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 7px;
+        height: 100%;
+        background-color: var(--color-border); /* A default fallback color */
+        transition: width 0.3s ease;
+      }
+
+      /* Assign colors to match the icon of each card */
+      .stats-grid .stat-card:nth-child(1)::before {
+        background-color: #3b82f6; /* Total Issues - Blue */
+      }
+      .stats-grid .stat-card:nth-child(2)::before {
+        background-color: #8b5cf6; /* Total Users - Purple */
+      }
+      .stats-grid .stat-card:nth-child(3)::before {
+        background-color: #f59e0b; /* Pending Issues - Orange */
+      }
+      .stats-grid .stat-card:nth-child(4)::before {
+        background-color: #10b981; /* Avg. Feedback - Green */
+      }
+
+      /* A modern hover effect to make the line wider */
+      .stat-card:hover::before {
+        width: 12px;
+      }
+
+      /* --- END: Styles for Stat Card Vertical Line --- */
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <ul class="menu-list">
+          <li class="menu-item">
+            <a href="{{ url_for('admin_dashboard') }}" class="menu-link active"
+              ><span class="material-symbols-rounded menu-icon">dashboard</span
+              ><span class="menu-label">Dashboard</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_issue_reports') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">assignment</span
+              ><span class="menu-label">Manage Issues</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_management') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">group</span
+              ><span class="menu-label">User Management</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_chat_analytics') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon"
+                >trending_up</span
+              ><span class="menu-label">Analytics & Trends</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_user_feedbacks') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">feedback</span
+              ><span class="menu-label">User Feedbacks</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_manage_about_us') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon">info</span
+              ><span class="menu-label">Manage About Us</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="{{ url_for('admin_profile') }}" class="menu-link"
+              ><span class="material-symbols-rounded menu-icon"
+                >account_circle</span
+              ><span class="menu-label">Admin Profile</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a
+              href="{{ url_for('admin_logout') }}"
+              class="menu-link logout-menu-link"
+              ><span class="material-symbols-rounded menu-icon">logout</span
+              ><span class="menu-label">Logout</span></a
+            >
+          </li>
+        </ul>
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span
+            ><span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="main-header">
+        <div class="header-search-container">
+          <span class="material-symbols-rounded search-icon">search</span>
+          <input type="text" id="headerSearchInput" placeholder="Search..." />
+        </div>
+
+        <div class="header-actions-right">
+          <button
+            class="announcement-trigger"
+            id="announcementBtn"
+            title="Manage Notifications"
+          >
+            <span class="material-symbols-rounded">notifications</span>
+            <span class="notification-badge" id="notificationBadge"></span>
+          </button>
+
+          <div class="profile-dropdown">
+            <button class="profile-trigger" id="profileTrigger">
+              <img
+                src="{{ url_for('static', filename='images/female_avatar.png') }}"
+                alt="Profile"
+                class="profile-avatar"
+                id="headerProfilePic"
+              />
+              <div class="profile-info">
+                <div class="profile-name" id="headerProfileName">
+                  {{ username }}
+                </div>
+                <div class="profile-role">Admin</div>
+              </div>
+              <span class="material-symbols-rounded profile-dropdown-icon"
+                >expand_more</span
+              >
+            </button>
+            <div class="profile-dropdown-menu" id="profileDropdown">
+              <a href="{{ url_for('admin_profile') }}" class="dropdown-item">
+                <span class="material-symbols-rounded">person</span>
+                Admin Profile
+              </a>
+              <a href="#" class="dropdown-item logout" id="headerLogout">
+                <span class="material-symbols-rounded">logout</span>
+                Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="main-content-inner">
+        <div class="page-header">
+          <div class="page-header-content">
+            <div>
+              <h1 class="page-title">Admin Dashboard</h1>
+              <p class="page-subtitle">
+                Welcome back, {{ username }}! Here's an overview of your
+                platform.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Total Issues</span>
+              <div class="stat-icon" style="background: #3b82f6">
+                <span class="material-symbols-rounded">assignment</span>
+              </div>
+            </div>
+            <div class="stat-value" id="totalIssuesStat">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Total Users</span>
+              <div class="stat-icon" style="background: #8b5cf6">
+                <span class="material-symbols-rounded">group</span>
+              </div>
+            </div>
+            <div class="stat-value" id="totalUsersStat">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Pending Issues</span>
+              <div class="stat-icon" style="background: #f59e0b">
+                <span class="material-symbols-rounded">schedule</span>
+              </div>
+            </div>
+            <div class="stat-value" id="pendingIssuesStat">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Avg. Feedback</span>
+              <div class="stat-icon" style="background: #10b981">
+                <span class="material-symbols-rounded">star_half</span>
+              </div>
+            </div>
+            <div class="stat-value" id="avgFeedbackStat">-</div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-container">
+            <h3 class="chart-title">Issues by Status</h3>
+            <canvas id="statusChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3 class="chart-title">Top 5 Issue Categories</h3>
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-container" style="margin-bottom: 2rem">
+          <h3 class="chart-title">Submissions Trend (Last 30 Days)</h3>
+          <canvas id="trendChart"></canvas>
+        </div>
+
+        <div class="content-section">
+          <div class="table-header">
+            <h2 class="table-title">Recent Activity</h2>
+          </div>
+          <div class="table-wrapper">
+            <table class="activity-table">
+              <thead>
+                <tr>
+                  <th>Issue ID</th>
+                  <th>Submitter</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentActivityBody">
+                <tr>
+                  <td
+                    colspan="5"
+                    style="text-align: center; padding: 2rem"
+                    class="loading-placeholder"
+                  >
+                    Loading recent activity...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by
+            <a href="{{ url_for('team_details') }}">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="modal" id="announcementModal">
+      <div class="modal-content large">
+        <div class="modal-header">
+          <h3 class="modal-title">
+            <span class="material-symbols-rounded">campaign</span>
+            Manage Announcements
+          </h3>
+          <button type="button" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="announcement-form-container">
+            <h4 class="sub-header">Post a New Announcement</h4>
+            <form id="announcementForm">
+              <div class="form-group">
+                <label for="announcementTitle">Title</label>
+                <input
+                  type="text"
+                  id="announcementTitle"
+                  placeholder="e.g., System Maintenance"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="announcementContent">Content</label>
+                <textarea
+                  id="announcementContent"
+                  placeholder="Enter the full announcement details here..."
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+              <div class="form-buttons">
+                <button
+                  type="submit"
+                  class="btn btn-primary post-btn"
+                  id="postAnnouncementBtn"
+                >
+                  <span class="btn-text">Post Announcement</span>
+                  <span class="spinner"></span>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="cancelEditBtn"
+                  style="display: none"
+                >
+                  Cancel Edit
+                </button>
+              </div>
+            </form>
+          </div>
+          <div class="announcements-list-container">
+            <h4 class="sub-header">Published Announcements</h4>
+            <div id="announcementsList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="deleteAnnouncementConfirmModal">
+      <div class="modal-content" style="max-width: 500px">
+        <div class="modal-header">
+          <h3 class="modal-title">
+            <span
+              class="material-symbols-rounded"
+              style="color: var(--color-error)"
+              >delete_forever</span
+            >
+            Confirm Deletion
+          </h3>
+          <button type="button" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p
+            id="deleteConfirmText"
+            style="color: var(--color-text-secondary); line-height: 1.6"
+          >
+            Are you sure you want to permanently delete this announcement? This
+            action cannot be undone.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close-btn">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            <span class="btn-text">Yes, Delete</span>
+            <span class="spinner"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        let statusChartInstance, categoryChartInstance, trendChartInstance;
+        let lastAnalyticsData = null;
+        let announcementIdToDelete = null; // This will store the ID of the announcement to delete
+        const deleteConfirmModal = document.getElementById(
+          "deleteAnnouncementConfirmModal"
+        );
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        const deleteConfirmText = document.getElementById("deleteConfirmText");
+
+        // ADD THIS SCRIPT BLOCK inside your 'DOMContentLoaded' listener
+
+        // REPLACE your entire announcement script block with this one
+
+        // REPLACE your entire announcement script block with this one
+
+        // --- START: Announcement Feature Script ---
+        const announcementBtn = document.getElementById("announcementBtn");
+        const announcementModal = document.getElementById("announcementModal");
+        const announcementForm = document.getElementById("announcementForm");
+        const announcementsList = document.getElementById("announcementsList");
+        const postAnnouncementBtn = document.getElementById(
+          "postAnnouncementBtn"
+        );
+        const cancelEditBtn = document.getElementById("cancelEditBtn");
+        const announcementTitleInput =
+          document.getElementById("announcementTitle");
+        const announcementContentInput = document.getElementById(
+          "announcementContent"
+        );
+
+        // Helper function to reset the form to "new announcement" mode
+        const resetFormToNewMode = () => {
+          announcementForm.reset();
+          announcementForm.dataset.mode = "new";
+          announcementForm.dataset.editingId = "";
+          postAnnouncementBtn.querySelector(".btn-text").textContent =
+            "Post Announcement";
+          cancelEditBtn.style.display = "none";
+        };
+
+        // Helper function to switch the form to "edit" mode
+        const enterEditMode = (announcement) => {
+          announcementForm.dataset.mode = "edit";
+          announcementForm.dataset.editingId = announcement.id;
+          announcementTitleInput.value = announcement.title;
+          announcementContentInput.value = announcement.content;
+          postAnnouncementBtn.querySelector(".btn-text").textContent =
+            "Update Announcement";
+          cancelEditBtn.style.display = "flex";
+          announcementTitleInput.focus();
+        };
+
+        // Function to fetch and display all announcements
+        const loadAnnouncements = async () => {
+          try {
+            const response = await api("/admin/api/announcements");
+            announcementsList.innerHTML = "";
+            if (response && response.status === "success") {
+              // ... inside the loadAnnouncements function
+              if (response.announcements.length === 0) {
+                announcementsList.innerHTML = `
+        <div class="empty-state">
+            <span class="material-symbols-rounded">speaker_notes_off</span>
+            <p>No announcements have been published yet.</p>
+        </div>
+    `;
+                return;
+              }
+              //...
+              response.announcements.forEach((ann) => {
+                const item = document.createElement("div");
+                item.className = "announcement-item";
+                item.dataset.announcement = JSON.stringify(ann);
+
+                item.innerHTML = `
+                    <div class="announcement-item-header">
+                        <h5 class="announcement-item-title">${ann.title}</h5>
+                    </div>
+                    <div class="announcement-item-meta">
+                        <span class="material-symbols-rounded">calendar_today</span>
+                        <span>${formatDate(ann.created_at)}</span>
+                    </div>
+                    <p class="announcement-item-content">${ann.content}</p>
+                    <div class="announcement-item-actions">
+                         <button class="edit-btn" title="Edit">
+                            <span class="material-symbols-rounded">edit</span>
+                        </button>
+                        <button class="delete-btn" title="Delete">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+                `;
+                announcementsList.appendChild(item);
+              });
+            }
+          } catch (error) {
+            console.error("Failed to load announcements:", error);
+          }
+        };
+
+        // Open modal and reset the form to 'new' mode
+        announcementBtn.addEventListener("click", () => {
+          resetFormToNewMode();
+          announcementModal.classList.add("active");
+          loadAnnouncements();
+        });
+
+        // Close modal
+        // Close ANY active modal when the background or a close button is clicked
+        document.addEventListener("click", (e) => {
+          if (
+            e.target.classList.contains("modal") ||
+            e.target.closest(".modal-close-btn")
+          ) {
+            document
+              .querySelectorAll(".modal.active")
+              .forEach((modal) => modal.classList.remove("active"));
+          }
+        });
+        // Handle form submission for both CREATE and UPDATE
+        announcementForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const title = announcementTitleInput.value.trim();
+          const content = announcementContentInput.value.trim();
+          const mode = announcementForm.dataset.mode;
+          const editingId = announcementForm.dataset.editingId;
+
+          let url = "/admin/api/announcements";
+          if (mode === "edit") {
+            url += `/${editingId}`;
+          }
+
+          postAnnouncementBtn.classList.add("loading");
+          postAnnouncementBtn.disabled = true;
+
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, content }),
+          });
+          const result = await response.json();
+
+          if (result.status === "success") {
+            resetFormToNewMode();
+            await loadAnnouncements();
+            await updateNotificationBadge();
+          } else {
+            alert("Error: " + result.message);
+          }
+
+          postAnnouncementBtn.classList.remove("loading");
+          postAnnouncementBtn.disabled = false;
+        });
+
+        // Handle clicks on Edit and Delete buttons
+        announcementsList.addEventListener("click", async (e) => {
+          const editButton = e.target.closest(".edit-btn");
+          const deleteButton = e.target.closest(".delete-btn");
+          const itemElement = e.target.closest(".announcement-item");
+
+          if (!itemElement) return;
+          const announcementData = JSON.parse(itemElement.dataset.announcement);
+
+          if (editButton) {
+            enterEditMode(announcementData);
+          }
+
+          // ... inside announcementsList.addEventListener("click", ...)
+          if (deleteButton) {
+            const itemElement = deleteButton.closest(".announcement-item");
+            const announcementData = JSON.parse(
+              itemElement.dataset.announcement
+            );
+
+            // Store the ID and update the modal's text
+            announcementIdToDelete = announcementData.id;
+            deleteConfirmText.innerHTML = `Are you sure you want to permanently delete the announcement: "<strong>${announcementData.title}</strong>"? This action cannot be undone.`;
+
+            // Open the confirmation modal
+            deleteConfirmModal.classList.add("active");
+          }
+          //...
+        });
+
+        // ADD THIS NEW event listener for the final confirmation
+        confirmDeleteBtn.addEventListener("click", async () => {
+          if (!announcementIdToDelete) return;
+
+          confirmDeleteBtn.classList.add("loading");
+          confirmDeleteBtn.disabled = true;
+
+          const response = await fetch(
+            `/admin/api/announcements/${announcementIdToDelete}`,
+            { method: "DELETE" }
+          );
+          const result = await response.json();
+
+          if (result.status === "success") {
+            await loadAnnouncements();
+            await updateNotificationBadge();
+          } else {
+            alert("Error: " + result.message);
+          }
+
+          // Reset and close the modal
+          confirmDeleteBtn.classList.remove("loading");
+          confirmDeleteBtn.disabled = false;
+          deleteConfirmModal.classList.remove("active");
+          announcementIdToDelete = null;
+        });
+
+        // Handle the "Cancel Edit" button click
+        cancelEditBtn.addEventListener("click", resetFormToNewMode);
+        // --- END: Announcement Feature Script ---
+        // --- ADDED: HEADER SCRIPT ---
+        const profileTrigger = document.getElementById("profileTrigger");
+        const profileDropdown = document.getElementById("profileDropdown");
+        const headerLogout = document.getElementById("headerLogout");
+
+        profileTrigger.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isActive = profileTrigger.classList.toggle("active");
+          profileDropdown.classList.toggle("show", isActive);
+        });
+
+        document.addEventListener("click", (e) => {
+          if (
+            !profileTrigger.contains(e.target) &&
+            !profileDropdown.contains(e.target)
+          ) {
+            profileTrigger.classList.remove("active");
+            profileDropdown.classList.remove("show");
+          }
+        });
+
+        headerLogout.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (confirm("Are you sure you want to logout?")) {
+            window.location.href = "{{ url_for('admin_logout') }}";
+          }
+        });
+        // --- END OF ADDED: HEADER SCRIPT ---
+
+        // ADD THIS NEW FUNCTION inside your DOMContentLoaded listener
+
+        const updateNotificationBadge = async () => {
+          const notificationBadge =
+            document.getElementById("notificationBadge");
+          if (!notificationBadge) return;
+
+          const response = await api("/admin/api/announcements");
+          if (response && response.status === "success") {
+            const count = response.announcements.length;
+            if (count > 0) {
+              notificationBadge.textContent = count;
+              notificationBadge.classList.add("visible");
+            } else {
+              notificationBadge.textContent = "";
+              notificationBadge.classList.remove("visible");
+            }
+          }
+        };
+
+        const initializeTheme = () => {
+          const themeToggle = document.querySelector(".theme-toggle");
+          const updateThemeIcon = () => {
+            const themeIcon = themeToggle.querySelector(
+              ".material-symbols-rounded"
+            );
+            const isDark = document.body.classList.contains("dark-theme");
+            themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+          };
+          const savedTheme = localStorage.getItem("civicsense-theme");
+          const systemPrefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const shouldUseDarkTheme =
+            savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+          document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+          updateThemeIcon();
+
+          themeToggle.addEventListener("click", () => {
+            document.body.classList.toggle("dark-theme");
+            const isDark = document.body.classList.contains("dark-theme");
+            localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+            updateThemeIcon();
+
+            if (lastAnalyticsData) {
+              renderCharts(lastAnalyticsData);
+            }
+          });
+        };
+        initializeTheme();
+
+        const api = async (endpoint) => {
+          try {
+            const response = await fetch(endpoint);
+            if (!response.ok)
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            return await response.json();
+          } catch (error) {
+            console.error(`API Error fetching from ${endpoint}:`, error);
+            return null;
+          }
+        };
+
+        const formatDate = (dateString) => {
+          if (!dateString) return "N/A";
+          return new Date(dateString).toLocaleString("en-IN", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: "Asia/Kolkata", // Specifies Indian Standard Time
+          });
+        };
+
+        const renderStats = (statsData) => {
+          document.getElementById("totalIssuesStat").textContent =
+            statsData.analytics.overview.total_issues ?? "-";
+          document.getElementById("totalUsersStat").textContent =
+            statsData.users.stats.total_users ?? "-";
+          document.getElementById("pendingIssuesStat").textContent =
+            statsData.analytics.status_distribution.find(
+              (s) => s.status === "Submitted"
+            )?.count ?? 0;
+          document.getElementById("avgFeedbackStat").textContent =
+            statsData.feedback.stats.avg_rating ?? "-";
+        };
+
+        const renderCharts = (analyticsData) => {
+          const isDarkMode = document.body.classList.contains("dark-theme");
+          const textColor = isDarkMode
+            ? "rgba(241, 245, 249, 0.8)"
+            : "rgba(31, 41, 54, 0.8)";
+          const gridColor = isDarkMode
+            ? "rgba(51, 65, 85, 0.5)"
+            : "rgba(226, 232, 240, 0.8)";
+
+          // Status Chart (Doughnut)
+          const statusCtx = document
+            .getElementById("statusChart")
+            .getContext("2d");
+          const statusData = analyticsData.status_distribution;
+          const statusLabels = statusData.map((s) => s.status);
+          const statusCounts = statusData.map((s) => s.count);
+          if (statusChartInstance) statusChartInstance.destroy();
+          statusChartInstance = new Chart(statusCtx, {
+            type: "doughnut",
+            data: {
+              labels: statusLabels,
+              datasets: [
+                {
+                  data: statusCounts,
+                  backgroundColor: ["#6366f1", "#f59e0b", "#10b981", "#ef4444"],
+                  borderColor: isDarkMode ? "#0f172a" : "#ffffff",
+                  borderWidth: 4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: { position: "bottom", labels: { color: textColor } },
+              },
+            },
+          });
+
+          // Category Chart (Bar)
+          const categoryCtx = document
+            .getElementById("categoryChart")
+            .getContext("2d");
+          const categoryData = analyticsData.category_distribution.slice(0, 5);
+          const categoryLabels = categoryData.map((c) => c.issueCategory);
+          const categoryCounts = categoryData.map((c) => c.count);
+          if (categoryChartInstance) categoryChartInstance.destroy();
+          categoryChartInstance = new Chart(categoryCtx, {
+            type: "bar",
+            data: {
+              labels: categoryLabels,
+              datasets: [
+                {
+                  label: "Issues",
+                  data: categoryCounts,
+                  backgroundColor: "rgba(59, 130, 246, 0.7)",
+                  borderColor: "rgba(59, 130, 246, 1)",
+                  borderWidth: 1,
+                  borderRadius: 5,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              indexAxis: "y",
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                y: {
+                  ticks: { color: textColor },
+                  grid: { color: "transparent" },
+                },
+              },
+            },
+          });
+
+          // Trend Chart (Line)
+          const trendCtx = document
+            .getElementById("trendChart")
+            .getContext("2d");
+          const trendData = analyticsData.trend_data;
+          const trendLabels = trendData.map((t) => formatDate(t.date));
+          const trendCounts = trendData.map((t) => t.count);
+          if (trendChartInstance) trendChartInstance.destroy();
+          trendChartInstance = new Chart(trendCtx, {
+            type: "line",
+            data: {
+              labels: trendLabels,
+              datasets: [
+                {
+                  label: "Daily Submissions",
+                  data: trendCounts,
+                  borderColor: "rgba(16, 185, 129, 1)",
+                  backgroundColor: "rgba(16, 185, 129, 0.1)",
+                  fill: true,
+                  tension: 0.4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                y: {
+                  ticks: { color: textColor, beginAtZero: true },
+                  grid: { color: gridColor },
+                },
+              },
+            },
+          });
+        };
+
+        const renderRecentActivity = (issues) => {
+          const tbody = document.getElementById("recentActivityBody");
+          if (!issues || issues.length === 0) {
+            tbody.innerHTML =
+              '<tr><td colspan="5" style="text-align:center; padding: 2rem;">No recent activity.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = issues
+            .slice(0, 5)
+            .map(
+              (issue) => `
+                    <tr>
+                        <td><strong style="color: var(--color-hover-primary);">${
+                          issue.issue_id
+                        }</strong></td>
+                        <td>${issue.fullName}</td>
+                        <td>${issue.issueCategory}</td>
+                        <td><span class="status-badge status-${issue.status
+                          .toLowerCase()
+                          .replace(" ", "-")}">${issue.status}</span></td>
+                        <td>${formatDate(issue.submitted_at)}</td>
+                    </tr>
+                `
+            )
+            .join("");
+        };
+
+        const loadDashboardData = async () => {
+          const [usersData, feedbackData, analyticsData, issuesData] =
+            await Promise.all([
+              api("/admin/api/user-stats"),
+              api("/admin/api/feedback-stats"),
+              api("/api/analytics/overview"),
+              api("/admin/api/issues"),
+            ]);
+
+          if (usersData && feedbackData && analyticsData && issuesData) {
+            lastAnalyticsData = analyticsData.data;
+
+            renderStats({
+              users: usersData,
+              feedback: feedbackData,
+              analytics: analyticsData.data,
+            });
+            renderCharts(analyticsData.data);
+            renderRecentActivity(issuesData.issues);
+          }
+        };
+
+        loadDashboardData();
+        setInterval(loadDashboardData, 30000); // Auto-refresh every 30 seconds
+        updateNotificationBadge(); // <-- ADD THIS LINE
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Submissions - Civicsense AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      :root {
+        /* Light theme colors */
+        --color-text-primary: #1f2936;
+        --color-text-secondary: #64748b;
+        --color-text-placeholder: #798eae;
+        --color-bg-primary: #f8fafc;
+        --color-bg-secondary: #e2e8f0;
+        --color-bg-sidebar: #ffffff;
+        --color-border-hr: #e2e8f0;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #f1f5f9;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.08);
+        --color-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+      }
+
+      body.dark-theme {
+        /* Dark theme colors */
+        --color-text-primary: #f1f5f9;
+        --color-text-secondary: #94a3b8;
+        --color-text-placeholder: #a6b7d2;
+        --color-bg-primary: #0f172a;
+        --color-bg-secondary: #1e293b;
+        --color-bg-sidebar: #1e293b;
+        --color-border-hr: #334155;
+        --color-hover-primary: #3b82f6;
+        --color-hover-secondary: #334155;
+        --color-accent: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-shadow: rgba(0, 0, 0, 0.3);
+        --color-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--color-bg-primary);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg-sidebar);
+        border-right: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 20px var(--color-shadow);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1000;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: white;
+        color: #0d47a1;
+        position: relative;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.4s ease;
+      }
+
+      .header-logo {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        transition: opacity 0.4s ease;
+      }
+
+      .centered-logo {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .logo-img {
+        height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+
+      .sidebar-toggle {
+        height: 36px;
+        width: 36px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        color: white;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .sidebar-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      .sidebar-toggle span {
+        font-size: 1.4rem;
+        transition: transform 0.4s ease;
+      }
+
+      .sidebar-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-text-placeholder) transparent;
+      }
+
+      .sidebar-content::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .sidebar-content::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .sidebar-content::-webkit-scrollbar-thumb {
+        background: var(--color-text-placeholder);
+        border-radius: 3px;
+      }
+
+      .menu-section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--color-text-secondary);
+        margin-bottom: 8px;
+        padding: 0 12px;
+        transition: opacity 0.3s ease;
+      }
+
+      .menu-list {
+        display: flex;
+        gap: 4px;
+        list-style: none;
+        flex-direction: column;
+      }
+
+      .menu-link {
+        display: flex;
+        gap: 12px;
+        white-space: nowrap;
+        border-radius: 12px;
+        padding: 12px 16px;
+        align-items: center;
+        text-decoration: none;
+        color: var(--color-text-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .menu-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: var(--color-hover-primary);
+
+        z-index: -1;
+      }
+
+      .menu-link.active {
+        color: white;
+      }
+      .menu-link.active::before {
+        width: 100%;
+      }
+
+      /* Replace it with this code */
+      .menu-link:not(.logout-menu-link):not(.active):hover {
+        background-color: var(--color-hover-secondary);
+      }
+
+      .menu-link .menu-icon {
+        font-size: 1.3rem;
+        min-width: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .menu-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: opacity 0.3s ease;
+      }
+
+      .status-badge {
+        background: var(--color-accent);
+        color: white;
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: auto;
+        font-weight: 500;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--color-border-hr);
+        margin: 16px 0;
+      }
+
+      .sidebar-footer {
+        padding: 20px;
+        border-top: 1px solid var(--color-border-hr);
+        background: var(--color-bg-secondary);
+      }
+
+      .theme-toggle {
+        width: 100%;
+        min-height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        padding: 0 16px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-sidebar);
+        transition: all 0.3s ease;
+      }
+
+      .theme-toggle:hover {
+        background: var(--color-hover-secondary);
+      }
+
+      .theme-label {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+      }
+
+      .theme-text {
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: opacity 0.3s ease;
+      }
+
+      .theme-toggle-track {
+        height: 24px;
+        width: 48px;
+        border-radius: 999px;
+        background: var(--color-bg-secondary);
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      body.dark-theme .theme-toggle-track {
+        background: var(--color-hover-primary);
+      }
+
+      .theme-toggle-indicator {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+
+      body.dark-theme .theme-toggle-indicator {
+        transform: translateX(24px);
+      }
+
+      .main-content {
+        margin-left: var(--sidebar-width);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .main-content-inner {
+        flex: 1;
+        padding: 30px;
+        color: var(--color-text-primary);
+      }
+
+      .page-header {
+        margin-bottom: 30px;
+        padding: 30px;
+        border-radius: 20px;
+        background: linear-gradient(
+          135deg,
+          #f0c74c 0%,
+          #c89b3f 100%
+        ); /* New Gold Gradient */
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+      }
+
+      .page-subtitle {
+        font-size: 1rem;
+        color: white;
+        opacity: 0.8;
+        padding-left: 44px;
+        margin-top: 4px;
+      }
+
+      .header-stats {
+        display: flex;
+        gap: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 16px 24px;
+        border-radius: 16px;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        opacity: 0.8;
+      }
+
+      .controls-bar {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        padding: 16px;
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        box-shadow: 0 2px 12px var(--color-shadow);
+        border: 1px solid var(--color-border-hr);
+      }
+
+      .search-container {
+        flex-grow: 1;
+        position: relative;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-secondary);
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 16px 12px 50px;
+        border: 2px solid var(--color-border-hr);
+        border-radius: 12px;
+        font-size: 1rem;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+
+      .filter-select {
+        min-width: 180px;
+        padding: 12px 16px;
+        border: 2px solid var(--color-border-hr);
+        border-radius: 12px;
+        font-size: 1rem;
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+
+      .submissions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 24px;
+      }
+
+      .submission-card {
+        background: var(--color-bg-sidebar);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--color-border-hr);
+        box-shadow: 0 4px 16px var(--color-shadow);
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .submission-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px var(--color-shadow);
+        border-color: var(--color-hover-primary);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+
+      .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-right: 12px;
+        text-transform: capitalize;
+        color: var(--color-text-primary);
+      }
+
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .status-submitted {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+
+      .status-in-progress {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: var(--color-warning);
+      }
+
+      .status-resolved {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+      }
+
+      .status-rejected {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--color-error);
+      }
+
+      .card-body {
+        flex-grow: 1;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--color-text-secondary);
+        margin-bottom: 12px;
+      }
+
+      .info-item-text {
+        font-size: 0.95rem;
+      }
+
+      .card-footer {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid var(--color-border-hr);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .card-date {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .action-btn {
+        background: transparent;
+        border: 1px solid var(--color-border-hr);
+        color: var(--color-text-primary);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+
+      .action-btn:hover {
+        background: var(--color-hover-secondary);
+        border-color: var(--color-hover-primary);
+        color: var(--color-hover-primary);
+        transform: translateY(-1px);
+      }
+
+      .action-btn.primary {
+        background: var(--color-hover-primary);
+        border-color: var(--color-hover-primary);
+        color: white;
+      }
+
+      .action-btn.primary:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: white;
+      }
+
+      .action-btn.download {
+        background: var(--color-error);
+        border-color: var(--color-error);
+        color: white;
+      }
+
+      .action-btn.download:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: white;
+      }
+
+      .action-btn .material-symbols-rounded {
+        font-size: 1rem;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+        opacity: 1;
+      }
+
+      .modal-content {
+        background: var(--color-bg-sidebar);
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        transform: scale(0.95);
+        transition: transform 0.3s ease-in-out;
+        overflow: hidden;
+      }
+
+      .modal-overlay.active .modal-content {
+        transform: scale(1);
+      }
+
+      .modal-header {
+        padding: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--color-border-hr);
+        background: var(--color-bg-secondary);
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        color: var(--color-text-primary);
+      }
+
+      .close-modal-btn {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--color-text-secondary);
+        padding: 4px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .close-modal-btn:hover {
+        background: var(--color-hover-secondary);
+        color: var(--color-text-primary);
+      }
+
+      .modal-body {
+        padding: 24px;
+        overflow-y: auto;
+      }
+
+      .modal-section {
+        margin-bottom: 24px;
+      }
+
+      .modal-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-bottom: 2px solid var(--color-border-hr);
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--color-text-primary);
+      }
+
+      .modal-info-value {
+        font-weight: 500;
+        color: var(--color-text-primary);
+        line-height: 1.6;
+      }
+
+      #modal-map-container {
+        height: 300px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--color-border-hr);
+      }
+
+      /* --- CORRECTED TIMELINE STYLES --- */
+      .timeline {
+        position: relative;
+        padding: 10px 0;
+      }
+
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 20px; /* Aligns with the center of the 40px icon */
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: var(--color-border-hr);
+      }
+
+      .timeline-item {
+        position: relative;
+        padding-left: 60px;
+        margin-bottom: 24px;
+      }
+
+      .timeline-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .timeline-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--color-bg-sidebar);
+        border: 3px solid var(--color-border-hr);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+
+      .timeline-icon .material-symbols-rounded {
+        font-size: 1.5rem;
+      }
+
+      .timeline-item.submitted .timeline-icon {
+        border-color: #3b82f6;
+        color: #3b82f6;
+      }
+
+      .timeline-item.in-progress .timeline-icon {
+        border-color: var(--color-warning);
+        color: var(--color-warning);
+      }
+
+      .timeline-item.resolved .timeline-icon {
+        border-color: #22c55e;
+        color: #22c55e;
+      }
+
+      .timeline-item.rejected .timeline-icon {
+        border-color: var(--color-error);
+        color: var(--color-error);
+      }
+
+      .timeline-content {
+        background-color: var(--color-bg-primary);
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid var(--color-border-hr);
+      }
+
+      .timeline-title {
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+
+      .timeline-date {
+        font-size: 0.85rem;
+        color: var(--color-text-secondary);
+        margin-top: 4px;
+      }
+      /* --- END OF CORRECTED STYLES --- */
+
+      .placeholder {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--color-text-secondary);
+        grid-column: 1 / -1;
+      }
+
+      .placeholder .material-symbols-rounded {
+        font-size: 4rem;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+
+      .placeholder h3 {
+        margin-bottom: 8px;
+        color: var(--color-text-primary);
+      }
+
+      .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--color-border-hr);
+        border-top-color: var(--color-hover-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .footer-section {
+        background: var(--color-bg-secondary);
+        border-top: 1px solid var(--color-border-hr);
+        margin-top: auto;
+        padding: 10px 0;
+        transition: all 0.3s ease;
+      }
+
+      .logout-menu-link {
+        color: var(--color-error) !important;
+      }
+
+      /* Logout button hover + active styles */
+      .logout-menu-link::before {
+        display: none !important; /* remove sliding hover animation background */
+      }
+
+      .logout-menu-link:hover,
+      .logout-menu-link.active {
+        background: rgba(
+          239,
+          68,
+          68,
+          0.1
+        ) !important; /* Very light red background */
+        color: var(--color-error) !important; /* Solid red text */
+        font-weight: 600;
+      }
+
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        gap: 12px;
+      }
+
+      .footer-copyright {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer-developer {
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer-developer a {
+        color: #0d47a1;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .footer-developer a:hover {
+        color: var(--color-hover-primary);
+      }
+
+      @media (min-width: 768px) {
+        .footer-content {
+          flex-direction: row;
+          text-align: left;
+        }
+      }
+
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--color-bg-sidebar);
+        color: var(--color-text-primary);
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px var(--color-shadow);
+        border: 1px solid var(--color-border-hr);
+        z-index: 3000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .toast.success {
+        border-left: 4px solid var(--color-accent);
+      }
+
+      .toast.error {
+        border-left: 4px solid var(--color-error);
+      }
+
+      .toast .material-symbols-rounded {
+        font-size: 1.2rem;
+      }
+
+      .toast.success .material-symbols-rounded {
+        color: var(--color-accent);
+      }
+
+      .toast.error .material-symbols-rounded {
+        color: var(--color-error);
+      }
+
+      /* --- NEW: Sidebar Profile Picture Styles --- */
+      .sidebar-profile-pic {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--color-border-hr);
+        /* Placeholder background color */
+        background-color: var(--color-bg-secondary);
+      }
+      /* By default, hide the dark mode logo */
+      .dark-mode-logo {
+        display: none;
+      }
+
+      body.dark-theme .sidebar-header {
+        background: var(--color-bg-sidebar); /* Match the dark sidebar color */
+      }
+
+      /* When dark mode is on, hide the light logo... */
+      body.dark-theme .light-mode-logo {
+        display: none;
+      }
+
+      /* ...and show the dark logo */
+      body.dark-theme .dark-mode-logo {
+        display: block;
+        margin: 0 auto;
+        transform: translateX(10px); /* ⬅ adjust this value as per your need */
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="header-brand">
+          <div class="header-brand centered-logo">
+            <img
+              src="{{ url_for('static', filename='images/Civicsense.png') }}"
+              alt="Civicsense AI Logo"
+              class="logo-img light-mode-logo"
+            />
+            <img
+              src="{{ url_for('static', filename='images/Civicsense-dark.png') }}"
+              alt="Civicsense AI Logo Dark"
+              class="logo-img dark-mode-logo"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <!-- Main Menu -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="dashboard" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >dashboard</span
+                >
+                <span class="menu-label">Dashboard</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="report-issue" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >report_problem</span
+                >
+                <span class="menu-label">Report an Issue</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="my-submissions" class="menu-link active">
+                <span class="material-symbols-rounded menu-icon"
+                  >description</span
+                >
+                <span class="menu-label">My Submissions</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="check-status" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">task_alt</span>
+                <span class="menu-label">Check Status</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- AI & Analytics -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="chatbot" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >smart_toy</span
+                >
+                <span class="menu-label">AI Chatbot</span>
+              </a>
+            </li>
+
+            <li class="menu-item">
+              <a href="analytics" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >trending_up</span
+                >
+                <span class="menu-label">Analytics & Trends</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="feedback" class="menu-link">
+                <span class="material-symbols-rounded menu-icon"
+                  >star_rate</span
+                >
+                <span class="menu-label">Feedback & Rating</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="help-support" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">help</span>
+                <span class="menu-label">Help/Support</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="about-us" class="menu-link">
+                <span class="material-symbols-rounded menu-icon">info</span>
+                <span class="menu-label">About Us</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Account -->
+        <div class="menu-section">
+          <ul class="menu-list">
+            <li class="menu-item">
+              <a href="my-profile" class="menu-link">
+                <img
+                  src=""
+                  alt="My Profile"
+                  id="sidebarProfilePic"
+                  class="sidebar-profile-pic"
+                />
+                <span class="menu-label">My Profile</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="logout" class="menu-link logout-menu-link">
+                <span class="material-symbols-rounded menu-icon">logout</span>
+                <span class="menu-label">Logout</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle">
+          <div class="theme-label">
+            <span class="material-symbols-rounded">dark_mode</span>
+            <span class="theme-text">Dark Mode</span>
+          </div>
+          <div class="theme-toggle-track">
+            <div class="theme-toggle-indicator"></div>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="main-content-inner">
+        <header class="page-header">
+          <div class="header-text">
+            <h1 class="page-title">
+              <span class="material-symbols-rounded">description</span>
+              My Submissions
+            </h1>
+            <p class="page-subtitle">
+              Track the status and details of all the civic issues you have
+              reported.
+            </p>
+          </div>
+          <div class="header-stats">
+            <div class="stat-item">
+              <span id="total-submissions-stat" class="stat-value">--</span>
+              <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+              <span id="inprogress-submissions-stat" class="stat-value"
+                >--</span
+              >
+              <span class="stat-label">In Progress</span>
+            </div>
+            <div class="stat-item">
+              <span id="resolved-submissions-stat" class="stat-value">--</span>
+              <span class="stat-label">Resolved</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="controls-bar">
+          <div class="search-container">
+            <span class="material-symbols-rounded search-icon">search</span>
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search by category, location, or keyword..."
+            />
+          </div>
+          <select id="statusFilter" class="filter-select">
+            <option value="all">All Statuses</option>
+            <option value="Submitted">Submitted</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <select id="priorityFilter" class="filter-select">
+            <option value="all">All Priorities</option>
+            <option value="critical">Critical</option>
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+
+        <div id="submissions-container" class="submissions-grid">
+          <div id="loading-placeholder" class="placeholder">
+            <div class="loading-spinner"></div>
+            <h3>Loading Your Submissions...</h3>
+          </div>
+        </div>
+
+        <div id="empty-placeholder" class="placeholder" style="display: none">
+          <span class="material-symbols-rounded">upcoming</span>
+          <h3>No Submissions Found</h3>
+          <p>
+            You haven't reported any issues yet.
+            <a href="report-issue">Report one now!</a>
+          </p>
+        </div>
+      </div>
+
+      <div id="details-modal" class="modal-overlay">
+        <div class="modal-content">
+          <header class="modal-header">
+            <h2 id="modal-title" class="modal-title">Submission Details</h2>
+            <button id="close-modal" class="close-modal-btn">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </header>
+          <div id="modal-body" class="modal-body">
+            <div id="modal-loading-placeholder" class="placeholder">
+              <div class="loading-spinner"></div>
+              <h3>Fetching Details...</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-section">
+        <div class="footer-content">
+          <div class="footer-copyright">
+            Copyright © 2025 Civicsense AI. All rights reserved.
+          </div>
+          <div class="footer-developer">
+            Developed by <a href="team-details">Team UNIQUE</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let allSubmissions = [];
+        let currentDataState = "";
+        let pollingInterval;
+
+        const submissionsContainer = document.getElementById(
+          "submissions-container"
+        );
+        const loadingPlaceholder = document.getElementById(
+          "loading-placeholder"
+        );
+        const emptyPlaceholder = document.getElementById("empty-placeholder");
+        const searchInput = document.getElementById("searchInput");
+        const statusFilter = document.getElementById("statusFilter");
+        const priorityFilter = document.getElementById("priorityFilter");
+        const modal = document.getElementById("details-modal");
+        const modalBody = document.getElementById("modal-body");
+        const closeModalBtn = document.getElementById("close-modal");
+
+        function showToast(message, type = "success", duration = 3000) {
+          const toastContainer = document.getElementById("toast-container");
+          const toast = document.createElement("div");
+          toast.className = `toast ${type}`;
+
+          const icon = type === "success" ? "check_circle" : "error";
+          toast.innerHTML = `
+            <span class="material-symbols-rounded">${icon}</span>
+            <span>${message}</span>
+          `;
+
+          toastContainer.appendChild(toast);
+
+          setTimeout(() => toast.classList.add("show"), 100);
+
+          setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toastContainer.removeChild(toast), 300);
+          }, duration);
+        }
+
+        function updateHeaderStats(submissions) {
+          const total = submissions.length;
+          const inProgress = submissions.filter(
+            (s) => s.status === "In Progress"
+          ).length;
+          const resolved = submissions.filter(
+            (s) => s.status === "Resolved"
+          ).length;
+
+          document.getElementById("total-submissions-stat").textContent = total;
+          document.getElementById("inprogress-submissions-stat").textContent =
+            inProgress;
+          document.getElementById("resolved-submissions-stat").textContent =
+            resolved;
+        }
+
+        // --- START: Auto-scroll sidebar to active link ---
+        const activeMenuLink = document.querySelector(
+          ".sidebar .menu-link.active"
+        );
+
+        if (activeMenuLink) {
+          // This function scrolls the sidebar so the active link is in the middle
+          activeMenuLink.scrollIntoView({
+            behavior: "smooth", // Optional: for a smooth scrolling animation
+            block: "center", // This aligns the link to the center of the view
+          });
+        }
+        // --- END: Auto-scroll sidebar to active link ---
+
+        // --- START: Load Profile Picture into Sidebar ---
+        async function loadSidebarProfilePic() {
+          const sidebarPicElement =
+            document.getElementById("sidebarProfilePic");
+          if (!sidebarPicElement) return;
+
+          try {
+            const response = await fetch("/api/user/profile");
+            if (!response.ok) return; // Fail silently if not logged in or error
+
+            const data = await response.json();
+            if (data.photo_url) {
+              sidebarPicElement.src = data.photo_url;
+            }
+          } catch (error) {
+            console.error("Could not load sidebar profile picture:", error);
+          }
+        }
+
+        // Call the function to load the picture
+        loadSidebarProfilePic();
+        // --- END: Load Profile Picture into Sidebar ---
+
+        async function fetchSubmissions() {
+          try {
+            const response = await fetch("/my-submissions-data");
+            if (!response.ok) {
+              if (response.status === 401 || response.status === 500) {
+                clearInterval(pollingInterval);
+              }
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const newDataState = JSON.stringify(data);
+
+            if (newDataState !== currentDataState) {
+              currentDataState = newDataState;
+              allSubmissions = data;
+
+              if (loadingPlaceholder) loadingPlaceholder.style.display = "none";
+              if (allSubmissions.length === 0) {
+                if (emptyPlaceholder) emptyPlaceholder.style.display = "block";
+                if (submissionsContainer) submissionsContainer.innerHTML = "";
+              } else {
+                if (emptyPlaceholder) emptyPlaceholder.style.display = "none";
+                applyFilters();
+              }
+              updateHeaderStats(allSubmissions);
+            }
+          } catch (error) {
+            console.error("Failed to fetch submissions:", error);
+            if (loadingPlaceholder) {
+              loadingPlaceholder.innerHTML = `<div style="text-align: center; padding: 60px 20px;"><span class="material-symbols-rounded" style="font-size: 4rem;">error</span><h3>Failed to Load Data</h3><p>Could not retrieve your submissions. Please try again later.</p></div>`;
+            }
+            clearInterval(pollingInterval);
+          }
+        }
+
+        function renderSubmissions(submissions) {
+          if (!submissionsContainer) return;
+          submissionsContainer.innerHTML = "";
+          if (submissions.length === 0) {
+            submissionsContainer.innerHTML = `<div class="placeholder" style="grid-column: 1 / -1;"><span class="material-symbols-rounded" style="font-size: 4rem;">search_off</span><h3>No Matching Submissions</h3><p>Try adjusting your search or filter criteria.</p></div>`;
+            return;
+          }
+
+          submissions.forEach((sub) => {
+            const card = document.createElement("div");
+            card.className = "submission-card";
+            card.setAttribute("data-id", sub.id);
+            card.setAttribute("data-issue-id", sub.id);
+
+            const issueTitle = sub.customIssueType
+              ? sub.customIssueType
+              : (sub.issueCategory || "General Issue").replace(/-/g, " ");
+            const statusClass = `status-${(sub.status || "submitted")
+              .toLowerCase()
+              .replace(/\s+/g, "-")}`;
+
+            card.innerHTML = `
+              <header class="card-header">
+                <h3 class="card-title">${issueTitle}</h3>
+                <span class="status-badge ${statusClass}">${sub.status}</span>
+              </header>
+              <div class="card-body">
+                <div class="info-item">
+                  <span class="material-symbols-rounded">confirmation_number</span>
+                  <span class="info-item-text" style="font-weight: 500;">${
+                    sub.issue_id || "N/A"
+                  }</span>
+                </div>
+                <div class="info-item">
+                  <span class="material-symbols-rounded">location_on</span>
+                  <span class="info-item-text">${
+                    sub.locationAddress || "Address not available"
+                  }</span>
+                </div>
+                <div class="info-item">
+                  <span class="material-symbols-rounded">priority_high</span>
+                  <span class="info-item-text" style="text-transform: capitalize;">${
+                    sub.priority
+                  } Priority</span>
+                </div>
+              </div>
+              <footer class="card-footer">
+                <span class="card-date">${sub.submitted_at}</span>
+                <div class="card-actions">
+                  <a href="/report/view/${
+                    sub.id
+                  }" target="_blank" class="action-btn download">
+                    <span class="material-symbols-rounded">print</span>Print / View
+                  </a>
+                  <button class="action-btn primary details-btn">
+                    <span class="material-symbols-rounded">visibility</span>Details
+                  </button>
+                </div>
+              </footer>
+            `;
+            submissionsContainer.appendChild(card);
+          });
+        }
+
+        function generateTimelineHTML(history) {
+          if (!history || history.length === 0) {
+            return '<p class="modal-info-value">No status history available for this issue yet.</p>';
+          }
+
+          const statusMap = {
+            Submitted: { icon: "flag", class: "submitted" },
+            "In Progress": { icon: "construction", class: "in-progress" },
+            Resolved: { icon: "task_alt", class: "resolved" },
+            Rejected: { icon: "cancel", class: "rejected" },
+          };
+
+          let timelineHtml = '<div class="timeline">';
+          history.forEach((item) => {
+            const statusInfo = statusMap[item.status] || {
+              icon: "help",
+              class: "",
+            };
+            timelineHtml += `
+                    <div class="timeline-item ${statusInfo.class}">
+                        <div class="timeline-icon">
+                            <span class="material-symbols-rounded">${
+                              statusInfo.icon
+                            }</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h5 class="timeline-title">${item.status}</h5>
+                            <p class="timeline-date">${item.created_at}</p>
+                            ${
+                              item.notes
+                                ? `<p style="font-size: 0.9rem; margin-top: 8px; color: var(--color-text-secondary);">${item.notes}</p>`
+                                : ""
+                            }
+                        </div>
+                    </div>
+                `;
+          });
+          timelineHtml += "</div>";
+          return timelineHtml;
+        }
+
+        async function openDetailsModal(issueId) {
+          modal.classList.add("active");
+          modalBody.innerHTML = `<div class="placeholder" style="text-align: center; padding: 60px 20px;"><div class="loading-spinner"></div><h3 style="margin-top: 16px;">Fetching Details...</h3></div>`;
+
+          try {
+            const response = await fetch(`/get-submission-details/${issueId}`);
+            const data = await response.json();
+            if (!response.ok)
+              throw new Error(data.error || "Failed to fetch details");
+
+            const details = data.submission;
+            const history = data.history;
+
+            document.getElementById("modal-title").textContent =
+              details.customIssueType ||
+              (details.issueCategory || "").replace(/-/g, " ");
+
+            const timelineHtml = generateTimelineHTML(history);
+
+            modalBody.innerHTML = `
+                    <div class="modal-section">
+                        <h4 class="modal-section-title">
+                            <span class="material-symbols-rounded">confirmation_number</span>Issue ID
+                        </h4>
+                        <p class="modal-info-value" style="font-weight: 600; font-size: 1.2rem;">${
+                          details.issue_id || "Not Available"
+                        }</p>
+                        <div style="margin-top: 12px;">
+                            <a href="/report/view/${
+                              details.id
+                            }" target="_blank" class="action-btn download">
+                                <span class="material-symbols-rounded">print</span>View Full Report & Print
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal-section">
+                        <h4 class="modal-section-title">
+                            <span class="material-symbols-rounded">notes</span>Description
+                        </h4>
+                        <p class="modal-info-value" style="line-height:1.6; white-space:pre-wrap;">${
+                          details.issueDescription
+                        }</p>
+                    </div>
+                    <div class="modal-section">
+                        <h4 class="modal-section-title">
+                            <span class="material-symbols-rounded">image</span>Submitted Image
+                        </h4>
+                        ${
+                          details.image_filename
+                            ? `<img src="static/uploads/${details.image_filename}" alt="Submitted issue image" style="width:100%; max-width: 400px; border-radius: 8px; border: 1px solid var(--color-border-hr);">`
+                            : '<p class="modal-info-value">No image was submitted.</p>'
+                        }
+                    </div>
+                    <div class="modal-section">
+                        <h4 class="modal-section-title">
+                            <span class="material-symbols-rounded">pin_drop</span>Location
+                        </h4>
+                        <div id="modal-map-container"></div>
+                        <p class="modal-info-value" style="margin-top: 8px;">${
+                          details.locationAddress
+                        }</p>
+                    </div>
+                    <div class="modal-section">
+                        <h4 class="modal-section-title">
+                            <span class="material-symbols-rounded">timeline</span>Status History
+                        </h4>
+                        ${timelineHtml}
+                    </div>
+                `;
+
+            initModalMap(details.latitude, details.longitude);
+          } catch (error) {
+            modalBody.innerHTML = `<div class="placeholder" style="text-align: center; padding: 60px 20px;"><h3>Error</h3><p>${error.message}</p></div>`;
+          }
+        }
+
+        function applyFilters() {
+          const searchTerm = searchInput.value.toLowerCase();
+          const status = statusFilter.value;
+          const priority = priorityFilter.value;
+
+          const filteredSubmissions = allSubmissions.filter((sub) => {
+            const title = (
+              sub.customIssueType ||
+              sub.issueCategory ||
+              ""
+            ).toLowerCase();
+            const location = (sub.locationAddress || "").toLowerCase();
+            const matchesSearch =
+              title.includes(searchTerm) || location.includes(searchTerm);
+            const matchesStatus = status === "all" || sub.status === status;
+            const matchesPriority =
+              priority === "all" || sub.priority === priority;
+            return matchesSearch && matchesStatus && matchesPriority;
+          });
+          renderSubmissions(filteredSubmissions);
+        }
+
+        function closeModal() {
+          modal.classList.remove("active");
+        }
+
+        function initModalMap(lat, lng) {
+          if (
+            typeof google === "undefined" ||
+            !document.getElementById("modal-map-container")
+          ) {
+            const mapContainer = document.getElementById("modal-map-container");
+            if (mapContainer)
+              mapContainer.innerHTML =
+                '<p style="text-align:center; padding: 20px;">Could not load map. Please check your API key.</p>';
+            return;
+          }
+          const location = { lat: parseFloat(lat), lng: parseFloat(lng) };
+          const map = new google.maps.Map(
+            document.getElementById("modal-map-container"),
+            {
+              zoom: 16,
+              center: location,
+              disableDefaultUI: true,
+              gestureHandling: "cooperative",
+            }
+          );
+          new google.maps.Marker({ position: location, map: map });
+        }
+
+        if (searchInput) searchInput.addEventListener("input", applyFilters);
+        if (statusFilter) statusFilter.addEventListener("change", applyFilters);
+        if (priorityFilter)
+          priorityFilter.addEventListener("change", applyFilters);
+
+        if (submissionsContainer) {
+          submissionsContainer.addEventListener("click", (e) => {
+            if (e.target.closest(".details-btn")) {
+              const card = e.target.closest(".submission-card");
+              if (card) openDetailsModal(card.dataset.id);
+            }
+          });
+        }
+
+        if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
+        if (modal) {
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+          });
+        }
+
+        fetchSubmissions();
+        pollingInterval = setInterval(fetchSubmissions, 10000);
+      });
+
+      const themeToggle = document.querySelector(".theme-toggle");
+      if (themeToggle) {
+        const themeIcon = themeToggle.querySelector(
+          ".material-symbols-rounded"
+        );
+
+        const updateThemeIcon = () => {
+          const isDark = document.body.classList.contains("dark-theme");
+          if (themeIcon) {
+            themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+          }
+        };
+
+        const applyInitialTheme = () => {
+          const savedTheme = localStorage.getItem("civicsense-theme");
+          const systemPrefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const shouldUseDarkTheme =
+            savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+
+          document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
+          updateThemeIcon();
+        };
+
+        themeToggle.addEventListener("click", () => {
+          const isDark = document.body.classList.toggle("dark-theme");
+          localStorage.setItem("civicsense-theme", isDark ? "dark" : "light");
+          updateThemeIcon();
+        });
+
+        applyInitialTheme();
+      }
+    </script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDgvBDfYBO3SyzvGMkuN3R8vLvur78Oi4&libraries=places"
+      async
+      defer
+    ></script>
+  </body>
+</html>
